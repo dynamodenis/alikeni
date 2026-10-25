@@ -3,6 +3,8 @@
 // so routes that never touch auth still boot without DATABASE_URL.
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { createAuthMiddleware } from "better-auth/api"
+import { setSessionCookie } from "better-auth/cookies"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { serverEnv, type ServerEnv } from "@/env.server"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
@@ -20,6 +22,10 @@ const DEV_SECRET = "festly-dev-only-auth-secret-never-use-in-production"
 
 /** Any Drizzle Postgres database (node-postgres in the app, PGlite in tests). */
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
+
+// Who a /reset-password request is for, handed from the before hook to the
+// after hook: the endpoint consumes the token, so `after` can't look it up.
+const resettingUser = new WeakMap<object, string>()
 
 export function createAuth(db: AnyDb, env: ServerEnv, send: EmailSender) {
   const google =
@@ -59,6 +65,29 @@ export function createAuth(db: AnyDb, env: ServerEnv, send: EmailSender) {
     // the two instead of failing (Google verifies the address).
     account: {
       accountLinking: { enabled: true, trustedProviders: ["google"] },
+    },
+    // A successful password reset signs the person in instead of sending them
+    // back to the sign-in page to type the password they just chose.
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/reset-password") return
+        const token = ctx.body?.token ?? ctx.query?.token
+        if (typeof token !== "string" || !token) return
+        const verification =
+          await ctx.context.internalAdapter.findVerificationValue(
+            `reset-password:${token}`
+          )
+        if (verification) resettingUser.set(ctx.context, verification.value)
+      }),
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/reset-password") return
+        const userId = resettingUser.get(ctx.context)
+        if (!userId || ctx.context.returned instanceof Error) return
+        const user = await ctx.context.internalAdapter.findUserById(userId)
+        if (!user) return
+        const session = await ctx.context.internalAdapter.createSession(userId)
+        await setSessionCookie(ctx, { session, user })
+      }),
     },
     // Must stay last: lets auth calls inside server functions set cookies.
     plugins: [tanstackStartCookies()],

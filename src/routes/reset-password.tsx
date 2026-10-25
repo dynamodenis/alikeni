@@ -61,13 +61,15 @@ function ResetPassword() {
       setError(authErrorMessage(failure))
       return
     }
-    await router.navigate({ to: "/sign-in" })
+    // The reset signs them in (see the auth hooks), so go straight in.
+    await router.invalidate()
+    await router.navigate({ to: "/dashboard" })
   }
 
   return (
     <AuthShell
       title="Choose a new password"
-      subtitle="You will sign in with it from now on."
+      subtitle="You will be signed in as soon as it is saved."
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <AuthField

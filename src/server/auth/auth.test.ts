@@ -119,9 +119,16 @@ describe("email + password", () => {
     const token = link && new URL(link).pathname.split("/").at(-1)
     expect(token).toBeTruthy()
 
-    await auth.api.resetPassword({
+    const reset = await auth.api.resetPassword({
       body: { token: token!, newPassword: "a brand new password" },
+      asResponse: true,
     })
+    expect(reset.status).toBe(200)
+    const session = await auth.api.getSession({
+      headers: cookieHeaders(reset),
+    })
+    expect(session?.user.email).toBe(AMINA.email)
+
     const old = await auth.api.signInEmail({
       body: { email: AMINA.email, password: AMINA.password },
       asResponse: true,
@@ -132,5 +139,13 @@ describe("email + password", () => {
     })
     expect(old.status).toBe(401)
     expect(fresh.status).toBe(200)
+  })
+  it("does not sign anyone in when the reset token is bad", async () => {
+    const reset = await auth.api.resetPassword({
+      body: { token: "not-a-real-token", newPassword: "another new password" },
+      asResponse: true,
+    })
+    expect(reset.status).toBe(400)
+    expect(reset.headers.getSetCookie()).toHaveLength(0)
   })
 })
