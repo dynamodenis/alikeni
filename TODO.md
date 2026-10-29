@@ -155,7 +155,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [x] `docs/TEMPLATE_AUTHORING.md` (contract, vocabulary tables, distinctness rule, checklist, batch procedure) + `pnpm gen:template --id <cat>/<slug> --name … --base <cat>/<slug> [--palette --font --tags]` (scaffolds the folder from a base, registers in `registry.ts`, drops the name from `UPCOMING_TEMPLATES`, copies a placeholder thumbnail) + `pnpm contact-sheet --category <cat>` (`docs/batches/<cat>.png`)
 - [x] Shared decor grew for the batches: `PetalField` (petal | leaf), `GeoLattice`, `BatikBand`, `FilmStrip`, `WaveLines`, `PixelField`, `Bunting`; palettes +8 (`sogan-batik`, `barnwood`, `sunset-coral`, `noir`, `arcade`, `chalkboard`, `varsity`, `terminal`), all AA-checked
 - [x] Wedding (10/10) ✅ 2026-10-29: midnight-aurora, javanese-heritage, minimal-mono, rustic-barn, boho-terracotta, royal-islamic, beach-sunset, cinema-reel, pastel-petals (+ ivory-garden). Local signature pieces: `BohoSun`, `TicketStub`. Sheet: `docs/batches/wedding.png`
-- [ ] Birthday (1/8) · Graduation (1/6) · Baby shower (0/6) · Anniversary (0/5) · Corporate (0/6) · Other (0/9)
+- [x] Birthday (8/8) ✅ 2026-10-29: dino-adventure, princess-castle, neon-night, retro-arcade, golden-milestone, sweet-seventeen, garden-tea-party (+ confetti-pop). Local pieces: `DinoEgg`, `CastleCrest`, `NeonSign`, `ScoreBoard`, `Teacup`. Sheet: `docs/batches/birthday.png`
+- [x] Graduation (6/6) ✅ 2026-10-29: chalkboard, varsity, tech-terminal, starry-future, polaroid-memories (+ cap-and-gown). Local pieces: `ChalkFrame`, `VarsityStripes` + `VarsityLetter`, `TerminalCard`, `Constellation`, `Polaroid`. Sheet: `docs/batches/graduation.png`
+- [ ] Baby shower (0/6) · Anniversary (0/5) · Corporate (0/6) · Other (0/9)
 - [ ] Per batch: checklist pass, thumbnails, contact sheet in `docs/batches/`
 - Notes: every template must render one `<Divider />` (the SSR ornament test reads `data-ornament` from it); thumbnails are captured at `motion=none`, so WebGL backgrounds show as their static gradient
 

@@ -127,6 +127,7 @@ ${extras}
     )
 
   const defaultsSrc = baseDefaultsSrc
+    .replaceAll(baseTypeName, typeName)
     .replace(/paletteId: "[^"]+"/, `paletteId: "${palette}"`)
     .replace(/fontPairId: "[^"]+"/, `fontPairId: "${font}"`)
 
@@ -144,8 +145,9 @@ ${extras}
   // the base index are copied too, so the scaffold compiles immediately.
   for (const m of baseIndexSrc.matchAll(/from "\.\/([A-Z]\w+)"/g)) {
     const file = `${m[1]}.tsx`
-    if (existsSync(join(baseDir, file)))
-      await copyFile(join(baseDir, file), join(dir, file))
+    if (!existsSync(join(baseDir, file))) continue
+    const local = await readFile(join(baseDir, file), "utf8")
+    await writeFile(join(dir, file), local.replaceAll(baseTypeName, typeName))
   }
 
   await registerInRegistry(id, category, slug)

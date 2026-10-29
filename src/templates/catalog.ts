@@ -40,23 +40,11 @@ export const UPCOMING_TEMPLATES: ReadonlyArray<{
   [
     "birthday",
     [
-      "Dino Adventure",
-      "Princess Castle",
-      "Neon Night",
-      "Retro Arcade",
-      "Golden Milestone",
-      "Sweet Seventeen",
-      "Garden Tea Party",
     ],
   ],
   [
     "graduation",
     [
-      "Chalkboard",
-      "Varsity",
-      "Tech Terminal",
-      "Starry Future",
-      "Polaroid Memories",
     ],
   ],
   [
