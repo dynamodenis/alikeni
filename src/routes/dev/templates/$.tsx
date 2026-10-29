@@ -5,7 +5,7 @@ import { ORNAMENTS } from "@/templates/types"
 import { FONT_PAIRS } from "@/templates/_shared/theme/fonts"
 import { PALETTES } from "@/templates/_shared/theme/palettes"
 import { TemplateRenderer } from "@/templates/TemplateRenderer"
-import { hasTemplate, loadTemplate } from "@/templates/registry"
+import { hasTemplate, loadTemplate } from "@/templates/loaders"
 import { deepMerge } from "@/lib/deep-merge"
 
 const DevSearch = z.object({

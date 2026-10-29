@@ -65,6 +65,51 @@ describe("R2 driver", () => {
     expect(signed.headers.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /)
   })
 
+  it("stores and reads server-produced objects with signed requests", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array([7, 8]), {
+          headers: { "content-type": "image/png" },
+        })
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 404 }))
+      .mockResolvedValueOnce(new Response(null, { status: 500 }))
+    const r2 = createR2Driver(r2Config, fetchMock)
+    await r2.put("og/inv-1.png", new Uint8Array([7, 8]), "image/png")
+    const put = fetchMock.mock.calls[0][0] as Request
+    expect(put.method).toBe("PUT")
+    expect(new URL(put.url).pathname).toBe("/festly/og/inv-1.png")
+    expect(put.headers.get("content-type")).toBe("image/png")
+    expect(put.headers.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /)
+    expect(new Uint8Array(await put.arrayBuffer())).toEqual(
+      new Uint8Array([7, 8])
+    )
+
+    const object = await r2.get("og/inv-1.png")
+    expect(object?.mime).toBe("image/png")
+    expect(
+      new Uint8Array(await new Response(object?.body).arrayBuffer())
+    ).toEqual(new Uint8Array([7, 8]))
+    expect((fetchMock.mock.calls[1][0] as Request).method).toBe("GET")
+    expect(await r2.get("og/missing.png")).toBeNull()
+    await expect(r2.get("og/broken.png")).rejects.toThrow(/500/)
+  })
+
+  it("throws when a PUT is refused", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(null, { status: 403 }))
+    await expect(
+      createR2Driver(r2Config, fetchMock).put(
+        "og/x.png",
+        new Uint8Array([1]),
+        "image/png"
+      )
+    ).rejects.toThrow(/403/)
+  })
+
   it("builds public URLs on the configured base", () => {
     expect(createR2Driver(r2Config).publicUrl("u/x/image/1.webp")).toBe(
       "https://media.example.com/u/x/image/1.webp"
@@ -137,6 +182,27 @@ describe("local driver", () => {
       bytes: 3,
     })
     expect(new URL(target.url).pathname).toBe("/api/storage/upload")
+  })
+
+  it("puts and gets server-produced objects", async () => {
+    const driver = createLocalDriver({
+      secret,
+      origin: "http://localhost:3000",
+      root,
+    })
+    expect(await driver.get("og/inv-1.png")).toBeNull()
+    await driver.put("og/inv-1.png", new Uint8Array([9, 8, 7]), "image/png")
+    expect(await driver.get("og/inv-1.png")).toEqual({
+      body: new Uint8Array([9, 8, 7]),
+      mime: "image/png",
+    })
+    expect(await driver.head("og/inv-1.png")).toEqual({
+      bytes: 3,
+      mime: "image/png",
+    })
+    await expect(
+      driver.put("../escape.png", new Uint8Array([1]), "image/png")
+    ).rejects.toThrow()
   })
 })
 

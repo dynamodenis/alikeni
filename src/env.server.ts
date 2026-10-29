@@ -71,6 +71,17 @@ const serverEnvSchema = z
      * Off unless set to "true"; for local demos and scripts, never a real
      * deployment.
      */
+    /**
+     * Salt for hashing guest IPs and user agents (rate limits, view dedupe).
+     * Optional: falls back to BETTER_AUTH_SECRET, then a fixed development
+     * value. Rotating it resets dedupe and rate-limit identities.
+     */
+    ANALYTICS_SALT: z.string().min(16).optional(),
+    /**
+     * Cloudflare Turnstile secret. When set, guest RSVPs and wishes must carry
+     * a valid token (pair with VITE_TURNSTILE_SITE_KEY). Unset: skipped.
+     */
+    TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
     ALLOW_DEV_USER: z
       .enum(["true", "false", "1", "0"])
       .optional()
@@ -116,6 +127,17 @@ const serverEnvSchema = z
           })
         }
       }
+    }
+    if (
+      env.NODE_ENV === "production" &&
+      !env.ANALYTICS_SALT &&
+      !env.BETTER_AUTH_SECRET
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["ANALYTICS_SALT"],
+        message: "required in production (or set BETTER_AUTH_SECRET)",
+      })
     }
     if (env.STORAGE_DRIVER === "local" && env.NODE_ENV === "production") {
       ctx.addIssue({

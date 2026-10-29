@@ -194,15 +194,20 @@ async function registerInRegistry(id: string, category: string, slug: string) {
     `$1\n  ${alias},$2`
   )
 
-  // Loaders: before the closing brace of the object.
-  src = src.replace(
+  if (!src.includes(`  ${alias},`))
+    fail("registry.ts: insertion failed; register the template by hand")
+  await writeFile(file, src)
+
+  // Loaders live in loaders.ts: add one before the object's closing brace.
+  const loadersFile = join(TEMPLATES_DIR, "loaders.ts")
+  let loadersSrc = await readFile(loadersFile, "utf8")
+  loadersSrc = loadersSrc.replace(
     /(const loaders: Partial<Record<string, Loader>> = \{[\s\S]*?)(\n\})/,
     `$1\n  "${id}": () => import("./${category}/${slug}"),$2`
   )
-
-  if (!src.includes(`  ${alias},`) || !src.includes(`"${id}": () =>`))
-    fail("registry.ts: insertion failed; register the template by hand")
-  await writeFile(file, src)
+  if (!loadersSrc.includes(`"${id}": () =>`))
+    fail("loaders.ts: insertion failed; add the loader by hand")
+  await writeFile(loadersFile, loadersSrc)
 }
 
 async function removeFromUpcoming(name: string) {

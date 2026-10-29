@@ -2,6 +2,7 @@ import { ClientOnly } from "@tanstack/react-router"
 import { Suspense, lazy } from "react"
 import type { ReactNode } from "react"
 import type { EffectiveMotion } from "../theme/motion"
+import { useEffectsReady } from "../context"
 
 const FadeContent = lazy(() => import("@/components/reactbits/FadeContent"))
 
@@ -23,8 +24,9 @@ export function Reveal({
   className,
   delay = 0,
 }: RevealProps) {
+  const ready = useEffectsReady()
   const plain = <div className={className}>{children}</div>
-  if (motion !== "full") return plain
+  if (motion !== "full" || !ready) return plain
   return (
     <ClientOnly fallback={plain}>
       <Suspense fallback={plain}>

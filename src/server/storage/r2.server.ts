@@ -1,7 +1,7 @@
 // Cloudflare R2 through its S3-compatible endpoint, signed with aws4fetch
 // (the small SigV4 signer listed in Cloudflare's R2 docs; no AWS SDK).
 import { AwsClient } from "aws4fetch"
-import type { StorageDriver, UploadTarget } from "./types"
+import type { ServerStorage, UploadTarget } from "./types"
 import { UPLOAD_TTL_SECONDS } from "./types"
 
 export type R2Config = {
@@ -18,7 +18,7 @@ const encodeKey = (key: string) =>
 export function createR2Driver(
   config: R2Config,
   fetchImpl: typeof fetch = fetch
-): StorageDriver {
+): ServerStorage {
   const client = new AwsClient({
     accessKeyId: config.accessKeyId,
     secretAccessKey: config.secretAccessKey,
@@ -66,6 +66,27 @@ export function createR2Driver(
       const res = await fetchImpl(signed)
       if (!res.ok && res.status !== 404)
         throw new Error(`R2 DELETE failed: ${res.status}`)
+    },
+
+    async put(key, bytes, contentType) {
+      const signed = await client.sign(objectUrl(key), {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: bytes,
+      })
+      const res = await fetchImpl(signed)
+      if (!res.ok) throw new Error(`R2 PUT failed: ${res.status}`)
+    },
+
+    async get(key) {
+      const signed = await client.sign(objectUrl(key), { method: "GET" })
+      const res = await fetchImpl(signed)
+      if (res.status === 404) return null
+      if (!res.ok || !res.body) throw new Error(`R2 GET failed: ${res.status}`)
+      return {
+        body: res.body,
+        mime: res.headers.get("content-type") ?? "application/octet-stream",
+      }
     },
 
     publicUrl: (key) => `${publicBase}/${encodeKey(key)}`,

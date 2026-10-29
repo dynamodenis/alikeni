@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import type { MediaRef } from "../schema"
 import type { EffectiveMotion } from "../theme/motion"
+import { useEffectsReady } from "../context"
 
 const TiltedCard = lazy(() => import("@/components/reactbits/TiltedCard"))
 const Carousel = lazy(() => import("@/components/reactbits/Carousel"))
@@ -67,7 +68,8 @@ export function TiltedPhoto({
       className={className}
     />
   )
-  if (motion !== "full") return plain
+  const ready = useEffectsReady()
+  if (motion !== "full" || !ready) return plain
   return (
     <ClientOnly fallback={plain}>
       <Suspense fallback={plain}>
@@ -107,7 +109,8 @@ export function PhotoCarousel({
   mode,
   fallback,
 }: CarouselProps) {
-  if (motion !== "full") return <>{fallback}</>
+  const ready = useEffectsReady()
+  if (motion !== "full" || !ready) return <>{fallback}</>
   return (
     <ClientOnly fallback={fallback}>
       <Suspense fallback={fallback}>

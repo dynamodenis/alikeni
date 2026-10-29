@@ -2,6 +2,7 @@ import { ClientOnly } from "@tanstack/react-router"
 import { Suspense, createElement, lazy } from "react"
 import { cn } from "@/lib/utils"
 import type { EffectiveMotion } from "../theme/motion"
+import { useEffectsReady } from "../context"
 
 const SplitText = lazy(() => import("@/components/reactbits/SplitText"))
 const ShinyText = lazy(() => import("@/components/reactbits/ShinyText"))
@@ -39,8 +40,9 @@ export function TitleFx({
   shineColor,
 }: TitleFxProps) {
   const plain = createElement(tag, { className }, text)
+  const ready = useEffectsReady()
   const allowed =
-    motion === "full" || (motion === "reduced" && kind !== "split")
+    ready && (motion === "full" || (motion === "reduced" && kind !== "split"))
   if (kind === "none" || !allowed) return plain
 
   return (

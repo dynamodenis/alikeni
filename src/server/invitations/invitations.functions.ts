@@ -2,7 +2,7 @@
 // replaces handlers with RPC stubs in the client bundle.
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
-import { hasTemplate } from "@/templates/registry"
+import { hasTemplate } from "@/templates/loaders"
 import { getDb } from "@/server/db/client.server"
 import { storageInfo } from "@/server/storage/index.server"
 import {
@@ -14,6 +14,7 @@ import {
   getOwnedInvitation,
   listOwnedInvitations,
 } from "./drafts.server"
+import { EMPTY_STATS, statsForInvitations } from "./dashboard.server"
 import {
   EditorError,
   checkSlug,
@@ -48,15 +49,20 @@ export const createDraftFn = createServerFn({ method: "POST" })
     }
   })
 
-/** The current user's invitations for the dashboard. */
+/** The current user's invitations (archived included) with card stats. */
 export const listMyInvitationsFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const db = getDb()
     const ownerId = await requireUserId(db)
     const rows = await listOwnedInvitations(db, ownerId)
+    const stats = await statsForInvitations(
+      db,
+      rows.map((row) => row.id)
+    )
     return rows.map((row) => ({
       ...row,
       updatedAt: row.updatedAt.toISOString(),
+      stats: stats.get(row.id) ?? EMPTY_STATS,
     }))
   }
 )

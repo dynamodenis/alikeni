@@ -1,4 +1,3 @@
-import { TEMPLATE_METAS } from "./registry"
 import {
   TEMPLATE_CATEGORIES,
   type TemplateCategory,
@@ -32,41 +31,13 @@ export const UPCOMING_TEMPLATES: ReadonlyArray<{
   name: string
   category: TemplateCategory
 }> = [
-  [
-    "wedding",
-    [
-    ],
-  ],
-  [
-    "birthday",
-    [
-    ],
-  ],
-  [
-    "graduation",
-    [
-    ],
-  ],
-  [
-    "baby_shower",
-    [
-    ],
-  ],
-  [
-    "anniversary",
-    [
-    ],
-  ],
-  [
-    "corporate",
-    [
-    ],
-  ],
-  [
-    "other",
-    [
-    ],
-  ],
+  ["wedding", []],
+  ["birthday", []],
+  ["graduation", []],
+  ["baby_shower", []],
+  ["anniversary", []],
+  ["corporate", []],
+  ["other", []],
 ].flatMap(([category, names]) =>
   (names as Array<string>).map((name) => ({
     category: category as TemplateCategory,
@@ -135,10 +106,6 @@ export function categoryCounts(
     counts[item.category] += 1
   }
   return counts
-}
-
-export function getCatalog(): ReadonlyArray<TemplateMeta> {
-  return TEMPLATE_METAS
 }
 
 /** URL params for a template id ("wedding/ivory-garden" → category + slug). */

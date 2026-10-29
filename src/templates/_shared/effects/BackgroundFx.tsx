@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import type { BackgroundEffect } from "../../types"
 import type { EffectiveMotion } from "../theme/motion"
 import type { Palette } from "../theme/palettes"
+import { useEffectsReady } from "../context"
 
 // Every WebGL component is lazy so none of them land in the initial chunk.
 const Aurora = lazy(() => import("@/components/reactbits/Aurora"))
@@ -116,7 +117,8 @@ export function BackgroundFx({
   opacity = 0.9,
   className,
 }: BackgroundFxProps) {
-  const animate = kind !== "none" && motion === "full"
+  const ready = useEffectsReady()
+  const animate = kind !== "none" && motion === "full" && ready
   return (
     <div
       aria-hidden="true"

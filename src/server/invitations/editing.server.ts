@@ -3,6 +3,7 @@
 import { and, eq, ne, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { RESERVED_SLUGS, SLUG_PATTERN } from "@/lib/slug"
+import { invalidatePublishedCard } from "@/server/og/cache.server"
 import { loadTemplate } from "@/templates/registry"
 import * as schema from "@/server/db/schema"
 
@@ -129,7 +130,7 @@ export async function publishInvitation(
 
   const draft = (
     await db
-      .select({ draftConfig: inv.draftConfig })
+      .select({ draftConfig: inv.draftConfig, publishedAt: inv.publishedAt })
       .from(inv)
       .where(eq(inv.id, input.id))
   ).at(0)
@@ -158,6 +159,8 @@ export async function publishInvitation(
         publishedAt: inv.publishedAt,
         updatedAt: inv.updatedAt,
       })
+    // The OG card key includes publishedAt; drop the old one (best effort).
+    await invalidatePublishedCard(input.id, draft?.publishedAt)
     return {
       slug: row.slug ?? slug,
       publishedAt: (row.publishedAt ?? now).toISOString(),

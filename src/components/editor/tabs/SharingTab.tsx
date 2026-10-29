@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import {
   CheckCircle2,
@@ -6,7 +7,9 @@ import {
   ExternalLink,
   LoaderCircle,
   MessageCircle,
+  MessageSquareText,
   Rocket,
+  Users,
   XCircle,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -295,6 +298,30 @@ export function SharingTab({
           </div>
         </Group>
       )}
+
+      <Group
+        title="Guests & responses"
+        description="Personal links for each guest, RSVPs, wishes and the CSV export."
+      >
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link
+              to="/dashboard/$invitationId/guests"
+              params={{ invitationId }}
+            >
+              <Users aria-hidden="true" /> Guest list
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link
+              to="/dashboard/$invitationId/responses"
+              params={{ invitationId }}
+            >
+              <MessageSquareText aria-hidden="true" /> Responses
+            </Link>
+          </Button>
+        </div>
+      </Group>
     </>
   )
 }

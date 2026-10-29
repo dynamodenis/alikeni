@@ -16,19 +16,24 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as DevMapsRouteImport } from './routes/dev/maps'
 import { Route as DevSmokeRouteImport } from './routes/dev/smoke'
 import { Route as ISlugRouteImport } from './routes/i/$slug'
+import { Route as IcsSlugRouteImport } from './routes/ics/$slug'
+import { Route as OgChar123slugChar125DotpngRouteImport } from './routes/og/{$slug}[.]png'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as AuthedEditorInvitationIdRouteImport } from './routes/_authed/editor/$invitationId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiExportFileRouteImport } from './routes/api/export/$file'
 import { Route as ApiStorageUploadRouteImport } from './routes/api/storage/upload'
 import { Route as DevTemplatesIndexRouteImport } from './routes/dev/templates/index'
 import { Route as DevTemplatesSplatRouteImport } from './routes/dev/templates/$'
 import { Route as MediaLibrarySplatRouteImport } from './routes/media/library/$'
 import { Route as PreviewCategorySlugRouteImport } from './routes/preview/$category/$slug'
 import { Route as TemplatesCategorySlugRouteImport } from './routes/templates/$category/$slug'
+import { Route as AuthedDashboardInvitationIdGuestsRouteImport } from './routes/_authed/dashboard/$invitationId/guests'
+import { Route as AuthedDashboardInvitationIdResponsesRouteImport } from './routes/_authed/dashboard/$invitationId/responses'
 import { Route as ApiStorageFileSplatRouteImport } from './routes/api/storage/file/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,11 +70,6 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const DevMapsRoute = DevMapsRouteImport.update({
   id: '/maps',
   path: '/maps',
@@ -85,10 +85,26 @@ const ISlugRoute = ISlugRouteImport.update({
   path: '/i/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IcsSlugRoute = IcsSlugRouteImport.update({
+  id: '/ics/$slug',
+  path: '/ics/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgChar123slugChar125DotpngRoute =
+  OgChar123slugChar125DotpngRouteImport.update({
+    id: '/og/{$slug}.png',
+    path: '/og/{$slug}.png',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
   id: '/templates/',
   path: '/templates/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedEditorInvitationIdRoute =
   AuthedEditorInvitationIdRouteImport.update({
@@ -99,6 +115,11 @@ const AuthedEditorInvitationIdRoute =
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiExportFileRoute = ApiExportFileRouteImport.update({
+  id: '/api/export/$file',
+  path: '/api/export/$file',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStorageUploadRoute = ApiStorageUploadRouteImport.update({
@@ -131,6 +152,18 @@ const TemplatesCategorySlugRoute = TemplatesCategorySlugRouteImport.update({
   path: '/templates/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedDashboardInvitationIdGuestsRoute =
+  AuthedDashboardInvitationIdGuestsRouteImport.update({
+    id: '/dashboard/$invitationId/guests',
+    path: '/dashboard/$invitationId/guests',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedDashboardInvitationIdResponsesRoute =
+  AuthedDashboardInvitationIdResponsesRouteImport.update({
+    id: '/dashboard/$invitationId/responses',
+    path: '/dashboard/$invitationId/responses',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const ApiStorageFileSplatRoute = ApiStorageFileSplatRouteImport.update({
   id: '/api/storage/file/$',
   path: '/api/storage/file/$',
@@ -144,19 +177,24 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard': typeof AuthedDashboardRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
+  '/ics/$slug': typeof IcsSlugRoute
+  '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/templates/': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export/$file': typeof ApiExportFileRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
+  '/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
+  '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
+  '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/api/storage/file/$': typeof ApiStorageFileSplatRoute
 }
 export interface FileRoutesByTo {
@@ -166,19 +204,24 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard': typeof AuthedDashboardRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
+  '/ics/$slug': typeof IcsSlugRoute
+  '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/templates': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export/$file': typeof ApiExportFileRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
+  '/dashboard': typeof AuthedDashboardIndexRoute
   '/dev/templates': typeof DevTemplatesIndexRoute
+  '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
+  '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/api/storage/file/$': typeof ApiStorageFileSplatRoute
 }
 export interface FileRoutesById {
@@ -190,19 +233,24 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/_authed/dashboard': typeof AuthedDashboardRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
+  '/ics/$slug': typeof IcsSlugRoute
+  '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/templates/': typeof TemplatesIndexRoute
   '/_authed/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export/$file': typeof ApiExportFileRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
+  '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
+  '/_authed/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
+  '/_authed/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/api/storage/file/$': typeof ApiStorageFileSplatRoute
 }
 export interface FileRouteTypes {
@@ -214,19 +262,24 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
+    | '/ics/$slug'
+    | '/og/{$slug}.png'
     | '/templates/'
     | '/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/export/$file'
     | '/api/storage/upload'
     | '/dev/templates/$'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
+    | '/dashboard/'
     | '/dev/templates/'
+    | '/dashboard/$invitationId/guests'
+    | '/dashboard/$invitationId/responses'
     | '/api/storage/file/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -236,19 +289,24 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
+    | '/ics/$slug'
+    | '/og/{$slug}.png'
     | '/templates'
     | '/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/export/$file'
     | '/api/storage/upload'
     | '/dev/templates/$'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
+    | '/dashboard'
     | '/dev/templates'
+    | '/dashboard/$invitationId/guests'
+    | '/dashboard/$invitationId/responses'
     | '/api/storage/file/$'
   id:
     | '__root__'
@@ -259,19 +317,24 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/_authed/dashboard'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
+    | '/ics/$slug'
+    | '/og/{$slug}.png'
     | '/templates/'
     | '/_authed/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/export/$file'
     | '/api/storage/upload'
     | '/dev/templates/$'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
+    | '/_authed/dashboard/'
     | '/dev/templates/'
+    | '/_authed/dashboard/$invitationId/guests'
+    | '/_authed/dashboard/$invitationId/responses'
     | '/api/storage/file/$'
   fileRoutesById: FileRoutesById
 }
@@ -284,8 +347,11 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   ISlugRoute: typeof ISlugRoute
+  IcsSlugRoute: typeof IcsSlugRoute
+  OgChar123slugChar125DotpngRoute: typeof OgChar123slugChar125DotpngRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiExportFileRoute: typeof ApiExportFileRoute
   ApiStorageUploadRoute: typeof ApiStorageUploadRoute
   MediaLibrarySplatRoute: typeof MediaLibrarySplatRoute
   PreviewCategorySlugRoute: typeof PreviewCategorySlugRoute
@@ -344,13 +410,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/dev/maps': {
       id: '/dev/maps'
       path: '/maps'
@@ -372,12 +431,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ISlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ics/$slug': {
+      id: '/ics/$slug'
+      path: '/ics/$slug'
+      fullPath: '/ics/$slug'
+      preLoaderRoute: typeof IcsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/{$slug}.png': {
+      id: '/og/{$slug}.png'
+      path: '/og/{$slug}.png'
+      fullPath: '/og/{$slug}.png'
+      preLoaderRoute: typeof OgChar123slugChar125DotpngRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates/': {
       id: '/templates/'
       path: '/templates'
       fullPath: '/templates/'
       preLoaderRoute: typeof TemplatesIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/dashboard/': {
+      id: '/_authed/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthedDashboardIndexRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/editor/$invitationId': {
       id: '/_authed/editor/$invitationId'
@@ -391,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/export/$file': {
+      id: '/api/export/$file'
+      path: '/api/export/$file'
+      fullPath: '/api/export/$file'
+      preLoaderRoute: typeof ApiExportFileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/storage/upload': {
@@ -435,6 +522,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TemplatesCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/dashboard/$invitationId/guests': {
+      id: '/_authed/dashboard/$invitationId/guests'
+      path: '/dashboard/$invitationId/guests'
+      fullPath: '/dashboard/$invitationId/guests'
+      preLoaderRoute: typeof AuthedDashboardInvitationIdGuestsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/dashboard/$invitationId/responses': {
+      id: '/_authed/dashboard/$invitationId/responses'
+      path: '/dashboard/$invitationId/responses'
+      fullPath: '/dashboard/$invitationId/responses'
+      preLoaderRoute: typeof AuthedDashboardInvitationIdResponsesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/storage/file/$': {
       id: '/api/storage/file/$'
       path: '/api/storage/file/$'
@@ -464,13 +565,19 @@ const DevRouteRouteWithChildren = DevRouteRoute._addFileChildren(
 )
 
 interface AuthedRouteChildren {
-  AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedEditorInvitationIdRoute: typeof AuthedEditorInvitationIdRoute
+  AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
+  AuthedDashboardInvitationIdGuestsRoute: typeof AuthedDashboardInvitationIdGuestsRoute
+  AuthedDashboardInvitationIdResponsesRoute: typeof AuthedDashboardInvitationIdResponsesRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedEditorInvitationIdRoute: AuthedEditorInvitationIdRoute,
+  AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
+  AuthedDashboardInvitationIdGuestsRoute:
+    AuthedDashboardInvitationIdGuestsRoute,
+  AuthedDashboardInvitationIdResponsesRoute:
+    AuthedDashboardInvitationIdResponsesRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -485,8 +592,11 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   ISlugRoute: ISlugRoute,
+  IcsSlugRoute: IcsSlugRoute,
+  OgChar123slugChar125DotpngRoute: OgChar123slugChar125DotpngRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiExportFileRoute: ApiExportFileRoute,
   ApiStorageUploadRoute: ApiStorageUploadRoute,
   MediaLibrarySplatRoute: MediaLibrarySplatRoute,
   PreviewCategorySlugRoute: PreviewCategorySlugRoute,

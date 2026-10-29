@@ -8,7 +8,7 @@ import { MotionLevel } from "@/templates/_shared/schema"
 import { hasFontPair } from "@/templates/_shared/theme/fonts"
 import { hasPalette } from "@/templates/_shared/theme/palettes"
 import { TemplateRenderer } from "@/templates/TemplateRenderer"
-import { getTemplateMeta, loadTemplate } from "@/templates/registry"
+import { hasTemplate, loadTemplate } from "@/templates/loaders"
 
 const PreviewSearch = z.object({
   device: z.enum(DEVICE_IDS).optional().catch(undefined),
@@ -32,10 +32,10 @@ const DEVICE_MAX = {
 export const Route = createFileRoute("/preview/$category/$slug")({
   validateSearch: PreviewSearch,
   loader: async ({ params }) => {
-    const meta = getTemplateMeta(`${params.category}/${params.slug}`)
-    if (!meta) throw notFound()
-    const module = await loadTemplate(meta.id)
-    return { id: meta.id, name: meta.name, defaults: module.defaults }
+    const id = `${params.category}/${params.slug}`
+    if (!hasTemplate(id)) throw notFound()
+    const module = await loadTemplate(id)
+    return { id, name: module.meta.name, defaults: module.defaults }
   },
   head: ({ loaderData }) => ({
     meta: [

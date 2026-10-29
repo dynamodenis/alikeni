@@ -130,7 +130,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
   - TanStack devtools console piping is disabled (`vite.config.ts`): it echoed preview logs into a feedback loop that starved the dev server
   - iPhone behaviour of the SoundCloud widget (second tap) still needs a real-device check
 
-## Phase 5 — Auth & dashboard
+## Phase 5 — Auth & dashboard ✅ 2026-10-29
 
 - [x] Better Auth: `src/server/auth/auth.server.ts` (Drizzle adapter, `usePlural`; `tanstackStartCookies()` last), handler `/api/auth/$`, migration `0001_auth` (users + email_verified/image, sessions, accounts, verifications)
 - [x] Email + password (min 8; verification email sent, not required) and Google (on when both keys are set; links to an existing password account)
@@ -140,15 +140,26 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [x] Account menu (editor + dashboard), nav "Sign in" / "My invitations", "Use this template" sends signed-out visitors to sign-up and back
 - [x] Resend email module + branded reset/confirm templates; production requires `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`
 - [x] Tests: Better Auth against PGlite (sign-up, hashed password, duplicate email, sign-in session, wrong password, reset by email link); env rules; Playwright run of the whole flow (redirects, cross-user 404, sign-out)
-- [ ] Dashboard extras: 7-day views, RSVP counts, duplicate/archive/delete/copy link
-- [ ] `/dashboard/$id/responses`, CSV export, guest list + personal links
+- [x] Dashboard extras: 7-day views, responses + headcount, wish count; Edit / View live / Copy link / Responses / Guests / Duplicate / Archive-Unarchive / Delete (cascade; storage objects kept). Archived invitations sit in a collapsible section
+- [x] `/dashboard/$invitationId/responses` (react-table v9: sort, attending filter, totals, wish show/hide), `/api/export/<id>.csv` (BOM, CRLF, RFC 4180, formula-injection guard, owner only), `/dashboard/$invitationId/guests` (22-char Web Crypto tokens, `?to=<token>` links, copy + WhatsApp)
 
-## Phase 6 — Public invitation page
+## Phase 6 — Public invitation page ✅ 2026-10-29
 
-- [ ] `/i/$slug` SSR + OG head; `/og/$slug.png`; `/ics/$slug`
-- [ ] CoverGate + music gesture start; share; map directions
-- [ ] RSVP/wishes server fns: honeypot, Turnstile (optional in dev), rate limit
-- [ ] Perf budget: < 150 KB gz JS before "open"
+- [x] `/i/$slug` SSR loader through `getPublicPageFn` (404 for missing/archived), head with canonical, OG (1200×630 image), Twitter `summary_large_image`, `theme-color` from the palette; `?to=` guest name (guest token or sanitized text)
+- [x] `/og/<slug>.png`: satori + `@resvg/resvg-wasm` (WASM, Workers-ready), font pair mapped per invitation, cached in storage at `og/<id>-<publishedAt>.png`, old card deleted on republish; storage driver gained server-side `put`/`get`
+- [x] `/ics/$slug`: one VEVENT per sub-event, UTC times (correct across DST without a hand-built VTIMEZONE), RFC 5545 escaping + 75-octet folding
+- [x] `submitRsvpFn` / `submitWishFn` / `listWishesFn`: Zod limits, honeypot (fake success), Turnstile when `TURNSTILE_SECRET_KEY` is set, deadline + feature checks, rate limit 5/min + 30/day per ipHash per invitation (`src/server/rate-limit`, in-memory, swappable). 20 rapid RSVPs → 5 stored, 15 refused (PGlite test)
+- [x] Salted SHA-256 IP/UA hashes (`ANALYTICS_SALT` → `BETTER_AUTH_SECRET`), bot filter, `page_views` upsert with per-day dedupe
+- [x] Optimistic wishes (rollback on error); `ShareBar` (Web Share → copy + WhatsApp) under the template
+- [x] Effects gate: `useEffectsReady()` mounts WebGL, split titles, reveals, tilt and carousel only after the cover opens in public mode; template loaders split from metadata (`src/templates/loaders.ts`) so a page no longer downloads all 50 metas
+- Acceptance:
+  - [x] Browser run on the production build against `pnpm db:local`: cover shows the guest name, RSVP + wish submit, dashboard counts, responses page, CSV with BOM; zero console errors
+  - [x] Rate limit: 5 of 20 rapid posts accepted
+  - [~] JS before "open": **231.6 KB gz** (was 312.9; 61.8 KB now loads after the tap). Budget 150 KB is not reachable on this stack: React + router + Start runtime alone are ~137 KB. Left for Phase 8: lazy lightbox dialog (~12 KB), drop client-side Zod parse of published configs (~25 KB)
+  - [ ] OG card in WhatsApp/Facebook debuggers (needs a deployed URL)
+  - [ ] Music never starts before tap on real iOS Safari / Android Chrome (logic unchanged since Phase 4; needs devices)
+  - [ ] axe: 0 serious violations (not run; axe-core not installed; Phase 8 a11y audit)
+- Notes: uploaded WebP photos are skipped on the OG card (resvg-wasm cannot decode WebP); needs a JPEG variant or an image transform in Phase 8. Rate limiter and view dedupe are per process; Phase 8 on Workers needs a Durable Object/KV limiter.
 
 ## Phase 7 — Scale to 50 templates (batches) ✅ 2026-10-29
 
@@ -167,7 +178,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Phase 8 — Polish & deploy
 
-- [?] Choose deployment target first
+- [?] Choose deployment target first. Recommendation (2026-10-29): Cloudflare Workers ($5/mo base, no egress fees, edge latency); keep node-postgres behind Hyperdrive with a per-request pool; move the rate limiter to a Durable Object
 - [ ] Perf, a11y, reduced-motion audit, i18n (en + id), tests (Vitest + Playwright + SSR no-window test), security (CSP, URL validation, owner checks)
 - [ ] Auth before scaling past one instance: shared rate-limit storage, optional cookie cache (see `docs/AUTH.md`)
 - [ ] Deploy config + README

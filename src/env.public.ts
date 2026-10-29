@@ -24,6 +24,8 @@ const publicEnvSchema = z.object({
   VITE_MAPBOX_TOKEN: z.string().optional(),
   /** Publishable key (radar), prj_live_pk_... or prj_test_pk_... */
   VITE_RADAR_PUBLISHABLE_KEY: z.string().optional(),
+  /** Cloudflare Turnstile site key; shows the widget on public RSVP/wish forms. */
+  VITE_TURNSTILE_SITE_KEY: z.string().optional(),
   /** Allow /dev/* routes in a production build (off by default). */
   VITE_ENABLE_DEV_ROUTES: booleanString,
 })
@@ -53,5 +55,6 @@ export const publicEnv: PublicEnv = parsePublicEnv({
   VITE_GOOGLE_MAPS_JS_KEY: import.meta.env.VITE_GOOGLE_MAPS_JS_KEY,
   VITE_MAPBOX_TOKEN: import.meta.env.VITE_MAPBOX_TOKEN,
   VITE_RADAR_PUBLISHABLE_KEY: import.meta.env.VITE_RADAR_PUBLISHABLE_KEY,
+  VITE_TURNSTILE_SITE_KEY: import.meta.env.VITE_TURNSTILE_SITE_KEY,
   VITE_ENABLE_DEV_ROUTES: import.meta.env.VITE_ENABLE_DEV_ROUTES,
 })

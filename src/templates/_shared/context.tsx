@@ -18,9 +18,20 @@ export type RsvpInput = {
   partySize: number
   message?: string
   contact?: string
+  /** Honeypot: hidden from people, so only bots fill it. */
+  website?: string
+  /** Cloudflare Turnstile token, when the widget is enabled. */
+  turnstileToken?: string
 }
 
-export type WishInput = { name: string; message: string }
+export type WishInput = {
+  name: string
+  message: string
+  /** Honeypot: hidden from people, so only bots fill it. */
+  website?: string
+  /** Cloudflare Turnstile token, when the widget is enabled. */
+  turnstileToken?: string
+}
 
 export type WishItem = {
   id: string
@@ -175,4 +186,16 @@ export function useInvitation(): InvitationContextValue {
     throw new Error("useInvitation must be used inside <InvitationProvider>")
   }
   return ctx
+}
+
+/**
+ * Whether heavy client effects (WebGL backgrounds, split titles, scroll
+ * reveals, tilt cards) may mount yet. Guests get them only after the cover
+ * opens, so the code for them is not downloaded before the first tap (the
+ * Phase 6 budget). Previews and the editor mount them straight away, and so
+ * does anything rendered outside an invitation.
+ */
+export function useEffectsReady(): boolean {
+  const ctx = useContext(InvitationContext)
+  return !ctx || ctx.mode === "preview" || ctx.opened
 }

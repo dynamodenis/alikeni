@@ -1,6 +1,6 @@
 // Draft invitations: create from a template, read back for the owner.
 // Pure functions over a Drizzle db so tests can run them against PGlite.
-import { and, desc, eq, ne } from "drizzle-orm"
+import { and, desc, eq } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { deepMerge } from "@/lib/deep-merge"
 import type { InvitationConfigBase } from "@/templates/_shared/schema"
@@ -89,7 +89,8 @@ export async function getOwnedInvitation(
 
 /**
  * The user's invitations for the dashboard, most recently edited first.
- * Archived ones are left out. Only the fields a card shows leave the db.
+ * Archived ones are included (the dashboard lists them separately so they
+ * can be restored). Only the fields a card shows leave the db.
  */
 export async function listOwnedInvitations(db: AnyDb, ownerId: string) {
   const rows = await db
@@ -102,12 +103,7 @@ export async function listOwnedInvitations(db: AnyDb, ownerId: string) {
       updatedAt: schema.invitations.updatedAt,
     })
     .from(schema.invitations)
-    .where(
-      and(
-        eq(schema.invitations.ownerId, ownerId),
-        ne(schema.invitations.status, "archived")
-      )
-    )
+    .where(eq(schema.invitations.ownerId, ownerId))
     .orderBy(desc(schema.invitations.updatedAt))
   return rows.map(({ draftConfig, ...row }) => {
     // Drafts are stored unparsed, so read defensively.

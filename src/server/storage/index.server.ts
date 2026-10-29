@@ -1,7 +1,7 @@
 import { R2_KEYS, serverEnv, type ServerEnv } from "@/env.server"
 import { createLocalDriver } from "./local.server"
 import { createR2Driver } from "./r2.server"
-import type { StorageDriver } from "./types"
+import type { ServerStorage, StorageDriver } from "./types"
 
 const DEV_SECRET = "festly-local-storage-dev-secret"
 
@@ -10,7 +10,7 @@ const DEV_SECRET = "festly-local-storage-dev-secret"
  * STORAGE_DRIVER=local → local disk (development only).
  * Unset → R2 when fully configured, otherwise local in development.
  */
-export function selectStorage(env: ServerEnv): StorageDriver {
+export function selectStorage(env: ServerEnv): ServerStorage {
   const complete = R2_KEYS.every((key) => !!env[key])
   const wantR2 =
     env.STORAGE_DRIVER === "r2" ||
@@ -54,8 +54,8 @@ export function selectStorage(env: ServerEnv): StorageDriver {
   })
 }
 
-let cached: StorageDriver | undefined
-export function getStorage(): StorageDriver {
+let cached: ServerStorage | undefined
+export function getStorage(): ServerStorage {
   cached ??= selectStorage(serverEnv)
   return cached
 }
@@ -67,4 +67,4 @@ export function storageInfo(): StorageInfo {
   return { driver: getStorage().id }
 }
 
-export type { StorageDriver } from "./types"
+export type { ServerStorage, StorageDriver } from "./types"

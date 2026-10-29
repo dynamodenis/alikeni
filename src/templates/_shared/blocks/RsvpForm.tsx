@@ -3,6 +3,7 @@ import type { FormEvent } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { formatLongDate } from "@/lib/format-date"
+import { useTurnstile } from "@/components/turnstile/useTurnstile"
 import { useInvitation, type RsvpInput } from "../context"
 import { Section, type BlockProps } from "./Section"
 import { InvButton, inputClass } from "./ui"
@@ -18,6 +19,30 @@ const ATTENDING: Array<{ value: RsvpInput["attending"]; label: string }> = [
   { value: "no", label: "Regretfully decline" },
   { value: "maybe", label: "Not sure yet" },
 ]
+
+/**
+ * Hidden honeypot field (`website`). People never see or reach it; bots that
+ * fill every input do, and the server then pretends success without saving.
+ */
+export function HoneypotField({ id }: { id: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -left-[9999px] h-px w-px overflow-hidden opacity-0"
+    >
+      <label htmlFor={id}>Website</label>
+      <input
+        id={id}
+        name="website"
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        defaultValue=""
+      />
+    </div>
+  )
+}
 
 /**
  * RSVP form. Submits through `actions.submitRsvp` from context (wired by the
@@ -36,6 +61,7 @@ export function RsvpForm({
   const [attending, setAttending] = useState<RsvpInput["attending"]>("yes")
   const { texts, datetime } = config
   const disabled = mode === "preview" || !actions.submitRsvp
+  const turnstile = useTurnstile(!disabled)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -45,13 +71,21 @@ export function RsvpForm({
       })
       return
     }
+    if (turnstile.enabled && !turnstile.token) {
+      toast("One moment", {
+        description: "We are checking you are not a robot. Try again shortly.",
+      })
+      return
+    }
     const form = new FormData(event.currentTarget)
     const input: RsvpInput = {
       guestName: String(form.get("guestName") ?? "").trim(),
       attending,
-      partySize: Number(form.get("partySize") ?? 1),
+      partySize: attending === "no" ? 0 : Number(form.get("partySize") ?? 1),
       message: String(form.get("message") ?? "").trim() || undefined,
       contact: String(form.get("contact") ?? "").trim() || undefined,
+      website: String(form.get("website") ?? ""),
+      turnstileToken: turnstile.token,
     }
     setStatus("sending")
     try {
@@ -64,6 +98,8 @@ export function RsvpForm({
         description:
           error instanceof Error ? error.message : "Please try again.",
       })
+    } finally {
+      if (turnstile.enabled) turnstile.reset()
     }
   }
 
@@ -86,7 +122,7 @@ export function RsvpForm({
           onSubmit={handleSubmit}
           aria-describedby={disabled ? "rsvp-preview-note" : undefined}
           className={cn(
-            "flex flex-col gap-5",
+            "relative flex flex-col gap-5",
             variant === "card" &&
               "rounded-inv border border-inv-line bg-inv-surface p-6 sm:p-8"
           )}
@@ -99,7 +135,7 @@ export function RsvpForm({
               id="rsvp-name"
               name="guestName"
               required
-              maxLength={120}
+              maxLength={80}
               autoComplete="name"
               defaultValue={guestName ?? ""}
               className={inputClass}
@@ -136,7 +172,12 @@ export function RsvpForm({
           </fieldset>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
+            <div
+              className={cn(
+                "flex flex-col gap-2",
+                attending === "no" && "opacity-50"
+              )}
+            >
               <label htmlFor="rsvp-party" className="text-sm font-medium">
                 Number of guests
               </label>
@@ -145,8 +186,9 @@ export function RsvpForm({
                 name="partySize"
                 type="number"
                 min={1}
-                max={10}
+                max={20}
                 defaultValue={1}
+                disabled={attending === "no"}
                 inputMode="numeric"
                 className={inputClass}
               />
@@ -177,6 +219,9 @@ export function RsvpForm({
               className={inputClass}
             />
           </div>
+
+          <HoneypotField id="rsvp-website" />
+          {turnstile.widget}
 
           <InvButton
             type="submit"

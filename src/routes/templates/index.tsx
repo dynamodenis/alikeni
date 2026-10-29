@@ -18,8 +18,8 @@ import {
   categoryCounts,
   categoryLabel,
   filterTemplates,
-  getCatalog,
 } from "@/templates/catalog"
+import { TEMPLATE_METAS } from "@/templates/registry"
 
 const SEARCH_DEFAULTS = { category: "all", q: "" } as const
 
@@ -47,7 +47,7 @@ export const Route = createFileRoute("/templates/")({
 function GalleryPage() {
   const { category, q } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
-  const catalog = getCatalog()
+  const catalog = TEMPLATE_METAS
   const results = filterTemplates(catalog, { category, q })
   const upcoming = filterTemplates(UPCOMING_TEMPLATES, { category, q })
   const counts = categoryCounts(catalog, q)

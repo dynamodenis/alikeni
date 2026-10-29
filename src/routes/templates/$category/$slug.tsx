@@ -30,13 +30,21 @@ const DetailSearch = z.object({
 export const Route = createFileRoute("/templates/$category/$slug")({
   validateSearch: DetailSearch,
   search: { middlewares: [stripSearchParams({ device: "mobile" })] },
-  loader: ({ params }) => {
-    const meta = getTemplateMeta(`${params.category}/${params.slug}`)
+  // The registry is imported lazily so route configs (which live in the app
+  // entry chunk) do not pull every template's metadata onto every page.
+  loader: async ({ params }) => {
+    const { getTemplateMeta: lookup } = await import("@/templates/registry")
+    const meta = lookup(`${params.category}/${params.slug}`)
     if (!meta) throw notFound()
-    return { id: meta.id }
+    return {
+      id: meta.id,
+      name: meta.name,
+      category: meta.category,
+      description: meta.description,
+    }
   },
   head: ({ loaderData }) => {
-    const meta = loaderData ? getTemplateMeta(loaderData.id) : undefined
+    const meta = loaderData
     return {
       meta: meta
         ? [

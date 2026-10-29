@@ -4,7 +4,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto"
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { dirname, join, resolve } from "node:path"
-import type { StorageDriver, UploadTarget } from "./types"
+import type { ServerStorage, UploadTarget } from "./types"
 import { UPLOAD_TTL_SECONDS } from "./types"
 
 export const LOCAL_ROOT = resolve(".storage")
@@ -70,7 +70,7 @@ export async function readLocalObject(root: string, key: string) {
   }
 }
 
-export function createLocalDriver(config: LocalConfig): StorageDriver {
+export function createLocalDriver(config: LocalConfig): ServerStorage {
   const root = config.root ?? LOCAL_ROOT
   const origin = config.origin.replace(/\/$/, "")
   return {
@@ -110,6 +110,16 @@ export function createLocalDriver(config: LocalConfig): StorageDriver {
       const file = pathFor(root, key)
       await rm(file, { force: true })
       await rm(`${file}.meta.json`, { force: true })
+    },
+
+    put: (key, bytes, contentType) =>
+      writeLocalObject(root, key, contentType, bytes),
+
+    async get(key) {
+      const object = await readLocalObject(root, key)
+      return object
+        ? { body: new Uint8Array(object.body), mime: object.mime }
+        : null
     },
 
     publicUrl: (key) =>
