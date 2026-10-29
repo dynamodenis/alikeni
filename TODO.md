@@ -14,7 +14,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 | Object storage      | [?] ask at Phase 4 (R2 recommended · Supabase Storage · S3 · UploadThing) |            |
 | Auth                | Better Auth 1.7 (email + password, Google), sessions in Postgres          | 2026-10-24 |
 | Email               | Resend (dev without a key prints emails to the server log)                | 2026-10-24 |
-| Deployment          | [?] ask at Phase 8 (Vercel · Netlify · Cloudflare Workers · Railway)      |            |
+| Deployment          | Cloudflare Workers (Hyperdrive → Neon, R2 binding + S3 presign)           | 2026-10-29 |
 | Map display default | google-embed iframe; adapters pluggable (rule 11)                         | 2026-10-14 |
 | Geocoder default    | nominatim, server-side on submit, cached                                  | 2026-10-14 |
 
@@ -178,7 +178,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Phase 8 — Polish & deploy
 
-- [?] Choose deployment target first. Recommendation (2026-10-29): Cloudflare Workers ($5/mo base, no egress fees, edge latency); keep node-postgres behind Hyperdrive with a per-request pool; move the rate limiter to a Durable Object
+- [x] Deployment target: **Cloudflare Workers** (decided 2026-10-29): ($5/mo base, no egress fees, edge latency); keep node-postgres behind Hyperdrive with a per-request pool; move the rate limiter to a Durable Object
 - [ ] Perf, a11y, reduced-motion audit, i18n (en + id), tests (Vitest + Playwright + SSR no-window test), security (CSP, URL validation, owner checks)
 - [ ] Auth before scaling past one instance: shared rate-limit storage, optional cookie cache (see `docs/AUTH.md`)
 - [ ] Deploy config + README
