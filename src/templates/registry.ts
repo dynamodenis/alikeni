@@ -23,6 +23,32 @@ import { meta as varsity } from "./graduation/varsity/meta"
 import { meta as techTerminal } from "./graduation/tech-terminal/meta"
 import { meta as starryFuture } from "./graduation/starry-future/meta"
 import { meta as polaroidMemories } from "./graduation/polaroid-memories/meta"
+import { meta as cloudNine } from "./baby_shower/cloud-nine/meta"
+import { meta as littleSafari } from "./baby_shower/little-safari/meta"
+import { meta as genderReveal } from "./baby_shower/gender-reveal/meta"
+import { meta as twinkleStar } from "./baby_shower/twinkle-star/meta"
+import { meta as botanicalSage } from "./baby_shower/botanical-sage/meta"
+import { meta as teddyPicnic } from "./baby_shower/teddy-picnic/meta"
+import { meta as goldenYears } from "./anniversary/golden-years/meta"
+import { meta as silverJubilee } from "./anniversary/silver-jubilee/meta"
+import { meta as loveLetter } from "./anniversary/love-letter/meta"
+import { meta as thenAndNow } from "./anniversary/then-and-now/meta"
+import { meta as vinylLoveSong } from "./anniversary/vinyl-love-song/meta"
+import { meta as productLaunch } from "./corporate/product-launch/meta"
+import { meta as blackTieGala } from "./corporate/black-tie-gala/meta"
+import { meta as conferenceGrid } from "./corporate/conference-grid/meta"
+import { meta as holidayParty } from "./corporate/holiday-party/meta"
+import { meta as teamOffsite } from "./corporate/team-offsite/meta"
+import { meta as webinarMinimal } from "./corporate/webinar-minimal/meta"
+import { meta as engagementSparkle } from "./other/engagement-sparkle/meta"
+import { meta as khitananCeria } from "./other/khitanan-ceria/meta"
+import { meta as aqiqahSoft } from "./other/aqiqah-soft/meta"
+import { meta as housewarmingKeys } from "./other/housewarming-keys/meta"
+import { meta as bridalShowerBlush } from "./other/bridal-shower-blush/meta"
+import { meta as retirementSunset } from "./other/retirement-sunset/meta"
+import { meta as eidOpenHouse } from "./other/eid-open-house/meta"
+import { meta as christmasDinner } from "./other/christmas-dinner/meta"
+import { meta as classReunion } from "./other/class-reunion/meta"
 
 /**
  * Synchronous metadata for galleries and listings. Template code itself is
@@ -54,6 +80,32 @@ export const TEMPLATE_METAS: ReadonlyArray<TemplateMeta> = [
   techTerminal,
   starryFuture,
   polaroidMemories,
+  cloudNine,
+  littleSafari,
+  genderReveal,
+  twinkleStar,
+  botanicalSage,
+  teddyPicnic,
+  goldenYears,
+  silverJubilee,
+  loveLetter,
+  thenAndNow,
+  vinylLoveSong,
+  productLaunch,
+  blackTieGala,
+  conferenceGrid,
+  holidayParty,
+  teamOffsite,
+  webinarMinimal,
+  engagementSparkle,
+  khitananCeria,
+  aqiqahSoft,
+  housewarmingKeys,
+  bridalShowerBlush,
+  retirementSunset,
+  eidOpenHouse,
+  christmasDinner,
+  classReunion,
 ]
 
 type Loader = () => Promise<{ default: TemplateModule }>
@@ -83,6 +135,32 @@ const loaders: Partial<Record<string, Loader>> = {
   "graduation/tech-terminal": () => import("./graduation/tech-terminal"),
   "graduation/starry-future": () => import("./graduation/starry-future"),
   "graduation/polaroid-memories": () => import("./graduation/polaroid-memories"),
+  "baby_shower/cloud-nine": () => import("./baby_shower/cloud-nine"),
+  "baby_shower/little-safari": () => import("./baby_shower/little-safari"),
+  "baby_shower/gender-reveal": () => import("./baby_shower/gender-reveal"),
+  "baby_shower/twinkle-star": () => import("./baby_shower/twinkle-star"),
+  "baby_shower/botanical-sage": () => import("./baby_shower/botanical-sage"),
+  "baby_shower/teddy-picnic": () => import("./baby_shower/teddy-picnic"),
+  "anniversary/golden-years": () => import("./anniversary/golden-years"),
+  "anniversary/silver-jubilee": () => import("./anniversary/silver-jubilee"),
+  "anniversary/love-letter": () => import("./anniversary/love-letter"),
+  "anniversary/then-and-now": () => import("./anniversary/then-and-now"),
+  "anniversary/vinyl-love-song": () => import("./anniversary/vinyl-love-song"),
+  "corporate/product-launch": () => import("./corporate/product-launch"),
+  "corporate/black-tie-gala": () => import("./corporate/black-tie-gala"),
+  "corporate/conference-grid": () => import("./corporate/conference-grid"),
+  "corporate/holiday-party": () => import("./corporate/holiday-party"),
+  "corporate/team-offsite": () => import("./corporate/team-offsite"),
+  "corporate/webinar-minimal": () => import("./corporate/webinar-minimal"),
+  "other/engagement-sparkle": () => import("./other/engagement-sparkle"),
+  "other/khitanan-ceria": () => import("./other/khitanan-ceria"),
+  "other/aqiqah-soft": () => import("./other/aqiqah-soft"),
+  "other/housewarming-keys": () => import("./other/housewarming-keys"),
+  "other/bridal-shower-blush": () => import("./other/bridal-shower-blush"),
+  "other/retirement-sunset": () => import("./other/retirement-sunset"),
+  "other/eid-open-house": () => import("./other/eid-open-house"),
+  "other/christmas-dinner": () => import("./other/christmas-dinner"),
+  "other/class-reunion": () => import("./other/class-reunion"),
 }
 
 export const TEMPLATE_IDS: ReadonlyArray<string> = Object.keys(loaders)

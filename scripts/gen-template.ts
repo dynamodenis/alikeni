@@ -111,7 +111,7 @@ export const meta: TemplateMeta = {
   tags: ${JSON.stringify(tags)},
   description:
     "${description.replace(/"/g, '\\"')}",
-  thumbnail: "/thumbs/${category}-${slug}.webp",
+  thumbnail: "/thumbs/${category.replaceAll("_", "-")}-${slug}.webp",
   isPremium: false,
 ${extras}
   defaultPaletteId: "${palette}",
@@ -155,7 +155,11 @@ ${extras}
 
   // Placeholder thumbnail so registry.test.ts passes before `pnpm thumbs`.
   const baseThumb = /thumbnail:\s*"([^"]+)"/.exec(baseMetaSrc)?.[1]
-  const thumb = join("public", "thumbs", `${category}-${slug}.webp`)
+  const thumb = join(
+    "public",
+    "thumbs",
+    `${category.replaceAll("_", "-")}-${slug}.webp`
+  )
   if (baseThumb && existsSync(join("public", baseThumb))) {
     await copyFile(join("public", baseThumb), thumb)
   }

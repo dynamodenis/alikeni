@@ -64,7 +64,7 @@ export function Showcase() {
         eyebrow="Templates"
         title="Designed for"
         accent="every occasion"
-        description="Fifty templates are on the way, each one edited live and published in minutes."
+        description="Fifty templates across weddings, birthdays, graduations, baby showers, anniversaries and corporate events, each one edited live and published in minutes."
       />
       <div className="mt-16 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
         {SAMPLES.map((sample, i) => (

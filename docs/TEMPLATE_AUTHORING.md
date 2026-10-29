@@ -169,6 +169,8 @@ sheet lays every thumbnail of a category side by side for the batch review
    hero, every section in `sectionsOrder`, closing + footer, `MusicPlayer`.
    Render at least one `<Divider />` (hero children or under a section): the
    SSR test asserts `data-ornament` carries the template's ornament.
+   Keep `calendar` in `sectionsOrder` with `<AddToCalendar />`: the SSR test
+   also asserts the `/ics/<slug>` link is on the page.
 5. `/dev/templates/<id>` at motion full and none, mobile and desktop: no
    console errors, no hydration warnings, headline readable over the decor.
 6. `pnpm thumbs --only <id>`; the thumbnail shows the cover, not a blank.

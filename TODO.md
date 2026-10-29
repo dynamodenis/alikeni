@@ -150,16 +150,20 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [ ] RSVP/wishes server fns: honeypot, Turnstile (optional in dev), rate limit
 - [ ] Perf budget: < 150 KB gz JS before "open"
 
-## Phase 7 — Scale to 50 templates (batches)
+## Phase 7 — Scale to 50 templates (batches) ✅ 2026-10-29
 
 - [x] `docs/TEMPLATE_AUTHORING.md` (contract, vocabulary tables, distinctness rule, checklist, batch procedure) + `pnpm gen:template --id <cat>/<slug> --name … --base <cat>/<slug> [--palette --font --tags]` (scaffolds the folder from a base, registers in `registry.ts`, drops the name from `UPCOMING_TEMPLATES`, copies a placeholder thumbnail) + `pnpm contact-sheet --category <cat>` (`docs/batches/<cat>.png`)
 - [x] Shared decor grew for the batches: `PetalField` (petal | leaf), `GeoLattice`, `BatikBand`, `FilmStrip`, `WaveLines`, `PixelField`, `Bunting`; palettes +8 (`sogan-batik`, `barnwood`, `sunset-coral`, `noir`, `arcade`, `chalkboard`, `varsity`, `terminal`), all AA-checked
 - [x] Wedding (10/10) ✅ 2026-10-29: midnight-aurora, javanese-heritage, minimal-mono, rustic-barn, boho-terracotta, royal-islamic, beach-sunset, cinema-reel, pastel-petals (+ ivory-garden). Local signature pieces: `BohoSun`, `TicketStub`. Sheet: `docs/batches/wedding.png`
 - [x] Birthday (8/8) ✅ 2026-10-29: dino-adventure, princess-castle, neon-night, retro-arcade, golden-milestone, sweet-seventeen, garden-tea-party (+ confetti-pop). Local pieces: `DinoEgg`, `CastleCrest`, `NeonSign`, `ScoreBoard`, `Teacup`. Sheet: `docs/batches/birthday.png`
 - [x] Graduation (6/6) ✅ 2026-10-29: chalkboard, varsity, tech-terminal, starry-future, polaroid-memories (+ cap-and-gown). Local pieces: `ChalkFrame`, `VarsityStripes` + `VarsityLetter`, `TerminalCard`, `Constellation`, `Polaroid`. Sheet: `docs/batches/graduation.png`
-- [ ] Baby shower (0/6) · Anniversary (0/5) · Corporate (0/6) · Other (0/9)
-- [ ] Per batch: checklist pass, thumbnails, contact sheet in `docs/batches/`
-- Notes: every template must render one `<Divider />` (the SSR ornament test reads `data-ornament` from it); thumbnails are captured at `motion=none`, so WebGL backgrounds show as their static gradient
+- [x] Baby shower (6/6): cloud-nine, little-safari, gender-reveal, twinkle-star, botanical-sage, teddy-picnic. Local pieces: `SafariBadge`, `RevealBadge`, `MoonStar`, `Teddy`, `Gingham`
+- [x] Anniversary (5/5): golden-years, silver-jubilee, love-letter, then-and-now, vinyl-love-song. Schema extension `years` (+ `fieldsUi`). Local pieces: `YearsBadge`, `LetterCard`, `ThenNow`, `VinylRecord`
+- [x] Corporate (6/6): product-launch, black-tie-gala, conference-grid, holiday-party, team-offsite, webinar-minimal. Local pieces: `GridLines`, `Snow`, `TrailBadge`
+- [x] Other (9/9): engagement-sparkle, khitanan-ceria, aqiqah-soft, housewarming-keys, bridal-shower-blush, retirement-sunset, eid-open-house, christmas-dinner, class-reunion. Local pieces: `HouseKey`, `Horizon`, `Crescent`, `YearsRibbon`
+- Acceptance: 50 templates registered and seeded from the registry; `UPCOMING_TEMPLATES` is empty, so "Coming soon" no longer renders; every template SSR-tested (574 tests green); 50 thumbnails regenerated; contact sheets for all seven categories in `docs/batches/`
+- [x] Per batch: checklist pass, thumbnails, contact sheet in `docs/batches/`
+- Notes: every template must render one `<Divider />` (the SSR ornament test reads `data-ornament` from it) and keep `calendar` in `sectionsOrder` (the SSR test asserts the `/ics/` link); thumbnails are captured at `motion=none`, so WebGL backgrounds show as their static gradient. Open items: local SVG pieces from the last batch were checked only via thumbnails (cover crest), not at motion full in `/dev/templates`; Product Launch and Webinar Minimal are the closest pair visually
 
 ## Phase 8 — Polish & deploy
 

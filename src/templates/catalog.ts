@@ -50,47 +50,21 @@ export const UPCOMING_TEMPLATES: ReadonlyArray<{
   [
     "baby_shower",
     [
-      "Cloud Nine",
-      "Little Safari",
-      "Gender Reveal",
-      "Twinkle Star",
-      "Botanical Sage",
-      "Teddy Picnic",
     ],
   ],
   [
     "anniversary",
     [
-      "Golden Years",
-      "Silver Jubilee",
-      "Love Letter",
-      "Then and Now",
-      "Vinyl Love Song",
     ],
   ],
   [
     "corporate",
     [
-      "Product Launch",
-      "Black Tie Gala",
-      "Conference Grid",
-      "Holiday Party",
-      "Team Offsite",
-      "Webinar Minimal",
     ],
   ],
   [
     "other",
     [
-      "Engagement Sparkle",
-      "Khitanan Ceria",
-      "Aqiqah Soft",
-      "Housewarming Keys",
-      "Bridal Shower Blush",
-      "Retirement Sunset",
-      "Eid Open House",
-      "Christmas Dinner",
-      "Class Reunion",
     ],
   ],
 ].flatMap(([category, names]) =>
