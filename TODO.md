@@ -152,9 +152,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Phase 7 — Scale to 50 templates (batches)
 
-- [ ] `docs/TEMPLATE_AUTHORING.md` + `pnpm gen:template`
-- [ ] Wedding (10) · Birthday (8) · Graduation (6) · Baby shower (6) · Anniversary (5) · Corporate (6) · Other (9)
+- [x] `docs/TEMPLATE_AUTHORING.md` (contract, vocabulary tables, distinctness rule, checklist, batch procedure) + `pnpm gen:template --id <cat>/<slug> --name … --base <cat>/<slug> [--palette --font --tags]` (scaffolds the folder from a base, registers in `registry.ts`, drops the name from `UPCOMING_TEMPLATES`, copies a placeholder thumbnail) + `pnpm contact-sheet --category <cat>` (`docs/batches/<cat>.png`)
+- [x] Shared decor grew for the batches: `PetalField` (petal | leaf), `GeoLattice`, `BatikBand`, `FilmStrip`, `WaveLines`, `PixelField`, `Bunting`; palettes +8 (`sogan-batik`, `barnwood`, `sunset-coral`, `noir`, `arcade`, `chalkboard`, `varsity`, `terminal`), all AA-checked
+- [x] Wedding (10/10) ✅ 2026-10-29: midnight-aurora, javanese-heritage, minimal-mono, rustic-barn, boho-terracotta, royal-islamic, beach-sunset, cinema-reel, pastel-petals (+ ivory-garden). Local signature pieces: `BohoSun`, `TicketStub`. Sheet: `docs/batches/wedding.png`
+- [ ] Birthday (1/8) · Graduation (1/6) · Baby shower (0/6) · Anniversary (0/5) · Corporate (0/6) · Other (0/9)
 - [ ] Per batch: checklist pass, thumbnails, contact sheet in `docs/batches/`
+- Notes: every template must render one `<Divider />` (the SSR ornament test reads `data-ornament` from it); thumbnails are captured at `motion=none`, so WebGL backgrounds show as their static gradient
 
 ## Phase 8 — Polish & deploy
 

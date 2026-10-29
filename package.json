@@ -18,6 +18,8 @@
     "test:ui": "vitest --ui",
     "smoke:check": "node scripts/smoke-check.mjs",
     "thumbs": "tsx scripts/thumbs.ts",
+    "contact-sheet": "tsx scripts/contact-sheet.ts",
+    "gen:template": "tsx scripts/gen-template.ts",
     "music:add": "tsx --env-file-if-exists=.env scripts/music-library.ts add",
     "music:placeholders": "tsx --env-file-if-exists=.env scripts/music-library.ts placeholders",
     "music:list": "tsx scripts/music-library.ts list",

@@ -35,15 +35,6 @@ export const UPCOMING_TEMPLATES: ReadonlyArray<{
   [
     "wedding",
     [
-      "Midnight Aurora",
-      "Javanese Heritage",
-      "Minimal Mono",
-      "Rustic Barn",
-      "Boho Terracotta",
-      "Royal Islamic",
-      "Beach Sunset",
-      "Cinema Reel",
-      "Pastel Petals",
     ],
   ],
   [

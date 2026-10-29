@@ -36,7 +36,8 @@ describe("catalog search", () => {
       category: "birthday",
       q: "",
     })
-    expect(birthdays.map((m) => m.id)).toEqual(["birthday/confetti-pop"])
+    expect(birthdays.map((m) => m.id)).toContain("birthday/confetti-pop")
+    expect(birthdays.every((m) => m.category === "birthday")).toBe(true)
     expect(
       filterTemplates(TEMPLATE_METAS, { category: "wedding", q: "confetti" })
     ).toEqual([])
@@ -46,9 +47,10 @@ describe("catalog search", () => {
     const counts = categoryCounts(TEMPLATE_METAS, "")
     expect(Object.keys(counts)).toEqual([...CATEGORY_FILTERS])
     expect(counts.all).toBe(TEMPLATE_METAS.length)
-    expect(counts.wedding).toBe(1)
-    expect(counts.corporate).toBe(0)
-    expect(categoryCounts(TEMPLATE_METAS, "navy").all).toBe(1)
+    expect(counts.wedding).toBe(
+      TEMPLATE_METAS.filter((m) => m.category === "wedding").length
+    )
+    expect(categoryCounts(TEMPLATE_METAS, "ivory garden").all).toBe(1)
   })
 })
 
