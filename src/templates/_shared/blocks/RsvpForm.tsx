@@ -1,6 +1,7 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { toast } from "sonner"
+import { GuestRateLimitError, describeRateLimit } from "@/lib/guest-limit"
 import { cn } from "@/lib/utils"
 import { formatLongDate } from "@/lib/format-date"
 import { useTurnstile } from "@/components/turnstile/useTurnstile"
@@ -86,9 +87,17 @@ export function RsvpForm({
       toast(t.rsvp.thanksToast, { description: t.rsvp.thanksToastBody })
     } catch (error) {
       setStatus("idle")
-      toast.error(t.rsvp.errorToast, {
-        description: error instanceof Error ? error.message : t.common.tryAgain,
-      })
+      if (error instanceof GuestRateLimitError) {
+        toast.error(t.limits.title, {
+          description: describeRateLimit(error.info, "rsvp", t, locale),
+          duration: 10_000,
+        })
+      } else {
+        toast.error(t.rsvp.errorToast, {
+          description:
+            error instanceof Error ? error.message : t.common.tryAgain,
+        })
+      }
     } finally {
       if (turnstile.enabled) turnstile.reset()
     }

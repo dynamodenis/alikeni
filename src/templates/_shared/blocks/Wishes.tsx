@@ -1,6 +1,7 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { toast } from "sonner"
+import { GuestRateLimitError, describeRateLimit } from "@/lib/guest-limit"
 import { cn } from "@/lib/utils"
 import { useTurnstile } from "@/components/turnstile/useTurnstile"
 import { useInvitation, type WishItem } from "../context"
@@ -29,7 +30,7 @@ export function Wishes({
   tone,
   className,
 }: WishesProps) {
-  const { mode, actions, wishes, guestName, t } = useInvitation()
+  const { mode, actions, wishes, guestName, locale, t } = useInvitation()
   const [local, setLocal] = useState<Array<WishItem>>([])
   const [sending, setSending] = useState(false)
   const disabled = mode === "preview" || !actions.submitWish
@@ -73,9 +74,17 @@ export function Wishes({
     } catch (error) {
       // Roll back; the form still holds the text so the guest can retry.
       setLocal((prev) => prev.filter((w) => w.id !== pending.id))
-      toast.error(t.wishes.errorToast, {
-        description: error instanceof Error ? error.message : t.common.tryAgain,
-      })
+      if (error instanceof GuestRateLimitError) {
+        toast.error(t.limits.title, {
+          description: describeRateLimit(error.info, "wish", t, locale),
+          duration: 10_000,
+        })
+      } else {
+        toast.error(t.wishes.errorToast, {
+          description:
+            error instanceof Error ? error.message : t.common.tryAgain,
+        })
+      }
     } finally {
       setSending(false)
       if (turnstile.enabled) turnstile.reset()

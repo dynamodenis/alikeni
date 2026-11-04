@@ -5,18 +5,20 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Decisions (locked)
 
-| Concern             | Decision                                                                  | Date       |
-| ------------------- | ------------------------------------------------------------------------- | ---------- |
-| Framework           | TanStack Start 1.169.x (stable line, pinned) + React + TS strict          | 2026-10-14 |
-| UI                  | shadcn/ui + Tailwind v4, ReactBits via `@react-bits/<Name>-TS-TW`         | 2026-10-14 |
-| Validation / ORM    | Zod + Drizzle                                                             | 2026-10-14 |
-| Database provider   | Neon Postgres via node-postgres (pooled URL); Drizzle ORM                 | 2026-10-14 |
-| Object storage      | [?] ask at Phase 4 (R2 recommended · Supabase Storage · S3 · UploadThing) |            |
-| Auth                | Better Auth 1.7 (email + password, Google), sessions in Postgres          | 2026-10-24 |
-| Email               | Resend (dev without a key prints emails to the server log)                | 2026-10-24 |
-| Deployment          | Cloudflare Workers (Hyperdrive → Neon, R2 binding + S3 presign)           | 2026-10-29 |
-| Map display default | google-embed iframe; adapters pluggable (rule 11)                         | 2026-10-14 |
-| Geocoder default    | nominatim, server-side on submit, cached                                  | 2026-10-14 |
+| Concern             | Decision                                                                      | Date       |
+| ------------------- | ----------------------------------------------------------------------------- | ---------- |
+| Framework           | TanStack Start 1.169.x (stable line, pinned) + React + TS strict              | 2026-10-14 |
+| UI                  | shadcn/ui + Tailwind v4, ReactBits via `@react-bits/<Name>-TS-TW`             | 2026-10-14 |
+| Validation / ORM    | Zod + Drizzle                                                                 | 2026-10-14 |
+| Database provider   | Neon Postgres via node-postgres (pooled URL); Drizzle ORM                     | 2026-10-14 |
+| Object storage      | [?] ask at Phase 4 (R2 recommended · Supabase Storage · S3 · UploadThing)     |            |
+| Auth                | Better Auth 1.7 (email + password, Google), sessions in Postgres              | 2026-10-24 |
+| Email               | Resend (dev without a key prints emails to the server log)                    | 2026-10-24 |
+| Deployment          | Cloudflare Workers (Hyperdrive → Neon, R2 binding + S3 presign)               | 2026-10-29 |
+| Payments            | Paystack (Stripe's African arm): KES (M-Pesa, cards) + USD (cards, Apple Pay) | 2026-11-04 |
+| Pricing model       | Free tier + one-time upgrade per invitation (no subscription)                 | 2026-11-04 |
+| Map display default | google-embed iframe; adapters pluggable (rule 11)                             | 2026-10-14 |
+| Geocoder default    | nominatim, server-side on submit, cached                                      | 2026-10-14 |
 
 ## Phase 0 — Project setup & smoke test ✅ 2026-10-14
 
@@ -182,6 +184,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [ ] Perf, a11y, reduced-motion audit, i18n (en + id), tests (Vitest + Playwright + SSR no-window test), security (CSP, URL validation, owner checks)
 - [ ] Auth before scaling past one instance: shared rate-limit storage, optional cookie cache (see `docs/AUTH.md`)
 - [ ] Deploy config + README
+
+## Phase 9 — Payments (Paystack)
+
+- Free invitation: goes offline the day after the event, RSVP cap [?] number, no gift section (bank details / QR / registry not sent to guests)
+- Paid (one-time per invitation): no early expiry, unlimited RSVPs, gifts [?] other paid extras
+- [?] Price in KES and USD; KES (M-Pesa) for Kenyan visitors, USD elsewhere (`cf-ipcountry`)
+- [ ] `orders` table + `invitations.plan`; Paystack initialize → hosted checkout → webhook (`x-paystack-signature`, HMAC-SHA512) + verify on return, idempotent
+- [ ] Enforcement on the server: public page expiry, RSVP cap, gifts stripped from the published config on free
+- [ ] Editor and dashboard: plan badge, upgrade button, locked Gifts tab
 
 ## Credits / licensing log
 

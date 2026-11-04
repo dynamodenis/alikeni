@@ -7,6 +7,8 @@ import {
   submitRsvpFn,
   submitWishFn,
 } from "@/server/public/public.functions"
+import { guestDeviceId } from "@/lib/guest-device"
+import { GuestRateLimitError } from "@/lib/guest-limit"
 import { TemplateRenderer } from "@/templates/TemplateRenderer"
 import type { InvitationActions } from "@/templates/_shared/context"
 import { ShareBar } from "@/templates/_shared/blocks/ShareBar"
@@ -107,14 +109,28 @@ function PublicInvitation() {
   const actions = useMemo<InvitationActions>(
     () => ({
       submitRsvp: async (input) => {
-        await submitRsvpFn({
-          data: { ...input, slug, website: input.website ?? "" },
+        const result = await submitRsvpFn({
+          data: {
+            ...input,
+            slug,
+            website: input.website ?? "",
+            device: guestDeviceId(),
+          },
         })
+        if (!result.ok) throw new GuestRateLimitError(result.limited)
       },
-      submitWish: (input) =>
-        submitWishFn({
-          data: { ...input, slug, website: input.website ?? "" },
-        }),
+      submitWish: async (input) => {
+        const result = await submitWishFn({
+          data: {
+            ...input,
+            slug,
+            website: input.website ?? "",
+            device: guestDeviceId(),
+          },
+        })
+        if (!result.ok) throw new GuestRateLimitError(result.limited)
+        return result.wish
+      },
     }),
     [slug]
   )

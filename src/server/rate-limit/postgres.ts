@@ -1,8 +1,8 @@
-import { and, asc, eq, gt, lte, sql } from "drizzle-orm"
+import { and, asc, eq, inArray, lte, or, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import * as schema from "@/server/db/schema"
-import type { RateLimiter, RateResult, RateRule } from "./types"
-import { decide, maxWindowMs } from "./window"
+import type { RateCheck, RateLimiter, RateResult, RateRule } from "./types"
+import { decideAll, maxWindowMs } from "./window"
 
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
@@ -24,7 +24,9 @@ const { rateLimitHits: hits } = schema
  * shares one count, with no Durable Object or KV. Each hit runs in a short
  * transaction holding a per-key advisory lock (`pg_advisory_xact_lock`), so
  * concurrent hits on the same key are serialised and cannot both take the
- * last slot. Refused hits are not stored. Rows older than the key's longest
+ * last slot. `hitAll` locks its keys in sorted order (no deadlock between
+ * two calls sharing keys) and records on every key or none. Refused hits are
+ * not stored. Rows older than the key's longest
  * window are deleted on every hit; the whole table is pruned now and then.
  *
  * `db` is a getter because on Workers the client belongs to the request.
@@ -45,26 +47,52 @@ export class PostgresRateLimiter implements RateLimiter {
     this.random = options.random ?? Math.random
   }
 
-  async hit(key: string, rules: ReadonlyArray<RateRule>): Promise<RateResult> {
+  hit(key: string, rules: ReadonlyArray<RateRule>): Promise<RateResult> {
+    return this.hitAll([{ key, rules }])
+  }
+
+  async hitAll(checks: ReadonlyArray<RateCheck>): Promise<RateResult> {
+    // Nothing to check (and an empty `or()` would delete the whole table).
+    if (checks.length === 0) return { ok: true, retryAfterSec: 0 }
     const now = this.now()
-    const windowMs = maxWindowMs(rules)
-    const since = new Date(now - windowMs)
+    const keys = [...new Set(checks.map((check) => check.key))].sort()
+    const sinceFor = (check: RateCheck) =>
+      new Date(now - maxWindowMs(check.rules))
     const db = this.db()
     const result = await db.transaction(async (tx) => {
-      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${key}))`)
-      await tx.delete(hits).where(and(eq(hits.key, key), lte(hits.at, since)))
+      for (const key of keys) {
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${key}))`)
+      }
+      // Rows that left their key's longest window no longer count anywhere.
+      await tx
+        .delete(hits)
+        .where(
+          or(
+            ...checks.map((check) =>
+              and(eq(hits.key, check.key), lte(hits.at, sinceFor(check)))
+            )
+          )
+        )
       const rows = await tx
-        .select({ at: hits.at })
+        .select({ key: hits.key, at: hits.at })
         .from(hits)
-        .where(and(eq(hits.key, key), gt(hits.at, since)))
+        .where(inArray(hits.key, keys))
         .orderBy(asc(hits.at))
-      const verdict = decide(
-        rows.map((row) => row.at.getTime()),
-        rules,
+      const verdict = decideAll(
+        checks.map((check) => {
+          const since = sinceFor(check).getTime()
+          return rows
+            .filter((row) => row.key === check.key)
+            .map((row) => row.at.getTime())
+            .filter((at) => at > since)
+        }),
+        checks,
         now
       )
       if (verdict.ok) {
-        await tx.insert(hits).values({ key, at: new Date(now) })
+        await tx
+          .insert(hits)
+          .values(keys.map((key) => ({ key, at: new Date(now) })))
       }
       return verdict
     })

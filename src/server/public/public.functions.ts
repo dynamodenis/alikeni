@@ -9,6 +9,7 @@ import { getRateLimiter } from "@/server/rate-limit/limiter.server"
 import { fingerprint } from "./fingerprint.server"
 import {
   PublicError,
+  RateLimitedError,
   RsvpSubmission,
   WishSubmission,
   listWishesBySlug,
@@ -96,6 +97,9 @@ export const submitRsvpFn = createServerFn({ method: "POST" })
     try {
       return await submitRsvp(getDb(), data, await guestContext())
     } catch (error) {
+      if (error instanceof RateLimitedError) {
+        return { ok: false as const, limited: error.info }
+      }
       throw guestError(error)
     }
   })
@@ -104,8 +108,12 @@ export const submitWishFn = createServerFn({ method: "POST" })
   .validator(parseOr(WishSubmission))
   .handler(async ({ data }) => {
     try {
-      return await submitWish(getDb(), data, await guestContext())
+      const wish = await submitWish(getDb(), data, await guestContext())
+      return { ok: true as const, wish }
     } catch (error) {
+      if (error instanceof RateLimitedError) {
+        return { ok: false as const, limited: error.info }
+      }
       throw guestError(error)
     }
   })

@@ -142,4 +142,19 @@ export const id: Messages = {
     copied: "Tautan tersalin",
     copyFailed: "Gagal menyalin tautan",
   },
+  limits: {
+    title: "Mohon tunggu sebentar",
+    responses: (n: number) => `${n} konfirmasi kehadiran`,
+    wishes: (n: number) => `${n} ucapan`,
+    window: (windowSec: number) =>
+      windowSec <= 60
+        ? "dalam satu menit terakhir"
+        : windowSec <= 3600
+          ? "dalam satu jam terakhir"
+          : "dalam 24 jam terakhir",
+    you: (sent: string, window: string, wait: string) =>
+      `Anda telah mengirim ${sent} ${window}. Anda dapat mengirim lagi dalam ${wait}.`,
+    network: (wait: string) =>
+      `Banyak tamu di jaringan Anda sedang mengirim saat ini. Silakan coba lagi dalam ${wait}.`,
+  },
 }

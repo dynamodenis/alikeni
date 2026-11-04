@@ -5,7 +5,11 @@ import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import * as schema from "@/server/db/schema"
-import { GUEST_POST_RULES, PostgresRateLimiter } from "./index"
+import {
+  GUEST_NETWORK_RULES,
+  GUEST_POST_RULES,
+  PostgresRateLimiter,
+} from "./index"
 
 const client = new PGlite()
 const db = drizzle(client, { schema, casing: "snake_case" })
@@ -116,5 +120,34 @@ describe("PostgresRateLimiter", () => {
       (r) => r.key
     )
     expect(left).toEqual(["fresh"])
+  })
+
+  it("checks a device and its IP together, all or nothing", async () => {
+    const c = clock()
+    const limiter = limiterWith(c.now)
+    const device = (id: string) => ({ key: `d:${id}`, rules: GUEST_POST_RULES })
+    const network = { key: "ip", rules: GUEST_NETWORK_RULES }
+    for (let i = 0; i < 5; i++) {
+      expect((await limiter.hitAll([device("a"), network])).ok).toBe(true)
+    }
+    const refused = await limiter.hitAll([device("a"), network])
+    expect(refused.blocked).toMatchObject({ check: 0, used: 5 })
+    // Another phone on the same IP still has its own budget.
+    expect((await limiter.hitAll([device("b"), network])).ok).toBe(true)
+    const rows = await db.select().from(schema.rateLimitHits)
+    expect(rows.filter((r) => r.key === "ip")).toHaveLength(6)
+    expect(rows.filter((r) => r.key === "d:a")).toHaveLength(5)
+  })
+
+  it("serialises concurrent multi-key hits without deadlock", async () => {
+    const c = clock()
+    const limiter = limiterWith(c.now)
+    const network = { key: "ip", rules: GUEST_NETWORK_RULES }
+    const results = await Promise.all(
+      Array.from({ length: 40 }, (_, i) =>
+        limiter.hitAll([{ key: `d:${i}`, rules: GUEST_POST_RULES }, network])
+      )
+    )
+    expect(results.filter((r) => r.ok)).toHaveLength(30)
   })
 })

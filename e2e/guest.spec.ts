@@ -93,8 +93,12 @@ test("the sixth rapid RSVP is refused with a rate-limit error", async ({
       ).toBeVisible()
     }
   }
-  await expect(page.getByText("Could not send your RSVP")).toBeVisible()
-  await expect(page.getByText("Too many responses")).toBeVisible()
+  await expect(page.getByText("Please wait a little")).toBeVisible()
+  await expect(
+    page.getByText(
+      /You have sent 5 responses in the last minute\. You can send another in \d+ seconds\./
+    )
+  ).toBeVisible()
   await expect(rsvpForm(page)).toBeVisible()
   await context.close()
 })

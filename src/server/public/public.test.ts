@@ -15,7 +15,7 @@ import {
   NOT_AVAILABLE,
   PublicError,
   RSVP_CLOSED,
-  TOO_MANY,
+  RateLimitedError,
   VERIFY_FAILED,
   listWishes,
   loadPublicPage,
@@ -125,10 +125,52 @@ describe("submitRsvp", () => {
     const ok = results.filter((r) => r.status === "fulfilled").length
     expect(ok).toBe(5)
     const rejected = results.find((r) => r.status === "rejected")
-    expect(rejected?.status === "rejected" && rejected.reason).toEqual(
-      new PublicError(TOO_MANY)
-    )
+    const reason: unknown = rejected?.status === "rejected" && rejected.reason
+    expect(reason).toBeInstanceOf(RateLimitedError)
+    expect((reason as RateLimitedError).info).toMatchObject({
+      scope: "you",
+      used: 5,
+      limit: 5,
+      windowSec: 60,
+    })
     expect((await countRsvps()) - before).toBe(5)
+  })
+
+  it("counts per device, so guests sharing an IP do not block each other", async () => {
+    const limiter = new MemoryRateLimiter()
+    const shared = ctx({ limiter, ipHash: "venue-wifi" })
+    const post = (device: string) => submitRsvp(db, { ...rsvp, device }, shared)
+    for (let i = 0; i < 5; i++) await post("phone-aaaaaaaaaaaaaaaa")
+    await expect(post("phone-aaaaaaaaaaaaaaaa")).rejects.toMatchObject({
+      info: { scope: "you", used: 5 },
+    })
+    await expect(post("phone-bbbbbbbbbbbbbbbb")).resolves.toEqual({ ok: true })
+  })
+
+  it("caps everyone behind one IP at 30 a minute", async () => {
+    const limiter = new MemoryRateLimiter()
+    const shared = ctx({ limiter, ipHash: "carrier-nat" })
+    for (let i = 0; i < 30; i++) {
+      await submitRsvp(
+        db,
+        { ...rsvp, device: `guest-${i}-xxxxxxxxxxxx` },
+        shared
+      )
+    }
+    await expect(
+      submitRsvp(db, { ...rsvp, device: "guest-31-xxxxxxxxxxxx" }, shared)
+    ).rejects.toMatchObject({ info: { scope: "network", used: 30 } })
+  })
+
+  it("falls back to the IP budget for a missing or malformed device id", async () => {
+    const limiter = new MemoryRateLimiter()
+    const shared = ctx({ limiter, ipHash: "no-device" })
+    for (let i = 0; i < 5; i++) {
+      await submitRsvp(db, { ...rsvp, device: "bad id!" }, shared)
+    }
+    await expect(submitRsvp(db, rsvp, shared)).rejects.toBeInstanceOf(
+      RateLimitedError
+    )
   })
 
   it("pretends success for a filled honeypot and stores nothing", async () => {

@@ -6,7 +6,14 @@ import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { z } from "zod"
 import * as schema from "@/server/db/schema"
 import { getPublishedBySlug } from "@/server/invitations/editing.server"
-import { GUEST_POST_RULES, type RateLimiter } from "@/server/rate-limit"
+import { DEVICE_ID_PATTERN } from "@/lib/guest-device"
+import type { GuestRateLimit } from "@/lib/guest-limit"
+import {
+  GUEST_NETWORK_RULES,
+  GUEST_POST_RULES,
+  type RateCheck,
+  type RateLimiter,
+} from "@/server/rate-limit"
 import type { WishItem } from "@/templates/_shared/context"
 import { sha256Hex } from "./fingerprint.server"
 import { cleanText, sanitizeGuestName } from "./sanitize"
@@ -18,6 +25,14 @@ export class PublicError extends Error {
   constructor(message: string) {
     super(message)
     this.name = "PublicError"
+  }
+}
+
+/** Refused by the rate limit; the page words `info` in the guest's language. */
+export class RateLimitedError extends PublicError {
+  constructor(readonly info: GuestRateLimit) {
+    super(TOO_MANY)
+    this.name = "RateLimitedError"
   }
 }
 
@@ -57,6 +72,8 @@ const OptionalClean = (max: number) =>
 /** Honeypot: real people never see it, so anything in it marks a bot. */
 const Honeypot = z.string().max(500).optional().default("")
 const TurnstileToken = z.string().max(4096).optional()
+/** Per-browser id for the rate limit; a malformed one is ignored. */
+const DeviceId = z.string().regex(DEVICE_ID_PATTERN).optional().catch(undefined)
 
 export const RsvpSubmission = z
   .object({
@@ -68,6 +85,7 @@ export const RsvpSubmission = z
     contact: OptionalClean(120),
     website: Honeypot,
     turnstileToken: TurnstileToken,
+    device: DeviceId,
   })
   .refine((v) => v.partySize > 0 || v.attending === "no", {
     message: "Party size must be at least 1",
@@ -81,6 +99,7 @@ export const WishSubmission = z.object({
   message: Clean(1, 500),
   website: Honeypot,
   turnstileToken: TurnstileToken,
+  device: DeviceId,
 })
 export type WishSubmission = z.input<typeof WishSubmission>
 
@@ -92,17 +111,37 @@ async function requirePublished(db: AnyDb, slug: string) {
   return invitation
 }
 
-/** Rate limit per invitation per hashed IP (5/min, 30/day). */
+/**
+ * Rate limit per invitation, RSVPs and wishes counted separately. With a
+ * device id: the guest's own budget per device (5/min, 30/day) plus a shared
+ * ceiling per hashed IP (30/min, 300/day), so guests on one connection do not
+ * block each other. Without one: the guest budget on the IP. Both checks pass
+ * or neither post is counted.
+ */
 async function rateLimit(
   kind: "rsvp" | "wish",
   invitationId: string,
+  device: string | undefined,
   ctx: GuestContext
 ) {
-  const limit = await ctx.limiter.hit(
-    `${kind}:${invitationId}:${ctx.ipHash}`,
-    GUEST_POST_RULES
-  )
-  if (!limit.ok) throw new PublicError(TOO_MANY)
+  const scope = `${kind}:${invitationId}`
+  const network = `${scope}:ip:${ctx.ipHash}`
+  const checks: Array<RateCheck> = device
+    ? [
+        { key: `${scope}:device:${device}`, rules: GUEST_POST_RULES },
+        { key: network, rules: GUEST_NETWORK_RULES },
+      ]
+    : [{ key: network, rules: GUEST_POST_RULES }]
+  const result = await ctx.limiter.hitAll(checks)
+  if (result.ok) return
+  const blocked = result.blocked
+  throw new RateLimitedError({
+    scope: device && blocked?.check === 1 ? "network" : "you",
+    used: blocked?.used ?? 0,
+    limit: blocked?.rule.limit ?? 0,
+    windowSec: blocked?.rule.windowSec ?? 60,
+    retryAfterSec: result.retryAfterSec,
+  })
 }
 
 /* ---------- RSVP ---------- */
@@ -120,7 +159,7 @@ export async function submitRsvp(
   if (texts.rsvpDeadline && now.getTime() > Date.parse(texts.rsvpDeadline)) {
     throw new PublicError(RSVP_CLOSED)
   }
-  await rateLimit("rsvp", invitation.id, ctx)
+  await rateLimit("rsvp", invitation.id, input.device, ctx)
   // Honeypot filled: look successful so the bot moves on; store nothing.
   if (input.website) return { ok: true }
   if (!(await ctx.verifyHuman(input.turnstileToken))) {
@@ -163,7 +202,7 @@ export async function submitWish(
   const input = WishSubmission.parse(raw)
   const invitation = await requirePublished(db, input.slug)
   if (!invitation.config.features.wishes) throw new PublicError(WISHES_CLOSED)
-  await rateLimit("wish", invitation.id, ctx)
+  await rateLimit("wish", invitation.id, input.device, ctx)
   if (input.website) {
     // Same shape as a real wish, never stored.
     return {

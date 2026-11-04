@@ -141,6 +141,21 @@ export const en = {
     copied: "Link copied",
     copyFailed: "Could not copy the link",
   },
+  limits: {
+    title: "Please wait a little",
+    responses: (n: number) => (n === 1 ? "1 response" : `${n} responses`),
+    wishes: (n: number) => (n === 1 ? "1 wish" : `${n} wishes`),
+    window: (windowSec: number): string =>
+      windowSec <= 60
+        ? "in the last minute"
+        : windowSec <= 3600
+          ? "in the last hour"
+          : "in the last 24 hours",
+    you: (sent: string, window: string, wait: string) =>
+      `You have sent ${sent} ${window}. You can send another in ${wait}.`,
+    network: (wait: string) =>
+      `Many guests on your network are sending right now. Please try again in ${wait}.`,
+  },
 }
 
 export type Messages = typeof en

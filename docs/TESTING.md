@@ -76,7 +76,8 @@ driver; the test photo is a PNG generated in memory (`e2e/support/png.ts`).
   guest row).
 - `guest.spec.ts`: `?to=` name on the cover and in the RSVP form; a filled
   honeypot gets the thank-you but the dashboard stays at 0; the sixth RSVP in
-  a minute shows "Too many responses"; the calendar link downloads a valid
+  a minute shows "You have sent 5 responses in the last minute" with the
+  wait; the calendar link downloads a valid
   VCALENDAR; `/og/<slug>.png` is a 1200×630 PNG; unknown slugs 404 on
   `/i`, `/ics` and `/og`.
 - `auth.spec.ts`: signed-out `/dashboard` and `/editor/<id>` go to

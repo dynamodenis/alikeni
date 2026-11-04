@@ -1,5 +1,5 @@
-import type { RateLimiter, RateResult, RateRule } from "./types"
-import { decide, maxWindowMs } from "./window"
+import type { RateCheck, RateLimiter, RateResult, RateRule } from "./types"
+import { decideAll, maxWindowMs } from "./window"
 
 type Entry = {
   /** Hit timestamps (ms), oldest first. */
@@ -39,7 +39,11 @@ export class MemoryRateLimiter implements RateLimiter {
   }
 
   hit(key: string, rules: ReadonlyArray<RateRule>): Promise<RateResult> {
-    return Promise.resolve(this.hitSync(key, rules))
+    return this.hitAll([{ key, rules }])
+  }
+
+  hitAll(checks: ReadonlyArray<RateCheck>): Promise<RateResult> {
+    return Promise.resolve(this.hitSync(checks))
   }
 
   /** Number of tracked keys (tests and diagnostics). */
@@ -47,23 +51,28 @@ export class MemoryRateLimiter implements RateLimiter {
     return this.entries.size
   }
 
-  private hitSync(key: string, rules: ReadonlyArray<RateRule>): RateResult {
+  private hitSync(checks: ReadonlyArray<RateCheck>): RateResult {
     const now = this.now()
     if (++this.hitsSinceSweep >= this.sweepEvery) this.sweep(now)
 
-    const windowMs = maxWindowMs(rules)
-    const entry = this.entries.get(key) ?? { hits: [], maxWindowMs: windowMs }
-    entry.maxWindowMs = Math.max(entry.maxWindowMs, windowMs)
-    entry.hits = entry.hits.filter((t) => t > now - entry.maxWindowMs)
+    const tracked = checks.map(({ key, rules }) => {
+      const windowMs = maxWindowMs(rules)
+      const entry = this.entries.get(key) ?? { hits: [], maxWindowMs: windowMs }
+      entry.maxWindowMs = Math.max(entry.maxWindowMs, windowMs)
+      entry.hits = entry.hits.filter((t) => t > now - entry.maxWindowMs)
+      return { key, entry }
+    })
 
-    const result = decide(entry.hits, rules, now)
-    if (!result.ok) {
+    const result = decideAll(
+      tracked.map(({ entry }) => entry.hits),
+      checks,
+      now
+    )
+    for (const { key, entry } of tracked) {
+      if (result.ok) entry.hits.push(now)
       this.store(key, entry)
-      return result
     }
-    entry.hits.push(now)
-    this.store(key, entry)
-    return { ok: true, retryAfterSec: 0 }
+    return result
   }
 
   private store(key: string, entry: Entry) {
