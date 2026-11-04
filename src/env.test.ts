@@ -77,6 +77,48 @@ describe("auth env", () => {
   })
 })
 
+describe("storage env", () => {
+  const production = {
+    NODE_ENV: "production",
+    BETTER_AUTH_SECRET: "x".repeat(32),
+    RESEND_API_KEY: "re_test",
+    EMAIL_FROM: "Festly <hello@example.com>",
+  }
+
+  it("accepts the Workers binding driver with only R2_PUBLIC_URL", () => {
+    const env = parseServerEnv({
+      STORAGE_DRIVER: "binding",
+      R2_PUBLIC_URL: "https://media.example.com",
+    })
+    expect(env.STORAGE_DRIVER).toBe("binding")
+  })
+
+  it("needs STORAGE_SIGNING_SECRET for the binding in production", () => {
+    expect(() =>
+      parseServerEnv({ ...production, STORAGE_DRIVER: "binding" })
+    ).toThrow(/STORAGE_SIGNING_SECRET: required in production/)
+    expect(() =>
+      parseServerEnv({
+        ...production,
+        STORAGE_DRIVER: "binding",
+        STORAGE_SIGNING_SECRET: "s".repeat(32),
+      })
+    ).not.toThrow()
+  })
+
+  it("keeps local storage out of production", () => {
+    expect(() =>
+      parseServerEnv({ ...production, STORAGE_DRIVER: "local" })
+    ).toThrow(/development only/)
+  })
+
+  it("rejects unknown drivers", () => {
+    expect(() => parseServerEnv({ STORAGE_DRIVER: "s3" })).toThrow(
+      /STORAGE_DRIVER/
+    )
+  })
+})
+
 describe("public env", () => {
   it("parses boolean-ish flags", () => {
     expect(parsePublicEnv({}).VITE_ENABLE_DEV_ROUTES).toBe(false)

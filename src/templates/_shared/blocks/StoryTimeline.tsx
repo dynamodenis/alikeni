@@ -11,12 +11,12 @@ type StoryProps = BlockProps & {
 /** Chronological story: a couple's journey, a graduate's milestones, a life so far. */
 export function StoryTimeline({
   variant = "alternating",
-  eyebrow = "Our story",
-  title = "How we got here",
+  eyebrow,
+  title,
   tone,
   className,
 }: StoryProps) {
-  const { config } = useInvitation()
+  const { config, t } = useInvitation()
   const items = config.story
 
   if (variant === "milestones") {
@@ -24,8 +24,8 @@ export function StoryTimeline({
       <Section
         id="story"
         tone={tone}
-        eyebrow={eyebrow}
-        title={title}
+        eyebrow={eyebrow ?? t.story.eyebrow}
+        title={title ?? t.story.title}
         width="wide"
         className={className}
       >
@@ -35,7 +35,7 @@ export function StoryTimeline({
               key={item.title + i}
               className="flex flex-col gap-3 rounded-inv border border-inv-line bg-inv-surface p-6"
             >
-              <span className="font-inv-display text-4xl text-inv-primary/60">
+              <span className="font-inv-display text-4xl text-inv-primary">
                 {String(i + 1).padStart(2, "0")}
               </span>
               {item.date && (
@@ -57,8 +57,8 @@ export function StoryTimeline({
   return (
     <Section
       id="story"
-      eyebrow={eyebrow}
-      title={title}
+      eyebrow={eyebrow ?? t.story.eyebrow}
+      title={title ?? t.story.title}
       tone={tone}
       className={className}
     >

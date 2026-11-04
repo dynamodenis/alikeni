@@ -32,11 +32,14 @@ const serverEnvSchema = z
       })
       .optional(),
     /**
-     * Where uploads go. `r2`: Cloudflare R2 (all R2_* required). `local`:
-     * .storage/ on this machine (development only). Unset: R2 when fully
-     * configured, otherwise local in development.
+     * Where uploads go. `binding`: Cloudflare R2 through the Worker's BUCKET
+     * binding (Workers deployments; STORAGE_SIGNING_SECRET required in
+     * production, R2_PUBLIC_URL optional). `r2`: R2 over its S3 API (all
+     * R2_* required; Node or other hosts). `local`: .storage/ on this machine
+     * (development only). Unset: R2 when fully configured, else the binding
+     * when bound, else local in development.
      */
-    STORAGE_DRIVER: z.enum(["local", "r2"]).optional(),
+    STORAGE_DRIVER: z.enum(["local", "r2", "binding"]).optional(),
     /** Cloudflare R2. Set all five, or none (see docs/STORAGE.md). */
     R2_ACCOUNT_ID: z.string().min(1).optional(),
     R2_ACCESS_KEY_ID: z.string().min(1).optional(),
@@ -44,7 +47,11 @@ const serverEnvSchema = z
     R2_BUCKET: z.string().min(1).optional(),
     /** Public base URL of the bucket: an r2.dev URL or a custom domain. */
     R2_PUBLIC_URL: z.url({ protocol: /^https?$/ }).optional(),
-    /** HMAC secret for the local storage driver's signed upload URLs (dev only). */
+    /**
+     * HMAC secret for signed upload URLs of the `local` and `binding` drivers.
+     * Required in production with `binding`; generate with
+     * `openssl rand -base64 32`.
+     */
     STORAGE_SIGNING_SECRET: z.string().min(16).optional(),
     /** Geocoder (rule 11): nominatim (default, keyless) | google | mapbox | radar */
     GEOCODE_PROVIDER: z
@@ -89,9 +96,13 @@ const serverEnvSchema = z
   })
   .superRefine((env, ctx) => {
     // Storage must be unambiguous: fail at startup, naming what is missing.
+    // With the binding, only R2_PUBLIC_URL matters; the S3 keys are unused.
     const missing = R2_KEYS.filter((key) => !env[key])
     const partial = missing.length > 0 && missing.length < R2_KEYS.length
-    if (env.STORAGE_DRIVER === "r2" || partial) {
+    if (
+      env.STORAGE_DRIVER === "r2" ||
+      (partial && env.STORAGE_DRIVER !== "binding")
+    ) {
       for (const key of missing) {
         ctx.addIssue({
           code: "custom",
@@ -143,7 +154,19 @@ const serverEnvSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["STORAGE_DRIVER"],
-        message: "local storage is for development only; use r2 in production",
+        message:
+          "local storage is for development only; use binding (Workers) or r2 in production",
+      })
+    }
+    if (
+      env.STORAGE_DRIVER === "binding" &&
+      env.NODE_ENV === "production" &&
+      !env.STORAGE_SIGNING_SECRET
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["STORAGE_SIGNING_SECRET"],
+        message: "required in production with STORAGE_DRIVER=binding",
       })
     }
   })
@@ -167,4 +190,7 @@ export function parseServerEnv(
   return result.data
 }
 
+// Read once at module load. On Cloudflare Workers, vars and secrets are in
+// process.env from the start (nodejs_compat + compatibility_date ≥
+// 2025-04-01 turns on nodejs_compat_populate_process_env).
 export const serverEnv: ServerEnv = parseServerEnv(process.env)

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Copy, ExternalLink, Gift } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import type { Messages } from "@/lib/i18n"
 import { useInvitation } from "../context"
 import { Section, type BlockProps } from "./Section"
 import { InvButton, InvLink } from "./ui"
@@ -13,25 +14,25 @@ type GiftEnvelopeProps = BlockProps & {
   intro?: string
 }
 
-async function copy(text: string) {
+async function copy(text: string, t: Messages["gifts"]) {
   try {
     await navigator.clipboard.writeText(text)
-    toast("Copied", { description: text })
+    toast(t.copied, { description: text })
   } catch {
-    toast.error("Could not copy. Please copy it manually.")
+    toast.error(t.copyFailed)
   }
 }
 
 /** Bank accounts, e-wallets, a QR code and registry links behind an "open envelope" button. */
 export function GiftEnvelope({
   variant = "envelope",
-  eyebrow = "Gifts",
-  title = "A gift of love",
-  intro = "Your presence is enough. If you wish to send a gift, here are a few ways.",
+  eyebrow,
+  title,
+  intro,
   tone,
   className,
 }: GiftEnvelopeProps) {
-  const { config } = useInvitation()
+  const { config, t } = useInvitation()
   const { gifts } = config
   const [open, setOpen] = useState(variant === "cards")
   const entries = [
@@ -51,9 +52,9 @@ export function GiftEnvelope({
     <Section
       id="gifts"
       tone={tone}
-      eyebrow={eyebrow}
-      title={title}
-      intro={intro}
+      eyebrow={eyebrow ?? t.gifts.eyebrow}
+      title={title ?? t.gifts.title}
+      intro={intro ?? t.gifts.intro}
       width="narrow"
       className={className}
     >
@@ -66,7 +67,7 @@ export function GiftEnvelope({
             aria-controls="gift-details"
           >
             <Gift className="size-4" aria-hidden="true" />
-            Open envelope
+            {t.gifts.open}
           </InvButton>
         </div>
       ) : (
@@ -94,10 +95,10 @@ export function GiftEnvelope({
                     variant="ghost"
                     size="sm"
                     className="mt-2 self-start"
-                    onClick={() => copy(entry.number)}
+                    onClick={() => copy(entry.number, t.gifts)}
                   >
                     <Copy className="size-3.5" aria-hidden="true" />
-                    Copy number
+                    {t.gifts.copyNumber}
                   </InvButton>
                 </li>
               ))}
@@ -107,14 +108,14 @@ export function GiftEnvelope({
             <figure className="flex flex-col items-center gap-2">
               <img
                 src={gifts.qrImage.url}
-                alt={gifts.qrImage.alt ?? "Payment QR code"}
+                alt={gifts.qrImage.alt ?? t.gifts.qrAlt}
                 width={gifts.qrImage.width}
                 height={gifts.qrImage.height}
                 loading="lazy"
                 className="size-48 rounded-inv bg-white p-2"
               />
               <figcaption className="text-xs text-inv-muted">
-                Scan to send a gift
+                {t.gifts.qrCaption}
               </figcaption>
             </figure>
           )}

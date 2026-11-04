@@ -10,8 +10,8 @@ export type RateResult = {
 /**
  * Counts hits per key against every rule. A hit that is refused is not
  * counted, so a blocked client regains access as soon as its window frees up.
- * Implementations: in-memory (single instance, dev and Node). Phase 8 can add
- * a Durable Object / KV version behind the same interface.
+ * Implementations: `PostgresRateLimiter` (shared, used whenever a database
+ * exists) and `MemoryRateLimiter` (per process: tests, database-less dev).
  */
 export interface RateLimiter {
   hit: (key: string, rules: ReadonlyArray<RateRule>) => Promise<RateResult>

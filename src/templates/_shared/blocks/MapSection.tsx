@@ -19,12 +19,12 @@ type MapSectionProps = BlockProps & {
  */
 export function MapSection({
   variant = "embed",
-  eyebrow = "Where",
+  eyebrow,
   title,
   tone,
   className,
 }: MapSectionProps) {
-  const { config, palette } = useInvitation()
+  const { config, palette, t } = useInvitation()
   const { venue } = config
   const links = directionLinks(venue)
   const showEmbed = variant !== "card"
@@ -46,7 +46,7 @@ export function MapSection({
           )}
         </div>
       </div>
-      <ul className="flex flex-wrap gap-2">
+      <ul aria-label={t.map.directions} className="flex flex-wrap gap-2">
         {links.map((link) => (
           <li key={link.label}>
             <InvLink
@@ -55,6 +55,7 @@ export function MapSection({
               rel="noreferrer noopener"
               variant="outline"
               size="sm"
+              aria-label={`${t.map.directionsWith(link.label)} ${t.common.opensInNewTab}`}
             >
               <Navigation className="size-3.5" aria-hidden="true" />
               {link.label}
@@ -69,7 +70,7 @@ export function MapSection({
     <Section
       id="map"
       tone={tone}
-      eyebrow={eyebrow}
+      eyebrow={eyebrow ?? t.map.eyebrow}
       title={title ?? venue.name}
       width={variant === "split" ? "wide" : "regular"}
       className={className}

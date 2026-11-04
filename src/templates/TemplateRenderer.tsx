@@ -50,6 +50,7 @@ export function TemplateView({
         theme={resolved.config.theme}
         radius={module.meta.radius}
         grain={module.meta.grain}
+        locale={resolved.config.locale}
       >
         <Component config={resolved.config} mode={mode} />
       </ThemeScope>

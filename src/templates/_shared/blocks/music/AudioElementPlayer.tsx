@@ -11,7 +11,7 @@ type Props = { src: string; title?: string; startAt: number; loop: boolean }
  * Created after mount (never during render, so SSR stays clean).
  */
 export function AudioElementPlayer({ src, title, startAt, loop }: Props) {
-  const { mode, opened, registerMusic } = useInvitation()
+  const { mode, opened, registerMusic, t } = useInvitation()
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const started = useRef(false)
   const resumeOnShow = useRef(false)
@@ -107,7 +107,6 @@ export function AudioElementPlayer({ src, title, startAt, loop }: Props) {
       type="button"
       onClick={toggle}
       aria-pressed={playing}
-      aria-label={playing ? "Pause music" : "Play music"}
       title={title}
       className={cn(
         "fixed bottom-4 left-4 z-40 flex items-center gap-2 rounded-full border border-inv-line bg-inv-bg/90 px-3 py-2 text-xs text-inv-fg shadow-lg backdrop-blur transition-colors hover:border-inv-primary focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:outline-none",
@@ -118,11 +117,19 @@ export function AudioElementPlayer({ src, title, startAt, loop }: Props) {
         <Pause className="size-4 text-inv-primary" aria-hidden="true" />
       ) : (
         <Music2
-          className={cn("size-4 text-inv-primary", needsTap && "animate-pulse")}
+          className={cn(
+            "size-4 text-inv-primary",
+            needsTap && "motion-safe:animate-pulse"
+          )}
           aria-hidden="true"
         />
       )}
-      {playing ? "Playing" : needsTap ? "Tap to play" : "Music"}
+      {playing ? t.music.playing : needsTap ? t.music.tapToPlay : t.music.music}
+      {/* The accessible name keeps the visible words and adds the action. */}
+      <span className="sr-only">
+        {" "}
+        ({playing ? t.music.pause : t.music.play})
+      </span>
     </button>
   )
 }

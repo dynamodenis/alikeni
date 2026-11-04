@@ -14,11 +14,7 @@ type RsvpFormProps = BlockProps & {
   variant?: RsvpVariant
 }
 
-const ATTENDING: Array<{ value: RsvpInput["attending"]; label: string }> = [
-  { value: "yes", label: "Joyfully accept" },
-  { value: "no", label: "Regretfully decline" },
-  { value: "maybe", label: "Not sure yet" },
-]
+const ATTENDING: ReadonlyArray<RsvpInput["attending"]> = ["yes", "no", "maybe"]
 
 /**
  * Hidden honeypot field (`website`). People never see or reach it; bots that
@@ -51,12 +47,12 @@ export function HoneypotField({ id }: { id: string }) {
  */
 export function RsvpForm({
   variant = "card",
-  eyebrow = "RSVP",
-  title = "Will you join us?",
+  eyebrow,
+  title,
   tone,
   className,
 }: RsvpFormProps) {
-  const { config, mode, actions, guestName } = useInvitation()
+  const { config, mode, actions, guestName, locale, t } = useInvitation()
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle")
   const [attending, setAttending] = useState<RsvpInput["attending"]>("yes")
   const { texts, datetime } = config
@@ -66,15 +62,11 @@ export function RsvpForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (disabled || !actions.submitRsvp) {
-      toast("Preview mode", {
-        description: "RSVPs are disabled while previewing.",
-      })
+      toast(t.common.previewMode, { description: t.rsvp.previewToast })
       return
     }
     if (turnstile.enabled && !turnstile.token) {
-      toast("One moment", {
-        description: "We are checking you are not a robot. Try again shortly.",
-      })
+      toast(t.common.oneMoment, { description: t.common.robotCheck })
       return
     }
     const form = new FormData(event.currentTarget)
@@ -91,12 +83,11 @@ export function RsvpForm({
     try {
       await actions.submitRsvp(input)
       setStatus("sent")
-      toast("Thank you!", { description: "Your response has been recorded." })
+      toast(t.rsvp.thanksToast, { description: t.rsvp.thanksToastBody })
     } catch (error) {
       setStatus("idle")
-      toast.error("Could not send your RSVP", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
+      toast.error(t.rsvp.errorToast, {
+        description: error instanceof Error ? error.message : t.common.tryAgain,
       })
     } finally {
       if (turnstile.enabled) turnstile.reset()
@@ -107,15 +98,15 @@ export function RsvpForm({
     <Section
       id="rsvp"
       tone={tone}
-      eyebrow={eyebrow}
-      title={title}
+      eyebrow={eyebrow ?? t.rsvp.eyebrow}
+      title={title ?? t.rsvp.title}
       intro={texts.rsvpPrompt}
       width="narrow"
       className={className}
     >
       {status === "sent" ? (
         <p className="text-center font-inv-display text-2xl text-inv-primary">
-          Thank you, we have your response.
+          {t.rsvp.sent}
         </p>
       ) : (
         <form
@@ -129,7 +120,7 @@ export function RsvpForm({
         >
           <div className="flex flex-col gap-2">
             <label htmlFor="rsvp-name" className="text-sm font-medium">
-              Your name
+              {t.rsvp.name}
             </label>
             <input
               id="rsvp-name"
@@ -144,15 +135,15 @@ export function RsvpForm({
 
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 text-sm font-medium">
-              Will you attend?
+              {t.rsvp.attending}
             </legend>
             <div className="grid gap-2 sm:grid-cols-3">
               {ATTENDING.map((option) => (
                 <label
-                  key={option.value}
+                  key={option}
                   className={cn(
                     "flex cursor-pointer items-center justify-center rounded-inv border px-3 py-3 text-center text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-inv-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-inv-bg",
-                    attending === option.value
+                    attending === option
                       ? "border-inv-primary bg-inv-primary text-inv-bg"
                       : "border-inv-line hover:border-inv-primary/60"
                   )}
@@ -160,12 +151,12 @@ export function RsvpForm({
                   <input
                     type="radio"
                     name="attending"
-                    value={option.value}
-                    checked={attending === option.value}
-                    onChange={() => setAttending(option.value)}
+                    value={option}
+                    checked={attending === option}
+                    onChange={() => setAttending(option)}
                     className="sr-only"
                   />
-                  {option.label}
+                  {t.rsvp[option]}
                 </label>
               ))}
             </div>
@@ -179,7 +170,7 @@ export function RsvpForm({
               )}
             >
               <label htmlFor="rsvp-party" className="text-sm font-medium">
-                Number of guests
+                {t.rsvp.partySize}
               </label>
               <input
                 id="rsvp-party"
@@ -195,8 +186,8 @@ export function RsvpForm({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="rsvp-contact" className="text-sm font-medium">
-                Phone or email{" "}
-                <span className="text-inv-muted">(optional)</span>
+                {t.rsvp.contact}{" "}
+                <span className="text-inv-muted">{t.common.optional}</span>
               </label>
               <input
                 id="rsvp-contact"
@@ -209,7 +200,8 @@ export function RsvpForm({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="rsvp-message" className="text-sm font-medium">
-              A note for us <span className="text-inv-muted">(optional)</span>
+              {t.rsvp.note}{" "}
+              <span className="text-inv-muted">{t.common.optional}</span>
             </label>
             <textarea
               id="rsvp-message"
@@ -229,13 +221,14 @@ export function RsvpForm({
             disabled={status === "sending"}
             className="self-center"
           >
-            {status === "sending" ? "Sending…" : "Send RSVP"}
+            {status === "sending" ? t.common.sending : t.rsvp.send}
           </InvButton>
 
           {texts.rsvpDeadline && (
             <p className="text-center text-xs text-inv-muted">
-              Please reply by{" "}
-              {formatLongDate(texts.rsvpDeadline, datetime.timezone)}
+              {t.rsvp.replyBy(
+                formatLongDate(texts.rsvpDeadline, datetime.timezone, locale)
+              )}
             </p>
           )}
           {disabled && (
@@ -243,7 +236,7 @@ export function RsvpForm({
               id="rsvp-preview-note"
               className="text-center text-xs text-inv-muted"
             >
-              Preview: responses are not recorded.
+              {t.rsvp.previewNote}
             </p>
           )}
         </form>

@@ -109,3 +109,41 @@ describe.each(TEMPLATE_IDS)("SSR of %s", (id) => {
     expect(html).toContain('data-motion="none"')
   })
 })
+
+describe("locale", () => {
+  const render = async (id: string, locale: "en" | "id") => {
+    const module = await loadTemplate(id)
+    const config = deepMerge(module.defaults, { locale })
+    return unescape(
+      renderToString(
+        <TemplateView module={module} config={config} mode="public" />
+      )
+    )
+  }
+
+  it("writes lang on the invitation root", async () => {
+    expect(await render("wedding/ivory-garden", "en")).toContain('lang="en"')
+    expect(await render("wedding/ivory-garden", "id")).toContain('lang="id"')
+  })
+
+  it("renders shared block chrome and dates in Indonesian", async () => {
+    const html = await render("wedding/ivory-garden", "id")
+    expect(html).toContain("Nama Anda")
+    expect(html).toContain("Dengan senang hati hadir")
+    expect(html).toContain("detik")
+    expect(html).toContain("Juni 2027")
+    expect(html).not.toContain("Joyfully accept")
+    expect(html).not.toContain("Saturday, June 12")
+  })
+
+  it("defaults the Indonesian templates to Indonesian", async () => {
+    for (const id of [
+      "wedding/javanese-heritage",
+      "other/khitanan-ceria",
+      "other/aqiqah-soft",
+    ]) {
+      const module = await loadTemplate(id)
+      expect(module.defaults.locale).toBe("id")
+    }
+  })
+})

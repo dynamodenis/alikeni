@@ -1,15 +1,8 @@
+import { en } from "@/lib/i18n/en"
 import type { Host } from "../schema"
 
-export const ROLE_LABEL: Record<Host["role"], string> = {
-  bride: "The Bride",
-  groom: "The Groom",
-  host: "Your Host",
-  graduate: "The Graduate",
-  celebrant: "The Celebrant",
-  baby: "The Little One",
-  company: "Hosted by",
-  other: "",
-}
+/** English role labels; blocks read the invitation's locale via `t.hosts`. */
+export const ROLE_LABEL: Record<Host["role"], string> = en.hosts
 
 /** "Amara & Kofi" from short names (falls back to full names). */
 export function hostNames(hosts: ReadonlyArray<Host>, joiner = " & "): string {

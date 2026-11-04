@@ -1,6 +1,8 @@
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { useInvitation } from "../context"
 import type { SectionId } from "../schema"
+import { accessibleTokens } from "../theme/accessible"
 import { Eyebrow } from "./ui"
 
 export type SectionTone = "plain" | "surface" | "tint"
@@ -51,13 +53,23 @@ export function Section({
   className,
   children,
 }: SectionProps) {
+  const { palette } = useInvitation()
   const headingId = title ? `${id}-title` : undefined
+  // The stylesheet re-derives muted text on tinted/surface bands; replace it
+  // with the contrast-safe value for that band (see theme/accessible.ts).
+  const style =
+    tone === "plain"
+      ? undefined
+      : ({
+          "--inv-muted": accessibleTokens(palette).muted[tone],
+        } as CSSProperties)
   return (
     <section
       id={id}
       data-section={id}
       data-tone={tone}
       aria-labelledby={headingId}
+      style={style}
       className={cn(
         "relative isolate px-5 py-20 sm:px-8 sm:py-28",
         tones[tone],

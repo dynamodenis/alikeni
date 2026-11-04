@@ -109,3 +109,20 @@ Every handler resolves the user through `requireUserId()` (dev user until Phase 
 /i/$slug  SSR loader → TemplateRenderer(config, mode="public") → CoverGate → sections
           head() → OG tags → /og/$slug.png ; /ics/$slug ; submitRsvp / submitWish server fns
 ```
+
+## Deployment (Phase 8)
+
+Production runs on **Cloudflare Workers** (`wrangler.jsonc`,
+`main: "@tanstack/react-start/server-entry"`, `nodejs_compat`). The build
+target is chosen in `vite.config.ts` by `FESTLY_TARGET`: Node by default
+(`pnpm dev`, `pnpm build`, Vitest), Workers for `pnpm build:worker`, which
+adds `@cloudflare/vite-plugin` and aliases `@/server/platform/runtime` to
+`runtime.workers.ts`. That platform module is the only runtime-specific code:
+the database (one pool per process on Node; a per-request `pg` pool over
+Hyperdrive on Workers, behind a `getDb()` proxy), the R2 binding (storage
+driver `binding`), and how the OG WASM is loaded. Rate limits
+(`rate_limit_hits`) and page-view dedupe (`page_view_visitors`) live in
+Postgres so they hold across isolates; views are counted by a client beacon,
+leaving `/i/$slug` HTML cacheable (`s-maxage=60`). `src/start.ts` adds the
+global request middleware: security headers + CSP, per-request cleanup, and
+Start's CSRF check for server functions. Details: `docs/DEPLOY.md`.

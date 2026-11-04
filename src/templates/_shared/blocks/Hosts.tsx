@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import { useInvitation } from "../context"
 import type { Host } from "../schema"
 import { Section, type BlockProps } from "./Section"
-import { ROLE_LABEL, initials } from "./hosts"
+import { initials } from "./hosts"
 
 export type HostsVariant = "duo" | "list" | "spotlight"
 export type PortraitShape = "circle" | "arch" | "square"
@@ -74,7 +74,8 @@ function HostCard({
   size: "lg" | "md"
   shape: PortraitShape
 }) {
-  const role = ROLE_LABEL[host.role]
+  const { t } = useInvitation()
+  const role = t.hosts[host.role]
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <Portrait host={host} size={size} shape={shape} />

@@ -241,6 +241,46 @@ export const pageViews = pgTable(
   (t) => [primaryKey({ columns: [t.invitationId, t.day] })]
 )
 
+/**
+ * Visitors already counted in `page_views`, one row per invitation, UTC day
+ * and visitor (sha256 of the salted IP + user-agent hashes). Shared by every
+ * server instance, so a returning guest counts once per day anywhere. Rows
+ * older than a couple of days are pruned opportunistically.
+ */
+export const pageViewVisitors = pgTable(
+  "page_view_visitors",
+  {
+    invitationId: uuid("invitation_id")
+      .notNull()
+      .references(() => invitations.id, { onDelete: "cascade" }),
+    day: date("day", { mode: "string" }).notNull(),
+    visitorHash: text("visitor_hash").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.invitationId, t.day, t.visitorHash] }),
+    index("page_view_visitors_day_idx").on(t.day),
+  ]
+)
+
+/* ---------- rate limiting ---------- */
+
+/**
+ * Accepted hits per rate-limit key (sliding-window log, see
+ * src/server/rate-limit/postgres.ts). Keys hold hashed identities only.
+ * Rows older than the longest window are pruned as hits arrive.
+ */
+export const rateLimitHits = pgTable(
+  "rate_limit_hits",
+  {
+    key: text("key").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index("rate_limit_hits_key_at_idx").on(t.key, t.at),
+    index("rate_limit_hits_at_idx").on(t.at),
+  ]
+)
+
 /* ---------- geocoding ---------- */
 
 export const geocodeCache = pgTable("geocode_cache", {

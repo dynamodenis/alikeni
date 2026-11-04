@@ -15,7 +15,7 @@ export function AddToCalendar({
   className,
   asSection = true,
 }: AddToCalendarProps) {
-  const { config, slug } = useInvitation()
+  const { config, slug, t } = useInvitation()
   const { event, datetime, venue, texts } = config
   const google = googleCalendarUrl({
     title: event.title,
@@ -41,12 +41,12 @@ export function AddToCalendar({
         size="sm"
       >
         <CalendarPlus className="size-3.5" aria-hidden="true" />
-        Google Calendar
+        {t.calendar.google}
       </InvLink>
       {slug && (
         <InvLink href={icsPath(slug)} variant="outline" size="sm" download>
           <CalendarPlus className="size-3.5" aria-hidden="true" />
-          Apple / Outlook (.ics)
+          {t.calendar.ics}
         </InvLink>
       )}
     </div>
@@ -55,7 +55,7 @@ export function AddToCalendar({
   if (!asSection) return links
   return (
     <section id="calendar" data-section="calendar" className="px-6 py-8">
-      <h2 className="sr-only">Add to calendar</h2>
+      <h2 className="sr-only">{t.calendar.heading}</h2>
       {links}
     </section>
   )

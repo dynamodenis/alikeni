@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils"
 
 /** Buttons inside invitations follow the invitation palette, not the app theme. */
 export const invButton = cva(
-  "inline-flex items-center justify-center gap-2 rounded-inv font-inv-body text-sm font-medium tracking-wide whitespace-nowrap transition-all duration-300 focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:ring-offset-2 focus-visible:ring-offset-inv-bg focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60",
+  "inline-flex items-center justify-center gap-2 rounded-inv font-inv-body text-sm font-medium tracking-wide whitespace-nowrap transition-[color,background-color,border-color,box-shadow,opacity,translate] duration-300 focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:ring-offset-2 focus-visible:ring-offset-inv-bg focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60 in-data-[motion=none]:transition-none motion-reduce:transition-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-inv-primary text-inv-bg shadow-[0_10px_30px_-12px_var(--inv-primary)] hover:-translate-y-0.5 hover:opacity-90",
+          "bg-inv-primary text-inv-bg shadow-[0_10px_30px_-12px_var(--inv-primary)] hover:opacity-90 in-data-[motion=full]:motion-safe:hover:-translate-y-0.5 in-data-[motion=reduced]:motion-safe:hover:-translate-y-0.5",
         outline:
           "border border-inv-primary/50 text-inv-primary hover:border-inv-primary hover:bg-inv-primary hover:text-inv-bg",
         ghost: "text-inv-fg hover:bg-inv-surface",

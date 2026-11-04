@@ -5,7 +5,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server"
 import { z } from "zod"
 import { serverEnv } from "@/env.server"
 import { getDb } from "@/server/db/client.server"
-import { getRateLimiter } from "@/server/rate-limit"
+import { getRateLimiter } from "@/server/rate-limit/limiter.server"
 import { fingerprint } from "./fingerprint.server"
 import {
   PublicError,
@@ -13,6 +13,7 @@ import {
   WishSubmission,
   listWishesBySlug,
   loadPublicPage,
+  recordViewBySlug,
   submitRsvp,
   submitWish,
   type GuestContext,
@@ -49,22 +50,44 @@ async function guestContext(): Promise<GuestContext> {
   }
 }
 
+const SlugInput = z.object({
+  slug: z.string().trim().toLowerCase().min(1).max(80),
+})
+
 /**
- * The page loader: published invitation, approved wishes, guest name from
- * `?to=`, and a deduplicated page view. Null when missing or archived.
+ * The page loader: published invitation, approved wishes and the guest name
+ * from `?to=`. Null when missing or archived. Visitor-independent, so the
+ * HTML can be cached (`/i/$slug` sends `s-maxage`); views are counted by
+ * `recordViewFn`.
  */
 export const getPublicPageFn = createServerFn({ method: "GET" })
   .validator(
-    z.object({
-      slug: z.string().trim().toLowerCase().min(1).max(80),
+    SlugInput.extend({
       to: z.string().max(60).optional(),
     })
   )
   .handler(async ({ data }) => {
-    const visitor = await fingerprint(new Headers(getRequestHeaders()))
-    const page = await loadPublicPage(getDb(), data, visitor)
+    const page = await loadPublicPage(getDb(), data)
     if (!page) return null
     return { ...page, origin: serverEnv.APP_ORIGIN }
+  })
+
+/**
+ * View beacon: the page calls it once after hydration. Bots (by user agent)
+ * are skipped here on the server; one count per hashed IP + UA per
+ * invitation per UTC day. Never throws to the guest.
+ */
+export const recordViewFn = createServerFn({ method: "POST" })
+  .validator(SlugInput)
+  .handler(async ({ data }) => {
+    try {
+      const visitor = await fingerprint(new Headers(getRequestHeaders()))
+      if (visitor.bot) return { counted: false }
+      return { counted: await recordViewBySlug(getDb(), data.slug, visitor) }
+    } catch (error) {
+      console.error("[public] recordView failed", error)
+      return { counted: false }
+    }
   })
 
 export const submitRsvpFn = createServerFn({ method: "POST" })
@@ -89,5 +112,5 @@ export const submitWishFn = createServerFn({ method: "POST" })
 
 /** Approved wishes for a published slug, newest first (max 50). */
 export const listWishesFn = createServerFn({ method: "GET" })
-  .validator(z.object({ slug: z.string().trim().toLowerCase().min(1).max(80) }))
+  .validator(SlugInput)
   .handler(async ({ data }) => listWishesBySlug(getDb(), data.slug))

@@ -1,8 +1,9 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 import { z } from "zod"
 import {
   getPublicPageFn,
+  recordViewFn,
   submitRsvpFn,
   submitWishFn,
 } from "@/server/public/public.functions"
@@ -16,8 +17,17 @@ import { resolvePalette } from "@/templates/_shared/theme/palettes"
  *
  * - Loader (`getPublicPageFn`, one server round trip): the published config
  *   (404 when missing, draft-only or archived), approved wishes, the guest
- *   name, `APP_ORIGIN` for absolute URLs, and a page view (bots skipped,
- *   one per hashed IP + UA per invitation per UTC day).
+ *   name and `APP_ORIGIN` for absolute URLs. Nothing visitor-specific except
+ *   `?to=` (part of the URL, so part of the cache key).
+ * - Caching: `Cache-Control: public, max-age=0, s-maxage=60,
+ *   stale-while-revalidate=600`. Browsers revalidate every time; shared
+ *   caches may serve the HTML for 60 s (stale for 10 min while refetching),
+ *   so a republish shows within ~60 s. Cloudflare does not cache Worker
+ *   responses by itself, and instant purge would need the cache purge API;
+ *   neither is built (docs/DEPLOY.md).
+ * - Page views: `recordViewFn` beacon, POSTed once after hydration (bots
+ *   skipped on the server; one per hashed IP + UA per invitation per UTC
+ *   day), so the HTML stays cacheable.
  * - `?to=`: a `guests.slug_token` of this invitation shows that guest's
  *   stored name; anything else is treated as a name and sanitized on the
  *   server (controls and `<>` stripped, spaces collapsed, ≤ 60 chars).
@@ -30,6 +40,10 @@ import { resolvePalette } from "@/templates/_shared/theme/palettes"
 const PublicSearch = z.object({
   to: z.string().max(60).optional().catch(undefined),
 })
+
+/** Edge-cacheable for 60 s, served stale for 10 min while revalidating. */
+const PUBLIC_CACHE_CONTROL =
+  "public, max-age=0, s-maxage=60, stale-while-revalidate=600"
 
 export const Route = createFileRoute("/i/$slug")({
   validateSearch: PublicSearch,
@@ -76,6 +90,8 @@ export const Route = createFileRoute("/i/$slug")({
       links: [{ rel: "canonical", href: url }],
     }
   },
+  headers: ({ loaderData }) =>
+    loaderData ? { "Cache-Control": PUBLIC_CACHE_CONTROL } : undefined,
   component: PublicInvitation,
 })
 
@@ -103,6 +119,15 @@ function PublicInvitation() {
     [slug]
   )
   const palette = useMemo(() => resolvePalette(config.theme), [config.theme])
+
+  // View beacon: once per mounted slug, after hydration (effects never run
+  // on the server). Failures are ignored; analytics must not bother guests.
+  const counted = useRef<string | null>(null)
+  useEffect(() => {
+    if (counted.current === slug) return
+    counted.current = slug
+    recordViewFn({ data: { slug } }).catch(() => {})
+  }, [slug])
 
   return (
     <>

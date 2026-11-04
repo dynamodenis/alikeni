@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import type { Locale } from "@/lib/i18n/locales"
 import type { Theme } from "../schema"
+import { accessibleTokens } from "./accessible"
 import { getFontPair } from "./fonts"
 import { useEffectiveMotion } from "./motion"
 import { resolvePalette, type Palette } from "./palettes"
@@ -17,8 +19,13 @@ export function themeVars(
   radius: string
 ): ThemeVars {
   const fonts = getFontPair(fontPairId)
+  const safe = accessibleTokens(palette)
   return {
-    "--inv-primary": palette.primary,
+    // Contrast-safe for small text on every band (see accessible.ts).
+    "--inv-primary": safe.primary,
+    // Inline beats the stylesheet's 62 % mix on the root; Section sets the
+    // per-band value on tint/surface wrappers.
+    "--inv-muted": safe.muted.plain,
     "--inv-secondary": palette.secondary,
     "--inv-accent": palette.accent,
     "--inv-bg": palette.background,
@@ -37,6 +44,8 @@ type ThemeScopeProps = {
   radius?: string
   /** Adds the paper-grain overlay (print-inspired templates). */
   grain?: boolean
+  /** The invitation's language; written as `lang` so screen readers and hyphenation follow it. */
+  locale?: Locale
   className?: string
   children: ReactNode
 }
@@ -50,6 +59,7 @@ export function ThemeScope({
   theme,
   radius = "0.75rem",
   grain = false,
+  locale = "en",
   className,
   children,
 }: ThemeScopeProps) {
@@ -58,6 +68,7 @@ export function ThemeScope({
   return (
     <div
       data-inv-root=""
+      lang={locale}
       data-mode={palette.mode}
       data-motion={motion}
       style={themeVars(palette, theme.fontPairId, radius)}

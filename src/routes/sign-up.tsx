@@ -83,7 +83,7 @@ function SignUp() {
           <Link
             to="/sign-in"
             search={{ redirect: target }}
-            className="text-gold-soft underline-offset-4 hover:underline"
+            className="text-gold-soft underline underline-offset-4 hover:decoration-2"
           >
             Sign in
           </Link>

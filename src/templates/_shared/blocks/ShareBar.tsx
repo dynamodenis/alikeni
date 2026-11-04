@@ -3,6 +3,7 @@ import { Link2, MessageCircle, Share2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useHydrated } from "@/hooks/use-hydrated"
+import { getMessages, type Locale } from "@/lib/i18n"
 
 export type ShareBarProps = {
   title: string
@@ -10,6 +11,8 @@ export type ShareBarProps = {
   url: string
   /** Colors from the invitation palette (the bar sits outside ThemeScope). */
   colors?: { primary: string; background: string; foreground: string }
+  /** The invitation's locale (`config.locale`); English when omitted. */
+  locale?: Locale
   className?: string
 }
 
@@ -24,8 +27,15 @@ export function whatsappShareUrl(title: string, url: string): string {
  * server renders the fallback and `navigator` is read only after hydration
  * and inside handlers. Context-free so pages can render it outside a template.
  */
-export function ShareBar({ title, url, colors, className }: ShareBarProps) {
+export function ShareBar({
+  title,
+  url,
+  colors,
+  locale,
+  className,
+}: ShareBarProps) {
   const hydrated = useHydrated()
+  const t = getMessages(locale).share
   const canShare = hydrated && typeof navigator.share === "function"
 
   async function share() {
@@ -41,9 +51,9 @@ export function ShareBar({ title, url, colors, className }: ShareBarProps) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(url)
-      toast("Link copied", { description: url })
+      toast(t.copied, { description: url })
     } catch {
-      toast.error("Could not copy the link", { description: url })
+      toast.error(t.copyFailed, { description: url })
     }
   }
 
@@ -59,7 +69,8 @@ export function ShareBar({ title, url, colors, className }: ShareBarProps) {
 
   return (
     <nav
-      aria-label="Share this invitation"
+      aria-label={t.label}
+      lang={locale}
       style={style}
       className={cn(
         "flex flex-wrap items-center justify-center gap-2 bg-[var(--share-bg,transparent)] px-4 py-6 text-[var(--share-fg,inherit)]",
@@ -69,13 +80,13 @@ export function ShareBar({ title, url, colors, className }: ShareBarProps) {
       {canShare ? (
         <button type="button" onClick={share} className={button}>
           <Share2 className="size-4" aria-hidden="true" />
-          Share invitation
+          {t.share}
         </button>
       ) : (
         <>
           <button type="button" onClick={copy} className={button}>
             <Link2 className="size-4" aria-hidden="true" />
-            Copy link
+            {t.copy}
           </button>
           <a
             href={whatsappShareUrl(title, url)}

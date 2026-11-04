@@ -32,6 +32,23 @@ describe("InvitationConfigBase", () => {
     expect(parsed.theme.motionLevel).toBe("full")
   })
 
+  describe("locale", () => {
+    it("defaults to English for configs saved before locales existed", () => {
+      const legacy = clone()
+      delete legacy.locale
+      expect(InvitationConfigBase.parse(legacy).locale).toBe("en")
+    })
+
+    it("accepts Indonesian", () => {
+      const config = { ...clone(), locale: "id" as const }
+      expect(InvitationConfigBase.parse(config).locale).toBe("id")
+    })
+
+    it("rejects an unsupported locale", () => {
+      expect(issuePaths({ ...clone(), locale: "fr" })).toContain("locale")
+    })
+  })
+
   describe("dates", () => {
     it("rejects a non-ISO start", () => {
       const bad = clone()

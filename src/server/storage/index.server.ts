@@ -1,20 +1,54 @@
 import { R2_KEYS, serverEnv, type ServerEnv } from "@/env.server"
+import { getBucket } from "@/server/platform/runtime"
+import type { BucketLike } from "@/server/platform/types"
+import { createBindingDriver } from "./binding.server"
 import { createLocalDriver } from "./local.server"
 import { createR2Driver } from "./r2.server"
-import type { ServerStorage, StorageDriver } from "./types"
+import type { ServerStorage } from "./types"
 
 const DEV_SECRET = "festly-local-storage-dev-secret"
 
 /**
- * STORAGE_DRIVER=r2 → R2 (env validation already guaranteed every key).
+ * STORAGE_DRIVER=binding → R2 through the Worker's BUCKET binding (Workers).
+ * STORAGE_DRIVER=r2 → R2 over its S3 API (env validation already guaranteed
+ * every key; for Node or other non-Workers hosts).
  * STORAGE_DRIVER=local → local disk (development only).
- * Unset → R2 when fully configured, otherwise local in development.
+ * Unset → R2 when fully configured, else the binding when present, else
+ * local in development.
  */
-export function selectStorage(env: ServerEnv): ServerStorage {
+export function selectStorage(
+  env: ServerEnv,
+  bucket: BucketLike | undefined = getBucket()
+): ServerStorage {
   const complete = R2_KEYS.every((key) => !!env[key])
   const wantR2 =
     env.STORAGE_DRIVER === "r2" ||
     (env.STORAGE_DRIVER === undefined && complete)
+  const wantBinding =
+    env.STORAGE_DRIVER === "binding" ||
+    (env.STORAGE_DRIVER === undefined && !complete && !!bucket)
+
+  if (wantBinding) {
+    if (!bucket) {
+      throw new Error(
+        "STORAGE_DRIVER=binding needs the BUCKET R2 binding (Cloudflare Workers, wrangler.jsonc). On Node use r2 or local."
+      )
+    }
+    const secret =
+      env.STORAGE_SIGNING_SECRET ??
+      (env.NODE_ENV === "production" ? undefined : DEV_SECRET)
+    if (!secret) {
+      throw new Error(
+        "STORAGE_SIGNING_SECRET is required for the binding storage driver in production."
+      )
+    }
+    return createBindingDriver({
+      bucket,
+      secret,
+      origin: env.APP_ORIGIN,
+      publicUrl: env.R2_PUBLIC_URL,
+    })
+  }
 
   if (wantR2) {
     const {
@@ -45,7 +79,7 @@ export function selectStorage(env: ServerEnv): ServerStorage {
   }
   if (env.NODE_ENV === "production") {
     throw new Error(
-      "Storage is not configured: set STORAGE_DRIVER=r2 and the R2_* variables (docs/STORAGE.md)."
+      "Storage is not configured: set STORAGE_DRIVER=binding (Workers) or r2 with the R2_* variables (docs/STORAGE.md)."
     )
   }
   return createLocalDriver({
@@ -60,11 +94,12 @@ export function getStorage(): ServerStorage {
   return cached
 }
 
-export type StorageInfo = { driver: StorageDriver["id"] }
+/** "r2" covers both R2 drivers (S3 API and Workers binding). */
+export type StorageInfo = { driver: "local" | "r2" }
 
 /** Which driver is active (the editor shows a badge for local storage). */
 export function storageInfo(): StorageInfo {
-  return { driver: getStorage().id }
+  return { driver: getStorage().id === "local" ? "local" : "r2" }
 }
 
 export type { ServerStorage, StorageDriver } from "./types"

@@ -8,6 +8,7 @@ import {
   TextField,
 } from "../fields"
 import { timeZones } from "@/lib/zoned-time"
+import { LOCALES, LOCALE_NAMES } from "@/lib/i18n/locales"
 
 const EVENT_LABELS: Record<EventType, string> = {
   wedding: "Wedding",
@@ -51,6 +52,12 @@ export function BasicsTab() {
           optional
           placeholder="Together with their families"
           maxLength={200}
+        />
+        <SelectField
+          path={["locale"]}
+          label="Invitation language"
+          help="Buttons, form labels and dates guests see. Your own texts stay as you write them."
+          options={LOCALES.map((v) => ({ value: v, label: LOCALE_NAMES[v] }))}
         />
       </Group>
       <Group

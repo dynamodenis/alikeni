@@ -10,6 +10,7 @@ const photo = (seed: string, w: number, h: number, alt: string) => ({
 })
 
 export const defaults: z.infer<typeof schema> = schema.parse({
+  locale: "id",
   hosts: [
     {
       name: "Raffi Aditya Pratama",

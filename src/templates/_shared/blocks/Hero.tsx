@@ -42,9 +42,9 @@ export function Hero({
   className,
   children,
 }: HeroProps) {
-  const { config, motion, palette } = useInvitation()
+  const { config, motion, palette, locale } = useInvitation()
   const { texts, event, datetime } = config
-  const parts = dateParts(datetime.start, datetime.timezone)
+  const parts = dateParts(datetime.start, datetime.timezone, locale)
   const editorial = variant === "editorial"
 
   return (
@@ -95,7 +95,7 @@ export function Hero({
           )}
         >
           <time dateTime={datetime.start}>
-            {formatLongDate(datetime.start, datetime.timezone)}
+            {formatLongDate(datetime.start, datetime.timezone, locale)}
           </time>
           <span aria-hidden="true" className="opacity-50">
             ·

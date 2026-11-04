@@ -2,6 +2,7 @@ import type { InvitationConfigBase } from "./base"
 
 /** A complete, valid wedding config. Used by tests, the seed and dev pages. */
 export const sampleInvitationConfig: InvitationConfigBase = {
+  locale: "en",
   hosts: [
     {
       name: "Amara Wanjiku",

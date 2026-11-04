@@ -78,6 +78,18 @@ describe("CoverGate envelope in public mode", () => {
     expect(lock()).toBe(true)
   })
 
+  it("makes the rest of the page inert until opened, then focuses the content", () => {
+    const { button } = setup()
+    const content = document.getElementById("inv-content")
+    expect(content).toHaveAttribute("inert")
+    expect(cover()).not.toHaveAttribute("inert")
+
+    fireEvent.click(button)
+    expect(content).not.toHaveAttribute("inert")
+    act(() => vi.advanceTimersByTime(2400))
+    expect(content).toHaveFocus()
+  })
+
   it("plays the opening, then removes itself and hands focus to the content", () => {
     const { button } = setup()
     fireEvent.click(button)

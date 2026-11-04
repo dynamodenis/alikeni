@@ -1,6 +1,8 @@
 // The shared, Zod-validated shape of every invitation. Templates extend it;
 // the editor, server functions and the database (jsonb $type) all reuse it.
 import { z } from "zod"
+// Relative on purpose: drizzle-kit and tsx scripts load this file without path aliases.
+import { LOCALES } from "../../../lib/i18n/locales"
 
 /* ---------- primitives ---------- */
 
@@ -317,9 +319,15 @@ export const Seo = z.object({
 
 export const MAX_GALLERY = 30
 
+/** Language of the guest-facing chrome (buttons, labels, dates). */
+export const Locale = z.enum(LOCALES)
+export type Locale = z.infer<typeof Locale>
+
 /* ---------- the whole invitation ---------- */
 
 export const InvitationConfigBase = z.object({
+  /** Older saved configs have no locale; the default keeps them parsing. */
+  locale: Locale.default("en"),
   hosts: z.array(Host).min(1).max(8),
   event: Event,
   datetime: DateTime,

@@ -45,13 +45,13 @@ export function MusicPlayer() {
 
 /** Credit line for the footer (CC BY library tracks and SoundCloud require one). */
 export function MusicCredit({ className }: { className?: string }) {
-  const { config } = useInvitation()
+  const { config, t } = useInvitation()
   const source = config.music.enabled ? config.music.source : undefined
   if (!source || source.kind === "upload") return null
   if (source.kind === "soundcloud") {
     return (
       <p className={className}>
-        Music:{" "}
+        {t.music.creditPrefix}{" "}
         <a
           href={source.permalinkUrl}
           target="_blank"
@@ -60,7 +60,7 @@ export function MusicCredit({ className }: { className?: string }) {
         >
           {source.title}
         </a>{" "}
-        by{" "}
+        {t.music.by}{" "}
         {source.artistUrl ? (
           <a
             href={source.artistUrl}
@@ -73,7 +73,7 @@ export function MusicCredit({ className }: { className?: string }) {
         ) : (
           source.artist
         )}{" "}
-        on SoundCloud
+        {t.music.onSoundCloud}
       </p>
     )
   }

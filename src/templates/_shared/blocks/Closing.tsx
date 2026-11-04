@@ -27,7 +27,7 @@ export function Closing({
   className,
   children,
 }: ClosingProps) {
-  const { config } = useInvitation()
+  const { config, t } = useInvitation()
   const { texts, hosts } = config
   return (
     <Section
@@ -46,7 +46,7 @@ export function Closing({
         {texts.closing}
       </p>
       <p className="mt-10 text-[0.7rem] tracking-[0.3em] text-inv-muted uppercase">
-        With love
+        {t.closing.signOff}
       </p>
       <p className="inv-foil mt-3 font-inv-display text-5xl leading-tight sm:text-6xl">
         {hostNames(hosts)}
@@ -58,7 +58,7 @@ export function Closing({
 
 /** Tiny footer every invitation ends with. */
 export function Footer({ className }: { className?: string }) {
-  const { config } = useInvitation()
+  const { config, t } = useInvitation()
   return (
     <footer
       className={cn(
@@ -69,7 +69,7 @@ export function Footer({ className }: { className?: string }) {
       {config.texts.footerNote && <p>{config.texts.footerNote}</p>}
       <MusicCredit />
       <p>
-        Made with{" "}
+        {t.closing.madeWith}{" "}
         <a
           href="/"
           className="underline-offset-4 hover:text-inv-fg hover:underline"

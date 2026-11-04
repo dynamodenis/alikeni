@@ -14,12 +14,12 @@ type EventDetailsProps = BlockProps & {
 /** Schedule of sub-events (or the main event when none are set), venue and dress code. */
 export function EventDetails({
   variant = "cards",
-  eyebrow = "The details",
+  eyebrow,
   title,
   tone,
   className,
 }: EventDetailsProps) {
-  const { config } = useInvitation()
+  const { config, locale, t } = useInvitation()
   const { event, datetime, venue, texts } = config
   const tz = datetime.timezone
   const items: Array<SubEvent> =
@@ -33,7 +33,7 @@ export function EventDetails({
     <Section
       id="event"
       tone={tone}
-      eyebrow={eyebrow}
+      eyebrow={eyebrow ?? t.event.eyebrow}
       title={title ?? event.title}
       intro={event.subtitle}
       className={className}
@@ -69,18 +69,20 @@ export function EventDetails({
                   className="size-4 shrink-0 text-inv-primary"
                   aria-hidden="true"
                 />
-                <dt className="sr-only">Date</dt>
-                <dd>{formatLongDate(item.start, tz)}</dd>
+                <dt className="sr-only">{t.event.date}</dt>
+                <dd>{formatLongDate(item.start, tz, locale)}</dd>
               </div>
               <div className="flex items-center gap-2">
                 <Clock
                   className="size-4 shrink-0 text-inv-primary"
                   aria-hidden="true"
                 />
-                <dt className="sr-only">Time</dt>
+                <dt className="sr-only">{t.event.time}</dt>
                 <dd>
-                  {formatTimeRange(item.start, item.end, tz)}{" "}
-                  <span className="text-xs">({zoneLabel(item.start, tz)})</span>
+                  {formatTimeRange(item.start, item.end, tz, locale)}{" "}
+                  <span className="text-xs">
+                    ({zoneLabel(item.start, tz, locale)})
+                  </span>
                 </dd>
               </div>
               <div className="flex items-center gap-2">
@@ -88,7 +90,7 @@ export function EventDetails({
                   className="size-4 shrink-0 text-inv-primary"
                   aria-hidden="true"
                 />
-                <dt className="sr-only">Venue</dt>
+                <dt className="sr-only">{t.event.venue}</dt>
                 <dd>{item.venueRef ?? venue.name}</dd>
               </div>
             </dl>
@@ -99,13 +101,14 @@ export function EventDetails({
         <p className="mt-10 flex items-center justify-center gap-2 text-sm text-inv-muted">
           <Shirt className="size-4 text-inv-primary" aria-hidden="true" />
           <span>
-            Dress code: <span className="text-inv-fg">{texts.dressCode}</span>
+            {t.event.dressCode}{" "}
+            <span className="text-inv-fg">{texts.dressCode}</span>
           </span>
         </p>
       )}
       {dressPhotos.length > 0 && (
         <ul
-          aria-label="Dress code inspiration"
+          aria-label={t.event.dressInspiration}
           className={cn(
             "mx-auto grid gap-2 sm:gap-3",
             texts.dressCode ? "mt-4" : "mt-10",

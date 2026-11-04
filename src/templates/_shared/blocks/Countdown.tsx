@@ -21,37 +21,38 @@ const UNITS = ["days", "hours", "minutes", "seconds"] as const
  */
 export function Countdown({
   variant = "boxes",
-  eyebrow = "Counting down",
+  eyebrow,
   title,
   tone,
-  doneLabel = "The day is here",
+  doneLabel,
   className,
 }: CountdownProps) {
-  const { config } = useInvitation()
+  const { config, locale, t } = useInvitation()
   const now = useNow()
   const { start, timezone } = config.datetime
   const parts = now === null ? null : countdownParts(Date.parse(start), now)
   const pad = (n: number) => String(n).padStart(2, "0")
+  const longDate = formatLongDate(start, timezone, locale)
 
   return (
     <Section
       id="countdown"
-      eyebrow={eyebrow}
-      title={title ?? formatLongDate(start, timezone)}
+      eyebrow={eyebrow ?? t.countdown.eyebrow}
+      title={title ?? longDate}
       tone={tone}
       width="narrow"
       className={className}
     >
       {parts?.done ? (
         <p className="text-center font-inv-display text-4xl text-inv-primary">
-          {doneLabel}
+          {doneLabel ?? t.countdown.done}
         </p>
       ) : (
         <>
           <p className="sr-only">
             {parts
-              ? `${parts.days} days to go.`
-              : `Starts ${formatLongDate(start, timezone)}.`}
+              ? t.countdown.daysToGo(parts.days)
+              : t.countdown.starts(longDate)}
           </p>
           <dl
             aria-hidden="true"
@@ -96,12 +97,12 @@ export function Countdown({
                       strokeLinecap="round"
                       pathLength={100}
                       strokeDasharray={`${ringFill(unit, parts)} 100`}
-                      className="transition-[stroke-dasharray] duration-700"
+                      className="transition-[stroke-dasharray] duration-700 in-data-[motion=none]:transition-none motion-reduce:transition-none"
                     />
                   </svg>
                 )}
                 <dt className="text-[0.6rem] tracking-[0.22em] text-inv-muted uppercase sm:text-[0.65rem]">
-                  {unit}
+                  {t.countdown[unit]}
                 </dt>
                 <dd className="font-inv-display text-3xl leading-none tabular-nums sm:text-5xl">
                   {parts ? pad(parts[unit]) : "--"}

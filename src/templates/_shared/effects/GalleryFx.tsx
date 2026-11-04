@@ -42,7 +42,7 @@ export function PhotoButton({
         height={photo.height}
         loading="lazy"
         decoding="async"
-        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+        className="h-full w-full object-cover transition-transform duration-700 ease-out in-data-[motion=none]:transition-none in-data-[motion=full]:motion-safe:group-hover:scale-[1.04] in-data-[motion=reduced]:motion-safe:group-hover:scale-[1.04] motion-reduce:transition-none"
       />
     </button>
   )

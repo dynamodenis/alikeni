@@ -24,12 +24,12 @@ type WishesProps = BlockProps & {
  */
 export function Wishes({
   variant = "cards",
-  eyebrow = "Wishes",
-  title = "Leave a message",
+  eyebrow,
+  title,
   tone,
   className,
 }: WishesProps) {
-  const { mode, actions, wishes, guestName } = useInvitation()
+  const { mode, actions, wishes, guestName, t } = useInvitation()
   const [local, setLocal] = useState<Array<WishItem>>([])
   const [sending, setSending] = useState(false)
   const disabled = mode === "preview" || !actions.submitWish
@@ -41,15 +41,11 @@ export function Wishes({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (disabled || !actions.submitWish) {
-      toast("Preview mode", {
-        description: "Wishes are disabled while previewing.",
-      })
+      toast(t.common.previewMode, { description: t.wishes.previewToast })
       return
     }
     if (turnstile.enabled && !turnstile.token) {
-      toast("One moment", {
-        description: "We are checking you are not a robot. Try again shortly.",
-      })
+      toast(t.common.oneMoment, { description: t.common.robotCheck })
       return
     }
     const formEl = event.currentTarget
@@ -73,13 +69,12 @@ export function Wishes({
       })
       setLocal((prev) => prev.map((w) => (w.id === pending.id ? wish : w)))
       formEl.reset()
-      toast("Thank you for your wishes!")
+      toast(t.wishes.thanksToast)
     } catch (error) {
       // Roll back; the form still holds the text so the guest can retry.
       setLocal((prev) => prev.filter((w) => w.id !== pending.id))
-      toast.error("Could not send your wish", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
+      toast.error(t.wishes.errorToast, {
+        description: error instanceof Error ? error.message : t.common.tryAgain,
       })
     } finally {
       setSending(false)
@@ -91,26 +86,26 @@ export function Wishes({
     <Section
       id="wishes"
       tone={tone}
-      eyebrow={eyebrow}
-      title={title}
+      eyebrow={eyebrow ?? t.wishes.eyebrow}
+      title={title ?? t.wishes.title}
       width="narrow"
       className={className}
     >
       <form onSubmit={handleSubmit} className="relative flex flex-col gap-4">
         <label htmlFor="wish-name" className="sr-only">
-          Your name
+          {t.wishes.name}
         </label>
         <input
           id="wish-name"
           name="name"
           required
           maxLength={80}
-          placeholder="Your name"
+          placeholder={t.wishes.name}
           defaultValue={guestName ?? ""}
           className={inputClass}
         />
         <label htmlFor="wish-message" className="sr-only">
-          Your message
+          {t.wishes.message}
         </label>
         <textarea
           id="wish-message"
@@ -118,7 +113,7 @@ export function Wishes({
           required
           rows={3}
           maxLength={500}
-          placeholder="Write your wishes…"
+          placeholder={t.wishes.placeholder}
           className={inputClass}
         />
         <HoneypotField id="wish-website" />
@@ -129,11 +124,11 @@ export function Wishes({
           disabled={sending}
           className="self-end"
         >
-          {sending ? "Sending…" : "Send wishes"}
+          {sending ? t.common.sending : t.wishes.send}
         </InvButton>
         {disabled && (
           <p className="text-center text-xs text-inv-muted">
-            Preview: wishes are not recorded.
+            {t.wishes.previewNote}
           </p>
         )}
       </form>
@@ -150,7 +145,7 @@ export function Wishes({
               key={wish.id}
               aria-busy={wish.id.startsWith(PENDING) || undefined}
               className={cn(
-                "flex gap-3 transition-opacity",
+                "flex gap-3 transition-opacity in-data-[motion=none]:transition-none motion-reduce:transition-none",
                 wish.id.startsWith(PENDING) && "opacity-60",
                 variant === "cards" &&
                   "rounded-inv border border-inv-line bg-inv-surface p-4"

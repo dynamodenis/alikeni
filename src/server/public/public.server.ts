@@ -1,13 +1,14 @@
 // Guest-facing logic for published invitations: RSVPs, wishes, page views
 // and personal links. Pure functions over a Drizzle db (tested on PGlite);
 // request details (hashes, limiter, human check) come in as `GuestContext`.
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, desc, eq, lt, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { z } from "zod"
 import * as schema from "@/server/db/schema"
 import { getPublishedBySlug } from "@/server/invitations/editing.server"
 import { GUEST_POST_RULES, type RateLimiter } from "@/server/rate-limit"
 import type { WishItem } from "@/templates/_shared/context"
+import { sha256Hex } from "./fingerprint.server"
 import { cleanText, sanitizeGuestName } from "./sanitize"
 
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
@@ -264,49 +265,34 @@ export async function resolveGuestName(
 /** UTC calendar day, "YYYY-MM-DD". */
 export const utcDay = (date: Date) => date.toISOString().slice(0, 10)
 
+/** Visitor rows are kept this many days, then pruned. */
+const VISITOR_RETENTION_DAYS = 2
+
+export type Visitor = { ipHash: string; uaHash: string; bot: boolean }
+
 /**
- * Remembers which (invitation, ipHash, uaHash) already counted today. In
- * memory and per process: it resets at UTC midnight and on restart, and is
- * cleared if it ever grows past `maxEntries`, so a restart or a very busy
- * day can count a returning guest twice. Good enough for host-facing view
- * counts; Phase 8 can move it to KV alongside the rate limiter.
+ * +1 on today's `page_views` row the first time a visitor (salted IP + UA
+ * hashes) opens this invitation on this UTC day; bots never count. Dedupe
+ * lives in `page_view_visitors` (insert … on conflict do nothing), so it
+ * holds across server instances, Worker isolates and restarts. Old visitor
+ * rows are pruned on about 1 in `pruneEvery` counted views.
  */
-export class ViewDeduper {
-  private day = ""
-  private seen = new Set<string>()
-
-  constructor(private readonly maxEntries = 200_000) {}
-
-  /** True the first time this visitor is seen for this invitation today. */
-  first(day: string, invitationId: string, ipHash: string, uaHash: string) {
-    if (day !== this.day || this.seen.size >= this.maxEntries) {
-      this.day = day
-      this.seen = new Set()
-    }
-    const key = `${invitationId}:${ipHash}:${uaHash}`
-    if (this.seen.has(key)) return false
-    this.seen.add(key)
-    return true
-  }
-}
-
-const sharedDeduper = ((
-  globalThis as { __festlyViews?: ViewDeduper }
-).__festlyViews ??= new ViewDeduper())
-
-/** +1 on today's page_views row unless the visitor is a bot or already counted. */
 export async function recordView(
   db: AnyDb,
   invitationId: string,
-  visitor: { ipHash: string; uaHash: string; bot: boolean },
-  options: { now?: Date; deduper?: ViewDeduper } = {}
+  visitor: Visitor,
+  options: { now?: Date; pruneEvery?: number; random?: () => number } = {}
 ): Promise<boolean> {
   if (visitor.bot) return false
-  const day = utcDay(options.now ?? new Date())
-  const deduper = options.deduper ?? sharedDeduper
-  if (!deduper.first(day, invitationId, visitor.ipHash, visitor.uaHash)) {
-    return false
-  }
+  const now = options.now ?? new Date()
+  const day = utcDay(now)
+  const visitorHash = await sha256Hex(`${visitor.ipHash}:${visitor.uaHash}`)
+  const inserted = await db
+    .insert(schema.pageViewVisitors)
+    .values({ invitationId, day, visitorHash })
+    .onConflictDoNothing()
+    .returning({ day: schema.pageViewVisitors.day })
+  if (inserted.length === 0) return false
   await db
     .insert(schema.pageViews)
     .values({ invitationId, day, count: 1 })
@@ -314,17 +300,44 @@ export async function recordView(
       target: [schema.pageViews.invitationId, schema.pageViews.day],
       set: { count: sql`${schema.pageViews.count} + 1` },
     })
+  const random = options.random ?? Math.random
+  if (random() * (options.pruneEvery ?? 200) < 1) {
+    const horizon = new Date(
+      now.getTime() - VISITOR_RETENTION_DAYS * 86_400_000
+    )
+    await db
+      .delete(schema.pageViewVisitors)
+      .where(lt(schema.pageViewVisitors.day, utcDay(horizon)))
+  }
   return true
+}
+
+/**
+ * The view beacon (`recordViewFn`, fired once after hydration): counts a
+ * view of a published slug. False for bots, unknown slugs and repeats.
+ */
+export async function recordViewBySlug(
+  db: AnyDb,
+  slug: string,
+  visitor: Visitor,
+  options: { now?: Date } = {}
+): Promise<boolean> {
+  if (visitor.bot) return false
+  const invitation = await getPublishedBySlug(db, slug)
+  if (!invitation) return false
+  return recordView(db, invitation.id, visitor, options)
 }
 
 /* ---------- the public page ---------- */
 
-/** Everything `/i/$slug` needs, or null when the invitation is not public. */
+/**
+ * Everything `/i/$slug` needs, or null when the invitation is not public.
+ * Nothing here depends on who is asking (views are counted by the client
+ * beacon), so the HTML is cacheable at the edge.
+ */
 export async function loadPublicPage(
   db: AnyDb,
-  input: { slug: string; to?: string },
-  visitor: { ipHash: string; uaHash: string; bot: boolean },
-  options: { now?: Date; deduper?: ViewDeduper } = {}
+  input: { slug: string; to?: string }
 ) {
   const invitation = await getPublishedBySlug(db, input.slug)
   if (!invitation) return null
@@ -334,12 +347,6 @@ export async function loadPublicPage(
       : Promise.resolve([]),
     resolveGuestName(db, invitation.id, input.to),
   ])
-  try {
-    await recordView(db, invitation.id, visitor, options)
-  } catch (error) {
-    // Analytics must never break the invitation.
-    console.error("[public] recordView failed", error)
-  }
   return {
     templateId: invitation.templateId,
     slug: invitation.slug,

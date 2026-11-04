@@ -17,10 +17,10 @@ import {
   RSVP_CLOSED,
   TOO_MANY,
   VERIFY_FAILED,
-  ViewDeduper,
   listWishes,
   loadPublicPage,
   recordView,
+  recordViewBySlug,
   resolveGuestName,
   submitRsvp,
   submitWish,
@@ -228,51 +228,88 @@ describe("page views", () => {
       .where(eq(schema.pageViews.invitationId, invitationId))
 
   it("counts once per visitor per day and skips bots", async () => {
-    const deduper = new ViewDeduper()
     const now = new Date("2027-03-01T10:00:00Z")
-    expect(await recordView(db, invitationId, visitor, { now, deduper })).toBe(
-      true
-    )
-    expect(await recordView(db, invitationId, visitor, { now, deduper })).toBe(
-      false
-    )
+    expect(await recordView(db, invitationId, visitor, { now })).toBe(true)
+    expect(await recordView(db, invitationId, visitor, { now })).toBe(false)
     expect(
-      await recordView(
-        db,
-        invitationId,
-        { ...visitor, bot: true },
-        { now, deduper }
-      )
+      await recordView(db, invitationId, { ...visitor, bot: true }, { now })
     ).toBe(false)
-    await recordView(
-      db,
-      invitationId,
-      { ...visitor, ipHash: "ip-2" },
-      { now, deduper }
-    )
+    await recordView(db, invitationId, { ...visitor, ipHash: "ip-2" }, { now })
     const next = new Date("2027-03-02T00:00:01Z")
-    await recordView(db, invitationId, visitor, { now: next, deduper })
+    await recordView(db, invitationId, visitor, { now: next })
     const rows = await views()
     expect(rows.find((r) => r.day === "2027-03-01")?.count).toBe(2)
     expect(rows.find((r) => r.day === "2027-03-02")?.count).toBe(1)
+  })
+
+  it("dedupes in the database, so separate instances agree", async () => {
+    const now = new Date("2027-04-01T10:00:00Z")
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        recordView(db, invitationId, { ...visitor, ipHash: "ip-c" }, { now })
+      )
+    )
+    expect(results.filter(Boolean)).toHaveLength(1)
+    const rows = await views()
+    expect(rows.find((r) => r.day === "2027-04-01")?.count).toBe(1)
+  })
+
+  it("stores only a hash of the visitor", async () => {
+    const rows = await db
+      .select()
+      .from(schema.pageViewVisitors)
+      .where(eq(schema.pageViewVisitors.invitationId, invitationId))
+    expect(rows.length).toBeGreaterThan(0)
+    for (const row of rows) {
+      expect(row.visitorHash).toMatch(/^[0-9a-f]{64}$/)
+      expect(row.visitorHash).not.toContain("ip-")
+    }
+  })
+
+  it("prunes visitor rows older than two days", async () => {
+    const later = new Date("2027-04-10T10:00:00Z")
+    await recordView(
+      db,
+      invitationId,
+      { ...visitor, ipHash: "ip-prune" },
+      { now: later, random: () => 0 }
+    )
+    const days = (
+      await db
+        .select({ day: schema.pageViewVisitors.day })
+        .from(schema.pageViewVisitors)
+    ).map((r) => r.day)
+    expect(days).toEqual(["2027-04-10"])
+    // Pruning visitor rows never touches the counts.
+    expect((await views()).find((r) => r.day === "2027-03-01")?.count).toBe(2)
+  })
+
+  it("counts by slug for the beacon; unknown slugs and bots do not", async () => {
+    const now = new Date("2027-05-01T10:00:00Z")
+    expect(await recordViewBySlug(db, SLUG, visitor, { now })).toBe(true)
+    expect(await recordViewBySlug(db, "missing", visitor, { now })).toBe(false)
+    expect(
+      await recordViewBySlug(db, SLUG, { ...visitor, bot: true }, { now })
+    ).toBe(false)
   })
 })
 
 describe("loadPublicPage", () => {
   it("returns config, wishes and the guest name", async () => {
-    const page = await loadPublicPage(
-      db,
-      { slug: SLUG, to: "  Mr <script>  Otieno " },
-      visitor,
-      { deduper: new ViewDeduper() }
-    )
+    const before = await db.select().from(schema.pageViews)
+    const page = await loadPublicPage(db, {
+      slug: SLUG,
+      to: "  Mr <script>  Otieno ",
+    })
+    // Rendering the page never counts a view (the client beacon does).
+    expect(await db.select().from(schema.pageViews)).toEqual(before)
     expect(page?.slug).toBe(SLUG)
     expect(page?.guestName).toBe("Mr script Otieno")
     expect(page?.wishes.length).toBeGreaterThan(0)
   })
 
   it("is null for unknown or archived slugs", async () => {
-    expect(await loadPublicPage(db, { slug: "missing" }, visitor)).toBeNull()
+    expect(await loadPublicPage(db, { slug: "missing" })).toBeNull()
   })
 
   it("prefers a guest's personal token", async () => {

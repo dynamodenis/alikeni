@@ -66,6 +66,18 @@ describe("database", () => {
     await expect(db.insert(schema.pageViews).values(view)).rejects.toThrow()
   })
 
+  it("dedupes page-view visitors per invitation, day and visitor", async () => {
+    const [inv] = await db.select().from(schema.invitations)
+    const row = { invitationId: inv.id, day: "2027-06-01", visitorHash: "v" }
+    await db.insert(schema.pageViewVisitors).values(row)
+    await expect(
+      db.insert(schema.pageViewVisitors).values(row)
+    ).rejects.toThrow()
+    await db
+      .insert(schema.pageViewVisitors)
+      .values({ ...row, day: "2027-06-02" })
+  })
+
   it("cascades deletes from invitations to responses", async () => {
     const [inv] = await db.select().from(schema.invitations)
     await db.insert(schema.rsvps).values({
@@ -78,6 +90,7 @@ describe("database", () => {
     })
     await db.delete(schema.invitations).where(eq(schema.invitations.id, inv.id))
     expect(await db.select().from(schema.rsvps)).toHaveLength(0)
+    expect(await db.select().from(schema.pageViewVisitors)).toHaveLength(0)
     expect(await db.select().from(schema.pageViews)).toHaveLength(0)
   })
 })

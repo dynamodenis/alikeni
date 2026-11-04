@@ -1,4 +1,5 @@
 import type { RateLimiter, RateResult, RateRule } from "./types"
+import { decide, maxWindowMs } from "./window"
 
 type Entry = {
   /** Hit timestamps (ms), oldest first. */
@@ -21,8 +22,8 @@ export type MemoryRateLimiterOptions = {
  * within its longest window. Exact (no fixed-window burst at the boundary)
  * and cheap at our limits (≤ 30 timestamps per key). Memory is bounded by
  * pruning old timestamps on every hit, sweeping idle keys periodically and
- * a key cap. State is per process: fine for one Node server; a multi-instance
- * or Workers deployment needs a shared implementation.
+ * a key cap. State is per process: unit tests, and the fallback when no database
+ * is configured. Deployments use `PostgresRateLimiter` (shared).
  */
 export class MemoryRateLimiter implements RateLimiter {
   private readonly entries = new Map<string, Entry>()
@@ -50,28 +51,15 @@ export class MemoryRateLimiter implements RateLimiter {
     const now = this.now()
     if (++this.hitsSinceSweep >= this.sweepEvery) this.sweep(now)
 
-    const maxWindowMs = Math.max(0, ...rules.map((r) => r.windowSec * 1000))
-    const entry = this.entries.get(key) ?? { hits: [], maxWindowMs }
-    entry.maxWindowMs = Math.max(entry.maxWindowMs, maxWindowMs)
+    const windowMs = maxWindowMs(rules)
+    const entry = this.entries.get(key) ?? { hits: [], maxWindowMs: windowMs }
+    entry.maxWindowMs = Math.max(entry.maxWindowMs, windowMs)
     entry.hits = entry.hits.filter((t) => t > now - entry.maxWindowMs)
 
-    let retryAfterMs = 0
-    for (const rule of rules) {
-      const windowMs = rule.windowSec * 1000
-      const inWindow = entry.hits.filter((t) => t > now - windowMs)
-      if (inWindow.length >= rule.limit) {
-        // The slot frees when the oldest hit that still counts expires.
-        const oldest = inWindow[inWindow.length - rule.limit] ?? now
-        retryAfterMs = Math.max(retryAfterMs, oldest + windowMs - now)
-      }
-    }
-
-    if (retryAfterMs > 0 || rules.some((r) => r.limit <= 0)) {
+    const result = decide(entry.hits, rules, now)
+    if (!result.ok) {
       this.store(key, entry)
-      return {
-        ok: false,
-        retryAfterSec: Math.max(1, Math.ceil(retryAfterMs / 1000)),
-      }
+      return result
     }
     entry.hits.push(now)
     this.store(key, entry)

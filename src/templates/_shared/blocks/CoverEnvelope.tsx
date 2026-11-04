@@ -8,6 +8,8 @@ type CoverEnvelopeProps = {
   crest?: ReactNode
   /** "Dear {guestName}" written on the front of the envelope. */
   guestName?: string
+  /** The salutation above the guest name ("Dear" in the invitation's language). */
+  dearLabel?: string
   /** What the letter shows as it slides out. */
   eyebrow: string
   headline: string
@@ -48,6 +50,7 @@ type CoverEnvelopeProps = {
 export function CoverEnvelope({
   crest,
   guestName,
+  dearLabel = "Dear",
   eyebrow,
   headline,
   date,
@@ -144,7 +147,7 @@ export function CoverEnvelope({
       {guestName && (
         <div className="inv-env-drop absolute inset-x-0 bottom-[6%] z-[4] flex flex-col items-center gap-0.5 text-center">
           <span className="text-[0.55rem] tracking-[0.3em] text-inv-muted uppercase">
-            Dear
+            {dearLabel}
           </span>
           <span className="max-w-[70%] truncate font-inv-display text-lg sm:text-xl">
             {guestName}
@@ -210,7 +213,7 @@ export function CoverEnvelope({
               <span className="font-inv-display text-lg sm:text-2xl">
                 {stampDate.day}
               </span>
-              <span className="text-[0.4rem] tracking-[0.15em] opacity-80 sm:text-[0.5rem]">
+              <span className="text-[0.4rem] tracking-[0.15em] sm:text-[0.5rem]">
                 {stampDate.year}
               </span>
             </div>

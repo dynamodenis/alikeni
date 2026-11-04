@@ -7,6 +7,7 @@ import {
   useState,
 } from "react"
 import type { ReactNode } from "react"
+import { getMessages, isLocale, type Locale, type Messages } from "@/lib/i18n"
 import { ORNAMENTS, type OrnamentKind, type TemplateMode } from "../types"
 import type { InvitationConfigBase } from "./schema"
 import { resolvePalette, type Palette } from "./theme/palettes"
@@ -51,6 +52,10 @@ export type InvitationActions = {
 
 export type InvitationContextValue = {
   config: InvitationConfigBase
+  /** `config.locale`: drives `t` and every date the blocks format. */
+  locale: Locale
+  /** Guest-facing strings for `locale` (see `src/lib/i18n`). */
+  t: Messages
   mode: TemplateMode
   motion: EffectiveMotion
   palette: Palette
@@ -139,10 +144,15 @@ export function InvitationProvider({
   }, [])
   const palette = useMemo(() => resolvePalette(config.theme), [config.theme])
   const ornament = resolveOrnament(config.theme.ornament, defaultOrnament)
+  // Configs that skipped schema parsing (tests, older callers) may lack it.
+  const locale: Locale = isLocale(config.locale) ? config.locale : "en"
+  const t = getMessages(locale)
 
   const value = useMemo<InvitationContextValue>(
     () => ({
       config,
+      locale,
+      t,
       mode,
       motion,
       palette,
@@ -158,6 +168,8 @@ export function InvitationProvider({
     }),
     [
       config,
+      locale,
+      t,
       mode,
       motion,
       palette,

@@ -1,18 +1,27 @@
 # Storage (Cloudflare R2)
 
 Uploads (photos, the host's music) and the curated music library live in a
-Cloudflare R2 bucket. The browser uploads directly to R2 with a presigned URL;
-server functions only sign URLs and record metadata (`media_assets`). R2 is
-spoken to through its S3-compatible endpoint, signed with
-[aws4fetch](https://github.com/mhart/aws4fetch) (no AWS account or SDK).
+Cloudflare R2 bucket. Server functions only sign upload URLs and record
+metadata (`media_assets`); bytes never pass through a server function.
+
+- On **Cloudflare Workers** (production) the Worker reaches the bucket
+  through its `BUCKET` binding (`STORAGE_DRIVER=binding`): no S3 keys, no
+  CORS rule. The browser PUTs to our own `/api/storage/upload` with an
+  HMAC-signed URL; files are served from `R2_PUBLIC_URL` or, when it is
+  unset, from `/api/storage/file/<key>`.
+- On **Node** hosts R2 is spoken to through its S3-compatible endpoint,
+  signed with [aws4fetch](https://github.com/mhart/aws4fetch) (no AWS SDK),
+  and the browser uploads directly to R2 with a presigned URL
+  (`STORAGE_DRIVER=r2`).
 
 ## Choosing the driver
 
-| `STORAGE_DRIVER` | Behaviour                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `r2`             | Cloudflare R2. Startup fails, naming each missing `R2_*` variable, if any is empty.                          |
-| `local`          | `.storage/` on this machine. Development only; refused in production.                                        |
-| _(empty)_        | R2 when all five `R2_*` are set, otherwise local in development. Setting only some of them fails at startup. |
+| `STORAGE_DRIVER` | Behaviour                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `binding`        | R2 through the Worker's `BUCKET` binding (Workers only). Needs `STORAGE_SIGNING_SECRET` in production; `R2_PUBLIC_URL` optional; the other `R2_*` are ignored. |
+| `r2`             | Cloudflare R2 over the S3 API (Node hosts). Startup fails, naming each missing `R2_*` variable, if any is empty.                                               |
+| `local`          | `.storage/` on this machine. Development only; refused in production.                                                                                          |
+| _(empty)_        | R2 (S3 API) when all five `R2_*` are set, else the binding when the Worker has one, else local in development. Setting only some `R2_*` fails at startup.      |
 
 The editor header shows **Local storage (dev)** whenever uploads are going to
 `.storage/`, so you always know which one is active.
@@ -23,6 +32,24 @@ Leave the `R2_*` variables empty: the **local driver** stores files in
 `.storage/` (git-ignored), signs uploads with HMAC (`STORAGE_SIGNING_SECRET`)
 and serves them from `/api/storage/file/<key>` with HTTP Range support. It
 refuses to run in production.
+
+## The binding driver (Workers)
+
+`src/server/storage/binding.server.ts`. The upload flow mirrors the local
+driver, with the bucket instead of the disk:
+
+1. `createUploadUrlFn` signs `PUT <APP_ORIGIN>/api/storage/upload?key&mime&bytes&exp&sig`
+   (HMAC-SHA256 with `STORAGE_SIGNING_SECRET`, expiry ≤ 10 minutes).
+2. The route (`src/server/storage/routes.server.ts`) checks the signature and
+   expiry, that `Content-Type` equals the signed type, that the body is no
+   larger than signed (and within the media policy), then `BUCKET.put`s it
+   with its content type.
+3. `confirmUploadFn` `head`s the object as before.
+
+Reads: `publicUrl(key)` is `R2_PUBLIC_URL/<key>` when set (recommended:
+enable public access on the bucket), otherwise `/api/storage/file/<key>`,
+which streams from the binding with HTTP Range support. Setup:
+`docs/DEPLOY.md`.
 
 ## Setting up R2
 

@@ -1,0 +1,15 @@
+# Local overrides for `wrangler dev` / `pnpm preview:worker` (copy to .dev.vars;
+# never commit .dev.vars). Values here replace wrangler.jsonc "vars" locally.
+# Production secrets are set with `wrangler secret put` (docs/DEPLOY.md).
+NODE_ENV=development
+APP_ORIGIN=http://localhost:8787
+STORAGE_DRIVER=binding
+# Signs browser upload URLs for the binding storage driver (any long string)
+STORAGE_SIGNING_SECRET=local-wrangler-dev-signing-secret
+# Optional locally; required in production
+BETTER_AUTH_SECRET=
+ANALYTICS_SALT=
+RESEND_API_KEY=
+EMAIL_FROM=
+TURNSTILE_SECRET_KEY=
+GEOCODE_CONTACT_EMAIL=

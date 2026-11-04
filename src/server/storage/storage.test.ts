@@ -257,7 +257,7 @@ describe("storage configuration", () => {
       parseServerEnv({ ...production, STORAGE_DRIVER: "local" })
     ).toThrow(/development only/)
     expect(() => selectStorage(parseServerEnv(production))).toThrow(
-      /STORAGE_DRIVER=r2/
+      /STORAGE_DRIVER=binding \(Workers\) or r2/
     )
   })
 })

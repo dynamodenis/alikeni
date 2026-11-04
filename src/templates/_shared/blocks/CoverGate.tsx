@@ -61,13 +61,23 @@ export function CoverGate({
   crest,
   className,
 }: CoverGateProps) {
-  const { config, mode, guestName, opened, open, primeMusic, motion } =
-    useInvitation()
+  const {
+    config,
+    mode,
+    guestName,
+    opened,
+    open,
+    primeMusic,
+    motion,
+    locale,
+    t,
+  } = useInvitation()
   const hydrated = useHydrated()
   const reveal = revealProp ?? config.theme.coverReveal
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const gated = hydrated && mode === "public" && !opened
   const overlay = !gone && (gated || (opening && mode === "public"))
@@ -81,6 +91,31 @@ export function CoverGate({
 
   useEffect(() => {
     if (gated) buttonRef.current?.focus({ preventScroll: true })
+  }, [gated])
+
+  // A modal gate: everything outside it is inert while it is up, so Tab and
+  // screen-reader browsing stay on the cover (aria-modal alone does not stop
+  // keyboard focus). Released as soon as the guest opens it, before focus
+  // moves to the content.
+  useEffect(() => {
+    const cover = rootRef.current
+    if (!gated || !cover) return
+    const made: Array<Element> = []
+    for (
+      let node: Element = cover, parent = cover.parentElement;
+      parent && node !== document.body;
+      node = parent, parent = parent.parentElement
+    ) {
+      for (const sibling of Array.from(parent.children)) {
+        if (sibling === node || sibling.hasAttribute("inert")) continue
+        if (sibling instanceof HTMLScriptElement) continue
+        sibling.setAttribute("inert", "")
+        made.push(sibling)
+      }
+    }
+    return () => {
+      for (const element of made) element.removeAttribute("inert")
+    }
   }, [gated])
 
   useEffect(() => {
@@ -103,8 +138,8 @@ export function CoverGate({
 
   const { texts, event, datetime, hosts } = config
   const headline = texts.headline || hostNames(hosts)
-  const date = formatLongDate(datetime.start, datetime.timezone)
-  const parts = dateParts(datetime.start, datetime.timezone)
+  const date = formatLongDate(datetime.start, datetime.timezone, locale)
+  const parts = dateParts(datetime.start, datetime.timezone, locale)
   const envelope = reveal === "envelope"
 
   const handleOpen = () => {
@@ -132,7 +167,7 @@ export function CoverGate({
       onClick={handleOpen}
       aria-busy={opening || undefined}
     >
-      {texts.coverButtonLabel}
+      {texts.coverButtonLabel || t.cover.open}
     </InvButton>
   )
 
@@ -147,6 +182,7 @@ export function CoverGate({
 
   return (
     <div
+      ref={rootRef}
       data-block="cover"
       data-reveal={reveal}
       data-state={gated ? "gated" : opening ? "opening" : "inline"}
@@ -185,6 +221,7 @@ export function CoverGate({
               <CoverEnvelope
                 crest={crest}
                 guestName={guestName}
+                dearLabel={t.cover.dear}
                 eyebrow={texts.coverTitle}
                 headline={headline}
                 date={date}
@@ -248,7 +285,7 @@ export function CoverGate({
               {guestName && (
                 <div className="inv-anim-rise mt-2 flex flex-col items-center gap-1 [--delay:0.35s]">
                   <span className="text-[0.65rem] tracking-[0.3em] text-inv-muted uppercase">
-                    Dear
+                    {t.cover.dear}
                   </span>
                   <span className="font-inv-display text-2xl">{guestName}</span>
                 </div>

@@ -125,8 +125,9 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
         to="/editor/$invitationId"
         params={{ invitationId: row.id }}
         className="relative block aspect-[4/3] overflow-hidden bg-muted"
-        aria-label={`Edit ${row.title}`}
       >
+        {/* Name = "Edit <title>, <status>" so it includes the visible badge. */}
+        <span className="sr-only">Edit {row.title}, </span>
         {meta && (
           <img
             src={meta.thumbnail}

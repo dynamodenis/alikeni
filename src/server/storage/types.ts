@@ -14,7 +14,7 @@ export type ObjectInfo = { bytes: number; mime: string }
  * the server signs, the browser PUTs, the server confirms with `head`.
  */
 export interface StorageDriver {
-  readonly id: "r2" | "local"
+  readonly id: "r2" | "local" | "binding"
   createUploadTarget: (input: {
     key: string
     mime: string
@@ -45,8 +45,29 @@ export interface ServerObjects {
   get: (key: string) => Promise<StoredObject | null>
 }
 
-/** What `getStorage()` returns: both halves. */
-export type ServerStorage = StorageDriver & ServerObjects
+/**
+ * Drivers whose browser uploads and file reads go through our own routes
+ * (`local`, `binding`): `/api/storage/upload` checks the HMAC-signed PUT and
+ * writes with `put`; `/api/storage/file/<key>` serves with `readRange`.
+ * The `r2` driver has neither (the browser talks to R2 directly).
+ */
+export interface RouteServedStorage {
+  verifyUpload: (
+    upload: { key: string; mime: string; bytes: number; exp: number },
+    sig: string
+  ) => boolean
+  /** Bytes `start..end` (inclusive) of an object, or null when missing. */
+  readRange: (
+    key: string,
+    start: number,
+    end: number
+  ) => Promise<ReadableStream<Bytes> | Bytes | null>
+}
+
+/** What `getStorage()` returns: both halves, plus the route hooks if any. */
+export type ServerStorage = StorageDriver &
+  ServerObjects &
+  Partial<RouteServedStorage>
 
 /** Presigned URLs live at most 10 minutes (build prompt, Phase 8 security). */
 export const UPLOAD_TTL_SECONDS = 600

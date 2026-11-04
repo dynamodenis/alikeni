@@ -85,7 +85,7 @@ function SignIn() {
           <Link
             to="/sign-up"
             search={{ redirect: target }}
-            className="text-gold-soft underline-offset-4 hover:underline"
+            className="text-gold-soft underline underline-offset-4 hover:decoration-2"
           >
             Create an account
           </Link>

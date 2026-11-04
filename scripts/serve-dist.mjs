@@ -1,7 +1,9 @@
-// Minimal Node host for the production build (`pnpm build` → dist/).
-// The deployment adapter (Nitro/Vercel/Netlify/Cloudflare) is chosen in
-// Phase 8; until then this serves dist/client statically and hands every
-// other request to the TanStack Start fetch handler in dist/server/server.js.
+// Minimal Node host for the Node production build (`pnpm build` → dist/), for
+// local checks and Lighthouse runs. Production runs on Cloudflare Workers
+// (`pnpm build:worker` → dist-worker/, docs/DEPLOY.md). This serves
+// dist/client statically and hands every other request to the TanStack Start
+// fetch handler in dist/server/server.js (security headers come from the
+// app's request middleware, src/start.ts).
 import { createReadStream, existsSync, statSync } from "node:fs"
 import { createServer } from "node:http"
 import { extname, join, normalize } from "node:path"

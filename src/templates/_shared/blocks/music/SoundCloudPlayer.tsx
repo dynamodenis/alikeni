@@ -19,7 +19,7 @@ const START_GRACE_MS = 1500
  * after a short grace period the dock asks the guest to tap ▶ themselves.
  */
 function Dock({ source, startAt, loop }: Props) {
-  const { mode, opened, registerMusic, palette } = useInvitation()
+  const { mode, opened, registerMusic, palette, t } = useInvitation()
   const frame = useRef<HTMLIFrameElement>(null)
   const widget = useRef<SCWidget | null>(null)
   const pendingStart = useRef(false)
@@ -98,7 +98,7 @@ function Dock({ source, startAt, loop }: Props) {
   return (
     <div
       className={cn(
-        "fixed bottom-4 left-4 z-40 w-[min(22rem,calc(100vw-2rem))] transition-opacity duration-500",
+        "fixed bottom-4 left-4 z-40 w-[min(22rem,calc(100vw-2rem))] transition-opacity duration-500 in-data-[motion=none]:transition-none motion-reduce:transition-none",
         !visible && "pointer-events-none opacity-0"
       )}
       aria-hidden={!visible}
@@ -128,15 +128,15 @@ function Dock({ source, startAt, loop }: Props) {
             )}
           >
             {needsTap && !playing
-              ? "Tap ▶ below for music"
+              ? t.music.tapWidget
               : playing
-                ? "Now playing"
-                : "Music"}
+                ? t.music.nowPlaying
+                : t.music.music}
           </p>
           <button
             type="button"
             onClick={collapse}
-            aria-label="Minimize and pause music"
+            aria-label={t.music.minimize}
             className="rounded-full p-1 text-inv-muted hover:bg-inv-surface hover:text-inv-fg focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:outline-none"
           >
             <ChevronDown className="size-4" aria-hidden="true" />
@@ -144,7 +144,7 @@ function Dock({ source, startAt, loop }: Props) {
         </div>
         <iframe
           ref={frame}
-          title={`${source.title} by ${source.artist} on SoundCloud`}
+          title={t.music.widgetTitle(source.title, source.artist)}
           src={src}
           allow="autoplay"
           className="block h-[166px] w-full border-0"
