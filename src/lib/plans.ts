@@ -37,10 +37,18 @@ export function formatPrice(currency: Currency, locale = "en"): string {
   }).format(amount)
 }
 
-/** KES for visitors in Kenya (M-Pesa), USD elsewhere. */
+/**
+ * KES for visitors in Kenya (M-Pesa), USD elsewhere, limited to the
+ * currencies the account accepts (`available`, never empty): the first of
+ * them when the preferred one is not offered.
+ */
 export const defaultCurrency = (
-  country: string | null | undefined
-): Currency => (country?.toUpperCase() === "KE" ? "KES" : "USD")
+  country: string | null | undefined,
+  available: ReadonlyArray<Currency> = CURRENCIES
+): Currency => {
+  const preferred: Currency = country?.toUpperCase() === "KE" ? "KES" : "USD"
+  return available.includes(preferred) ? preferred : (available[0] ?? preferred)
+}
 
 /* ---------- free-plan expiry ---------- */
 

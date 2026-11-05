@@ -6,6 +6,8 @@ import type { Envelope } from "../schema"
 type CoverEnvelopeProps = {
   /** Shown pressed into the wax seal (monogram, badge, rosette). */
   crest?: ReactNode
+  /** No breathing or gloss on the seal (`data-seal-still`), e.g. for a text crest. */
+  stillSeal?: boolean
   /** "Dear {guestName}" written on the front of the envelope. */
   guestName?: string
   /** The salutation above the guest name ("Dear" in the invitation's language). */
@@ -49,6 +51,7 @@ type CoverEnvelopeProps = {
  */
 export function CoverEnvelope({
   crest,
+  stillSeal = false,
   guestName,
   dearLabel = "Dear",
   eyebrow,
@@ -92,6 +95,7 @@ export function CoverEnvelope({
       aria-hidden="true"
       data-liner={options.liner}
       data-seal={options.seal}
+      data-seal-still={stillSeal || undefined}
       data-peek={peek.playing || undefined}
       onAnimationEnd={endPeek}
       onClick={onOpen}
@@ -185,6 +189,7 @@ export function CoverEnvelope({
       </div>
 
       <div className="inv-env-peek-hide absolute top-[52%] left-1/2 z-[6] -translate-x-1/2 -translate-y-1/2">
+        <SealOrbit />
         <div className="inv-env-seal relative flex size-22 items-center justify-center rounded-full bg-inv-bg shadow-[0_6px_18px_-6px_rgb(0_0_0/0.45)] ring-1 ring-inv-primary/40 sm:size-26">
           {crest ? (
             <div
@@ -234,6 +239,53 @@ export function CoverEnvelope({
           </svg>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Two thin rings round the seal, turning slowly in opposite directions: a
+ * dashed outer ring and a solid inner one carrying a small accent dot.
+ * `inv-anim-spin` stops them when motion is off; they fade with the rest of
+ * the chrome as the envelope opens.
+ */
+function SealOrbit() {
+  return (
+    <div className="inv-env-chrome pointer-events-none absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 sm:size-42">
+      <svg
+        viewBox="0 0 100 100"
+        className="inv-anim-spin absolute inset-0 size-full overflow-visible [--d:32s]"
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r="47"
+          fill="none"
+          stroke="var(--inv-primary)"
+          strokeOpacity="0.55"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray="0.5 2"
+        />
+      </svg>
+      {/* Inline, not a utility: the unlayered `inv-anim-spin` rule would win. */}
+      <svg
+        viewBox="0 0 100 100"
+        style={{ animationDirection: "reverse" }}
+        className="inv-anim-spin absolute inset-0 size-full overflow-visible [--d:18s]"
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r="40"
+          fill="none"
+          stroke="var(--inv-primary)"
+          strokeOpacity="0.3"
+          strokeWidth="0.6"
+        />
+        <circle cx="50" cy="10" r="1.8" fill="var(--inv-accent)" />
+      </svg>
     </div>
   )
 }

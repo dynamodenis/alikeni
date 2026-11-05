@@ -85,9 +85,12 @@ async function main() {
 
       const webp = await page.evaluate(
         async ({ data, quality }) => {
-          const blob = await (
-            await fetch(`data:image/png;base64,${data}`)
-          ).blob()
+          // Decoded here, not fetched: the page's CSP has no data: in
+          // connect-src, so fetch() of a data: URL is refused.
+          const blob = new Blob(
+            [Uint8Array.from(atob(data), (c) => c.charCodeAt(0))],
+            { type: "image/png" }
+          )
           const bitmap = await createImageBitmap(blob)
           const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
           canvas.getContext("2d")?.drawImage(bitmap, 0, 0)

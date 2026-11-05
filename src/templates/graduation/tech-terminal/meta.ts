@@ -14,7 +14,7 @@ export const meta: TemplateMeta = {
     "developer",
   ],
   description:
-    "A terminal window: monospace headline, a bash card with `$ graduate` commands and a blinking cursor, matrix-dust particles over phosphor green on black, sections named like files.",
+    "A terminal window: a `whoami` that types the graduate's name on the cover, monospace headline, a bash card with `$ graduate` commands and a blinking cursor, matrix-dust particles over phosphor green on black, sections named like files.",
   thumbnail: "/thumbs/graduation-tech-terminal.webp",
   isPremium: false,
   supportedEventTypes: ["graduation", "corporate", "other"],

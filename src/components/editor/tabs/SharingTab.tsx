@@ -9,6 +9,7 @@ import {
   MessageCircle,
   MessageSquareText,
   Rocket,
+  Sparkles,
   Users,
   XCircle,
 } from "lucide-react"
@@ -18,6 +19,7 @@ import { renderSVG } from "uqr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHydrated } from "@/hooks/use-hydrated"
+import { FREE_RSVP_LIMIT, freeOnlineUntil } from "@/lib/plans"
 import { suggestSlug } from "@/lib/slug"
 import { cn } from "@/lib/utils"
 import {
@@ -54,7 +56,7 @@ export function SharingTab({
   lastSavedAt,
   onPublished,
 }: Props) {
-  const { config, invitationId } = useEditor()
+  const { config, invitationId, plan } = useEditor()
   const checkSlug = useServerFn(checkSlugFn)
   const publish = useServerFn(publishFn)
   const hydrated = useHydrated()
@@ -147,6 +149,11 @@ export function SharingTab({
 
   return (
     <>
+      <PlanBox
+        plan={plan}
+        invitationId={invitationId}
+        onlineUntil={freeOnlineUntil(config)}
+      />
       <Group
         title="Web address"
         description="Lowercase letters, numbers and dashes."
@@ -323,5 +330,69 @@ export function SharingTab({
         </div>
       </Group>
     </>
+  )
+}
+
+const day = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+})
+
+/**
+ * What the host gets on each plan, where they decide to send the link. Free
+ * shows the three limits and the upgrade button; Premium a one-line
+ * confirmation. Rules live in `src/lib/plans.ts`.
+ */
+function PlanBox({
+  plan,
+  invitationId,
+  onlineUntil,
+}: {
+  plan: "free" | "premium"
+  invitationId: string
+  onlineUntil: string
+}) {
+  if (plan === "premium") {
+    return (
+      <p className="flex items-center gap-2 rounded-xl border border-amber-300/40 bg-amber-300/10 p-3 text-sm">
+        <Sparkles
+          className="size-4 shrink-0 text-amber-300"
+          aria-hidden="true"
+        />
+        <span>
+          <span className="font-medium">Premium.</span> The page stays online
+          after the event, RSVPs are unlimited and guests see the gift section.
+        </span>
+      </p>
+    )
+  }
+  return (
+    <section
+      aria-labelledby="plan-heading"
+      className="flex flex-col gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4"
+    >
+      <h3 id="plan-heading" className="text-sm font-medium">
+        Free plan
+      </h3>
+      <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+        <li>
+          Online until {day.format(new Date(`${onlineUntil}T00:00:00Z`))}, the
+          day after the event, then the page goes offline.
+        </li>
+        <li>Up to {FREE_RSVP_LIMIT} RSVPs.</li>
+        <li>Gift details are not shown to guests.</li>
+      </ul>
+      <p className="text-sm">
+        Premium keeps the page online for good, lifts the RSVP cap and shows the
+        gift section. One-time payment for this invitation.
+      </p>
+      <Button asChild size="sm" className="self-start">
+        <Link to="/dashboard/$invitationId/upgrade" params={{ invitationId }}>
+          <Sparkles aria-hidden="true" /> Upgrade to Premium
+        </Link>
+      </Button>
+    </section>
   )
 }

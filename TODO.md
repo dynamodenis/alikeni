@@ -193,8 +193,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [x] Paystack client (`src/server/payments/paystack.server.ts`, fetch + Web Crypto): initialize, verify, webhook HMAC-SHA512 check in constant time
 - [x] Flow: `startCheckoutFn` (owner only) → hosted checkout (M-Pesa / card / Apple Pay) → webhook `POST /api/payments/paystack` and `?reference=` return both call `applyTransaction` (exact amount + currency, idempotent, editor `updated_at` untouched)
 - [x] Enforcement on the server: `getPublishedBySlug` hides ended free invitations from the page, RSVPs, wishes, calendar and OG card; gift details are removed before they leave the server; the RSVP cap is checked on submit. Ended pages show `EndedInvitation` in the invitation's language
+- [x] Editor entry points: Free/Premium pill with Upgrade in the header, plan box with limits and Upgrade above Publish in the Sharing tab
 - [x] UI: `/dashboard/$invitationId/upgrade` (plans, KES for Kenyan visitors via `cf-ipcountry`, USD elsewhere, switchable), Premium badge + "online until" + Upgrade on dashboard cards, Gifts tab notice on free
 - [x] Tests: plan rules (time zones, sub-events), checkout, amount/currency mismatch, idempotency, webhook signatures, owner isolation, free limits on the public side
+- [x] `PAYSTACK_CURRENCIES` (default KES): the upgrade page offers only currencies the account accepts; USD needs enabling by Paystack
 - [ ] Try it end to end with Paystack test keys (M-Pesa test number, test card), then live keys on deploy
 
 ## Credits / licensing log

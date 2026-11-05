@@ -2,6 +2,7 @@
 // to bundle this file into client code, so secrets (DATABASE_URL, and later
 // storage keys and auth secrets) can live here.
 import { z } from "zod"
+import { CURRENCIES, isCurrency, type Currency } from "@/lib/plans"
 
 export const R2_KEYS = [
   "R2_ACCOUNT_ID",
@@ -98,6 +99,30 @@ const serverEnvSchema = z
       .string()
       .regex(/^sk_(test|live)_\w+$/, "must start with sk_test_ or sk_live_")
       .optional(),
+    /**
+     * Currencies the Paystack account can charge, comma-separated (KES, USD).
+     * The upgrade page offers only these. Default KES: Kenyan accounts take
+     * USD only once Paystack enables it, and a currency the account cannot
+     * take fails at checkout.
+     */
+    PAYSTACK_CURRENCIES: z
+      .string()
+      .default("KES")
+      .transform((value, ctx): Array<Currency> => {
+        const list = value
+          .split(",")
+          .map((item) => item.trim().toUpperCase())
+          .filter(Boolean)
+        const unknown = list.filter((item) => !isCurrency(item))
+        if (list.length === 0 || unknown.length > 0) {
+          ctx.addIssue({
+            code: "custom",
+            message: `expected a comma-separated list of ${CURRENCIES.join(", ")}`,
+          })
+          return z.NEVER
+        }
+        return [...new Set(list.filter(isCurrency))]
+      }),
     ALLOW_DEV_USER: z
       .enum(["true", "false", "1", "0"])
       .optional()

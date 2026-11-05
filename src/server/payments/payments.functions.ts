@@ -25,6 +25,7 @@ export function paymentsDeps(): PaymentsDeps {
       ? { secretKey: serverEnv.PAYSTACK_SECRET_KEY }
       : null,
     origin: serverEnv.APP_ORIGIN,
+    currencies: serverEnv.PAYSTACK_CURRENCIES,
   }
 }
 
@@ -51,7 +52,11 @@ export const getUpgradeFn = createServerFn({ method: "GET" })
     return {
       ...info,
       paymentsEnabled: !!serverEnv.PAYSTACK_SECRET_KEY,
-      suggestedCurrency: defaultCurrency(country),
+      currencies: serverEnv.PAYSTACK_CURRENCIES,
+      suggestedCurrency: defaultCurrency(
+        country,
+        serverEnv.PAYSTACK_CURRENCIES
+      ),
     }
   })
 

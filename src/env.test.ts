@@ -143,3 +143,22 @@ describe("parseServerEnv blank values", () => {
     expect(env.R2_ACCOUNT_ID).toBeUndefined()
   })
 })
+
+describe("payments env", () => {
+  it("defaults to KES and parses a currency list", () => {
+    expect(parseServerEnv({}).PAYSTACK_CURRENCIES).toEqual(["KES"])
+    expect(
+      parseServerEnv({ PAYSTACK_CURRENCIES: " usd, KES ,usd" })
+        .PAYSTACK_CURRENCIES
+    ).toEqual(["USD", "KES"])
+  })
+
+  it("rejects unknown or empty currency lists", () => {
+    expect(() => parseServerEnv({ PAYSTACK_CURRENCIES: "KES,EUR" })).toThrow(
+      /PAYSTACK_CURRENCIES/
+    )
+    expect(() => parseServerEnv({ PAYSTACK_CURRENCIES: " , " })).toThrow(
+      /PAYSTACK_CURRENCIES/
+    )
+  })
+})

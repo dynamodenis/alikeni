@@ -6,6 +6,7 @@ import {
   Eye,
   LoaderCircle,
   PencilLine,
+  Sparkles,
   TriangleAlert,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -362,6 +363,26 @@ function EditorLoaded({
           </div>
           <div className="flex items-center gap-2">
             {draft.storageDriver === "local" && <LocalStorageBadge />}
+            {draft.plan === "premium" ? (
+              <span className="hidden items-center gap-1 rounded-full bg-amber-300/90 px-2.5 py-1 text-xs font-medium text-amber-950 sm:inline-flex">
+                <Sparkles className="size-3" aria-hidden="true" />
+                Premium
+              </span>
+            ) : (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link
+                  to="/dashboard/$invitationId/upgrade"
+                  params={{ invitationId: draft.id }}
+                >
+                  <Sparkles aria-hidden="true" /> Upgrade
+                </Link>
+              </Button>
+            )}
             <div className="sm:hidden">
               <SaveIndicator
                 state={autosave.state}

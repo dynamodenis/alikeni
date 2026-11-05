@@ -38,6 +38,8 @@ export type PaymentsDeps = {
   paystack: PaystackDeps | null
   /** Public origin for Paystack's return URL. */
   origin: string
+  /** Currencies the account can charge (PAYSTACK_CURRENCIES); all when unset. */
+  currencies?: ReadonlyArray<Currency>
   now?: () => Date
 }
 
@@ -52,6 +54,7 @@ export class PaymentError extends Error {
 export const PAYMENTS_OFF = "Payments are not available yet."
 export const NOT_FOUND = "Invitation not found."
 export const ALREADY_PREMIUM = "This invitation is already Premium."
+export const CURRENCY_OFF = "This currency is not available."
 
 const upgradePath = (invitationId: string) =>
   `/dashboard/${invitationId}/upgrade`
@@ -69,6 +72,9 @@ export async function startCheckout(
   }
 ): Promise<{ url: string; reference: string }> {
   if (!deps.paystack) throw new PaymentError(PAYMENTS_OFF)
+  if (deps.currencies && !deps.currencies.includes(input.currency)) {
+    throw new PaymentError(CURRENCY_OFF)
+  }
   const invitation = (
     await db
       .select({ id: inv.id, plan: inv.plan })

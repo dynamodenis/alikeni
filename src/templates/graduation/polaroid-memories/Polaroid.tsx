@@ -5,8 +5,9 @@ import type { MediaRef } from "../../_shared/schema"
 /**
  * Polaroid Memories' signature: an instant-camera print. A pale frame with
  * a thick bottom margin holds the photo; the caption sits in the display face
- * like handwriting; `tilt` rotates the whole print a few degrees. Pure CSS,
- * tokens only. Renders nothing without a photo.
+ * like handwriting; `tilt` rotates the whole print a few degrees and it
+ * swings gently from the tape (resting at `tilt` when motion is off). Pure
+ * CSS, tokens only. Renders nothing without a photo.
  */
 export function Polaroid({
   photo,
@@ -25,7 +26,7 @@ export function Polaroid({
     <figure
       style={style}
       className={cn(
-        "inv-anim-float relative w-56 rotate-(--r) rounded-[0.2rem] border border-inv-line bg-inv-surface p-3 pb-5 text-inv-fg shadow-[0_24px_50px_-24px_var(--inv-primary)] [--d:9s] sm:w-64",
+        "inv-anim-swing relative w-56 rounded-[0.2rem] border border-inv-line bg-inv-surface p-3 pb-5 text-inv-fg shadow-[0_24px_50px_-24px_var(--inv-primary)] [--d:7s] [--swing:1.6deg] sm:w-64",
         className
       )}
     >

@@ -96,6 +96,12 @@ describe("prices", () => {
     expect(defaultCurrency(null)).toBe("USD")
   })
 
+  it("falls back to an available currency", () => {
+    expect(defaultCurrency("US", ["KES"])).toBe("KES")
+    expect(defaultCurrency("KE", ["USD"])).toBe("USD")
+    expect(defaultCurrency("KE", ["USD", "KES"])).toBe("KES")
+  })
+
   it("formats whole amounts without decimals", () => {
     expect(formatPrice("USD")).toBe("$12")
     expect(formatPrice("KES")).toMatch(/^KES\s1,500$/)

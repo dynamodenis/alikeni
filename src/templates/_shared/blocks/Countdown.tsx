@@ -10,6 +10,11 @@ export type CountdownVariant = "boxes" | "inline" | "ring"
 type CountdownProps = BlockProps & {
   variant?: CountdownVariant
   doneLabel?: string
+  /**
+   * Ring variant only: a dashed outer ring turns slowly around each dial
+   * (stops under reduced motion, like every `inv-anim-*`).
+   */
+  spin?: boolean
 }
 
 const UNITS = ["days", "hours", "minutes", "seconds"] as const
@@ -25,6 +30,7 @@ export function Countdown({
   title,
   tone,
   doneLabel,
+  spin = false,
   className,
 }: CountdownProps) {
   const { config, locale, t } = useInvitation()
@@ -74,6 +80,25 @@ export function Countdown({
                   variant === "inline" && "px-1"
                 )}
               >
+                {variant === "ring" && spin && (
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="inv-anim-spin absolute inset-0 [--d:28s]"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke="var(--inv-accent)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      pathLength={100}
+                      strokeDasharray="1 5"
+                      className="opacity-70"
+                    />
+                  </svg>
+                )}
                 {variant === "ring" && (
                   <svg
                     viewBox="0 0 100 100"

@@ -14,6 +14,7 @@ import { createDraft } from "@/server/invitations/drafts.server"
 import { publishInvitation } from "@/server/invitations/editing.server"
 import {
   ALREADY_PREMIUM,
+  CURRENCY_OFF,
   NOT_FOUND,
   PAYMENTS_OFF,
   PaymentError,
@@ -204,6 +205,14 @@ describe("startCheckout", () => {
         currency: "KES",
       })
     ).rejects.toEqual(new PaymentError(PAYMENTS_OFF))
+    await expect(
+      startCheckout(db, deps({ currencies: ["KES"] }), {
+        ownerId: DEV_USER.id,
+        email: DEV_USER.email,
+        invitationId,
+        currency: "USD",
+      })
+    ).rejects.toEqual(new PaymentError(CURRENCY_OFF))
     await db
       .update(schema.invitations)
       .set({ plan: "premium" })

@@ -7,9 +7,17 @@ import { initials } from "./hosts"
 export type HostsVariant = "duo" | "list" | "spotlight"
 export type PortraitShape = "circle" | "arch" | "square"
 
+/**
+ * The line around each portrait: `offset` is a copy of the shape nudged down
+ * and right (a printed, framed feel); `orbit` is a concentric dashed ring
+ * that turns slowly (circle portraits; stops when motion is off).
+ */
+export type PortraitOutline = "offset" | "orbit"
+
 type HostsProps = BlockProps & {
   variant?: HostsVariant
   portrait?: PortraitShape
+  outline?: PortraitOutline
 }
 
 const shapes: Record<PortraitShape, string> = {
@@ -22,24 +30,48 @@ function Portrait({
   host,
   size,
   shape,
+  outline,
 }: {
   host: Host
   size: "lg" | "md"
   shape: PortraitShape
+  outline: PortraitOutline
 }) {
   const width = size === "lg" ? "w-44 sm:w-52" : "w-28"
   const frame = cn(width, shapes[shape], "relative overflow-hidden")
   return (
     <div className="relative">
-      {/* Offset outline gives the portrait a printed, framed feel. */}
-      <div
-        aria-hidden="true"
-        className={cn(
-          width,
-          shapes[shape],
-          "absolute inset-0 translate-x-2 translate-y-2 border border-inv-primary/50"
-        )}
-      />
+      {outline === "orbit" ? (
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 100 100"
+          className="inv-anim-spin absolute -inset-3 size-[calc(100%+1.5rem)] [--d:36s]"
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r="48.5"
+            fill="none"
+            stroke="var(--inv-primary)"
+            strokeOpacity="0.55"
+            strokeWidth="1"
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray="0.6 2.4"
+          />
+          <circle cx="50" cy="1.5" r="1.5" fill="var(--inv-accent)" />
+        </svg>
+      ) : (
+        /* Offset outline gives the portrait a printed, framed feel. */
+        <div
+          aria-hidden="true"
+          className={cn(
+            width,
+            shapes[shape],
+            "absolute inset-0 translate-x-2 translate-y-2 border border-inv-primary/50"
+          )}
+        />
+      )}
       {host.photo ? (
         <img
           src={host.photo.url}
@@ -69,16 +101,18 @@ function HostCard({
   host,
   size,
   shape,
+  outline,
 }: {
   host: Host
   size: "lg" | "md"
   shape: PortraitShape
+  outline: PortraitOutline
 }) {
   const { t } = useInvitation()
   const role = t.hosts[host.role]
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <Portrait host={host} size={size} shape={shape} />
+      <Portrait host={host} size={size} shape={shape} outline={outline} />
       <div className="flex flex-col gap-1.5">
         {role && (
           <p className="text-[0.7rem] tracking-[0.28em] text-inv-primary uppercase">
@@ -98,6 +132,7 @@ function HostCard({
 export function Hosts({
   variant = "duo",
   portrait = "circle",
+  outline = "offset",
   eyebrow,
   title,
   tone,
@@ -127,19 +162,29 @@ export function Hosts({
                   &amp;
                 </span>
               )}
-              <HostCard host={host} size="lg" shape={portrait} />
+              <HostCard
+                host={host}
+                size="lg"
+                shape={portrait}
+                outline={outline}
+              />
             </div>
           ))}
         </div>
       )}
       {variant === "spotlight" && (
         <div className="flex flex-col items-center gap-12">
-          <HostCard host={lead} size="lg" shape={portrait} />
+          <HostCard host={lead} size="lg" shape={portrait} outline={outline} />
           {rest.length > 0 && (
             <ul className="flex flex-wrap justify-center gap-10">
               {rest.map((host, i) => (
                 <li key={i}>
-                  <HostCard host={host} size="md" shape={portrait} />
+                  <HostCard
+                    host={host}
+                    size="md"
+                    shape={portrait}
+                    outline={outline}
+                  />
                 </li>
               ))}
             </ul>
@@ -147,10 +192,16 @@ export function Hosts({
         </div>
       )}
       {variant === "list" && (
-        <ul className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        // Flex, not grid, so a short last row (or a lone graduate) centres.
+        <ul className="flex flex-wrap justify-center gap-12 [&>li]:w-full sm:[&>li]:w-[calc((100%-3rem)/2)] lg:[&>li]:w-[calc((100%-6rem)/3)]">
           {config.hosts.map((host, i) => (
             <li key={i}>
-              <HostCard host={host} size="md" shape={portrait} />
+              <HostCard
+                host={host}
+                size="md"
+                shape={portrait}
+                outline={outline}
+              />
             </li>
           ))}
         </ul>

@@ -28,6 +28,12 @@ type CoverGateProps = {
   decor?: ReactNode
   /** Extra content above the eyebrow, e.g. a monogram or badge. Pressed into the seal for `envelope`. */
   crest?: ReactNode
+  /**
+   * Keep the envelope seal still: no breathing, no gloss. For a crest with
+   * small text (a terminal window) that scaling would blur. The rings round
+   * the seal keep turning.
+   */
+  stillSeal?: boolean
   className?: string
 }
 
@@ -59,6 +65,7 @@ export function CoverGate({
   imageAlt = "",
   decor,
   crest,
+  stillSeal = false,
   className,
 }: CoverGateProps) {
   const {
@@ -220,6 +227,7 @@ export function CoverGate({
             <div className="inv-anim-rise [--delay:0.3s]">
               <CoverEnvelope
                 crest={crest}
+                stillSeal={stillSeal}
                 guestName={guestName}
                 dearLabel={t.cover.dear}
                 eyebrow={texts.coverTitle}

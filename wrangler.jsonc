@@ -35,5 +35,7 @@
     // Replace with the deployed origin (no trailing slash).
     "APP_ORIGIN": "https://festly.example.workers.dev",
     "GEOCODE_PROVIDER": "nominatim",
+    // Currencies the Paystack account can charge (KES, USD).
+    "PAYSTACK_CURRENCIES": "KES",
   },
 }

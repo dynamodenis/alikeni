@@ -10,12 +10,7 @@ import {
 import { useState, type ReactNode } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import {
-  CURRENCIES,
-  FREE_RSVP_LIMIT,
-  formatPrice,
-  type Currency,
-} from "@/lib/plans"
+import { FREE_RSVP_LIMIT, formatPrice, type Currency } from "@/lib/plans"
 import { cn } from "@/lib/utils"
 import { startCheckoutFn } from "@/server/payments/payments.functions"
 import type {
@@ -166,9 +161,9 @@ export function UpgradeView({
           </h2>
           <fieldset className="grid gap-3 sm:grid-cols-2">
             <legend className="mb-2 text-sm text-muted-foreground">
-              Pay in
+              {info.currencies.length > 1 ? "Pay in" : "Price"}
             </legend>
-            {CURRENCIES.map((option) => (
+            {info.currencies.map((option) => (
               <label
                 key={option}
                 className={cn(

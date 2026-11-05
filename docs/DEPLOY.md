@@ -87,7 +87,8 @@ bucket. No CORS rule and no S3 API token are needed. Details:
 ### 3. Vars and secrets
 
 Non-secret vars live in `wrangler.jsonc` → `vars` (`NODE_ENV=production`,
-`STORAGE_DRIVER=binding`, `APP_ORIGIN`, `GEOCODE_PROVIDER`). **Set
+`STORAGE_DRIVER=binding`, `APP_ORIGIN`, `GEOCODE_PROVIDER`,
+`PAYSTACK_CURRENCIES`). **Set
 `APP_ORIGIN`** to the deployed origin (workers.dev URL or custom domain, no
 trailing slash); OG URLs, share links and auth callbacks use it.
 
@@ -129,10 +130,12 @@ redirect URI.
 
 Paystack: in Settings → API Keys & Webhooks, set the webhook URL to
 `<APP_ORIGIN>/api/payments/paystack` (separately for test and live mode).
-Enable the channels you want (M-Pesa, cards, Apple Pay) and USD if you
-charge in dollars; a currency the account cannot take fails at checkout with
-Paystack's message. Prices, the free RSVP cap and the free expiry live in
-`src/lib/plans.ts`.
+Enable the channels you want (M-Pesa, cards, Apple Pay). Kenyan accounts
+charge KES; Paystack enables USD on request ("Currency not supported by
+merchant" at checkout means it is not enabled yet). List what the account
+accepts in `PAYSTACK_CURRENCIES` (default `KES`; `KES,USD` once USD is on):
+the upgrade page offers only those. Prices, the free RSVP cap and the free
+expiry live in `src/lib/plans.ts`.
 
 To test webhooks against `pnpm dev`, expose port 3000 with a Cloudflare quick
 tunnel (no account needed; `vite.config.ts` allows `*.trycloudflare.com`):

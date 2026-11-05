@@ -25,12 +25,24 @@ import { meta } from "./meta"
 import { schema, type TechTerminalConfig } from "./schema"
 
 /**
+ * `class_of_2027` is one 13-character monospace word (about 7.5em wide) that
+ * cannot wrap, so the hero's stepped sizes overflow phones and small tablets.
+ * Size it to the viewport instead (3rem = the hero's side padding, 7.8 = its
+ * width in em plus a margin), capped at the old desktop 8rem. Repeated per
+ * breakpoint so it replaces the hero's own sm and lg sizes.
+ */
+const FIT_TITLE =
+  "text-[length:min(calc((100vw_-_3rem)/7.8),8rem)] sm:text-[length:min(calc((100vw_-_3rem)/7.8),8rem)] lg:text-[length:min(calc((100vw_-_3rem)/7.8),8rem)]"
+
+/**
  * Tech Terminal: phosphor green on black, a shell session as the invitation.
  *
- * A terminal window card (three dots, `$ graduate` commands, blinking block
- * cursor) is the cover crest and sits under a monospace `class_of_2027`
- * editorial headline; WebGL particles drift as matrix dust; every section
- * is named like a file or command and the page ends on `exit 0`.
+ * The cover's crest is a compact terminal window answering `$ whoami`: it
+ * types the graduate's name, backspaces it and types it again. In the hero a
+ * larger one (three dots, `$ graduate` commands, blinking block cursor) sits
+ * under a monospace `class_of_2027` editorial headline; WebGL particles
+ * drift as matrix dust; every section is named like a file or command and
+ * the page ends on `exit 0`.
  */
 function TechTerminal({
   config,
@@ -54,7 +66,10 @@ function TechTerminal({
     <div data-template={meta.id} data-mode={mode} className="relative">
       <CoverGate
         variant="minimal"
-        crest={<TerminalCard lines={["$ whoami", graduate.name]} compact />}
+        stillSeal
+        crest={
+          <TerminalCard lines={["$ whoami", graduate.name]} compact typeLast />
+        }
       />
 
       <div className="relative isolate">
@@ -69,7 +84,7 @@ function TechTerminal({
           variant="editorial"
           titleEffect={meta.effects.title}
           title={`class_of_${graduation.classOf}`}
-          titleClassName="font-mono tracking-tight"
+          titleClassName={`font-mono tracking-tight ${FIT_TITLE}`}
           kicker="// commencement"
           hideMessage
         >

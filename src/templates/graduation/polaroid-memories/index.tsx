@@ -28,9 +28,12 @@ import { schema, type PolaroidMemoriesConfig } from "./schema"
 /**
  * Polaroid Memories: a photo wall on matte paper.
  *
- * The graduate's portrait hangs in the hero as a tilted instant print with a
- * handwritten caption; light confetti drifts over the cover and the closing;
- * the countdown is a ring and the masonry gallery tilts on hover. Paper grain
+ * The graduate's portrait hangs in the hero as a tilted instant print that
+ * swings from its tape, with a handwritten caption; light confetti drifts over
+ * the cover and the closing. Round dials turn slowly like a lens focus ring:
+ * one around the graduate's circle portrait and one inside each countdown
+ * ring. The gallery is a wall of tilted prints that sway and straighten on
+ * hover. Paper grain
  * on, wave ornament, soft 0.5rem corners, no WebGL background.
  */
 function PolaroidMemories({
@@ -88,7 +91,12 @@ function PolaroidMemories({
         sections={{
           hosts: (
             <Reveal motion={motion}>
-              <Hosts variant="list" portrait="circle" eyebrow="The graduate" />
+              <Hosts
+                variant="list"
+                portrait="circle"
+                outline="orbit"
+                eyebrow="The graduate"
+              />
               <Divider />
             </Reveal>
           ),
@@ -108,7 +116,7 @@ function PolaroidMemories({
           gallery: (
             <Reveal motion={motion}>
               <Gallery
-                variant="masonry"
+                variant="polaroid"
                 effect={meta.effects.gallery}
                 eyebrow="Pinned up"
                 title="The wall"
@@ -119,6 +127,7 @@ function PolaroidMemories({
             <Countdown
               tone="tint"
               variant="ring"
+              spin
               eyebrow="Caps fly in"
               doneLabel="Caps are flying!"
             />

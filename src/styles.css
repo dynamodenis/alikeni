@@ -260,6 +260,17 @@
     transform: rotate(360deg);
   }
 }
+/* Pendulum: rocks ±--swing around a resting --r. Pair with a top
+   transform-origin so a print swings from its tape or pin. */
+@keyframes inv-swing {
+  0%,
+  100% {
+    transform: rotate(calc(var(--r, 0deg) - var(--swing, 2deg)));
+  }
+  50% {
+    transform: rotate(calc(var(--r, 0deg) + var(--swing, 2deg)));
+  }
+}
 @keyframes inv-rise-in {
   from {
     opacity: 0;
@@ -279,6 +290,17 @@
 .inv-anim-spin {
   animation: inv-spin var(--d, 30s) linear infinite;
 }
+/* Rests at --r when motion is off, so the tilt survives without animation. */
+.inv-anim-swing {
+  transform: rotate(var(--r, 0deg));
+  transform-origin: 50% 0;
+  animation: inv-swing var(--d, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+/* Holds still while pointed at or focused (here, not as a utility: this
+   unlayered rule would override one). */
+.inv-anim-swing:is(:hover, :focus-within) {
+  animation-play-state: paused;
+}
 .inv-anim-rise {
   animation: inv-rise-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0s)
     both;
@@ -297,13 +319,26 @@
   animation-name: inv-lift-in;
 }
 .inv-root[data-motion="none"]
-  :is(.inv-anim-float, .inv-anim-twinkle, .inv-anim-spin, .inv-anim-rise),
-.inv-root[data-motion="reduced"] :is(.inv-anim-float, .inv-anim-spin) {
+  :is(
+    .inv-anim-float,
+    .inv-anim-twinkle,
+    .inv-anim-spin,
+    .inv-anim-swing,
+    .inv-anim-rise
+  ),
+.inv-root[data-motion="reduced"]
+  :is(.inv-anim-float, .inv-anim-spin, .inv-anim-swing) {
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .inv-root
-    :is(.inv-anim-float, .inv-anim-twinkle, .inv-anim-spin, .inv-anim-rise) {
+    :is(
+      .inv-anim-float,
+      .inv-anim-twinkle,
+      .inv-anim-spin,
+      .inv-anim-swing,
+      .inv-anim-rise
+    ) {
     animation: none;
   }
 }
@@ -440,6 +475,63 @@
   --inv-primary: var(--env-wax-ink);
   --inv-bg: var(--env-wax);
   filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.3));
+}
+
+/* The closed envelope's seal invites the tap: it breathes, and a gloss
+   sweeps across it now and then (full motion only; the opening timeline
+   below is more specific and takes over the seal's animation). */
+@keyframes inv-env-seal-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+@keyframes inv-env-sheen {
+  0%,
+  62% {
+    background-position: 160% 0;
+  }
+  100% {
+    background-position: -60% 0;
+  }
+}
+.inv-env-seal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(
+      110deg,
+      transparent 38%,
+      rgb(255 255 255 / 0.55) 50%,
+      transparent 62%
+    )
+    160% 0 / 260% 100% no-repeat;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.inv-root[data-motion="full"] .inv-env-seal {
+  animation: inv-env-seal-breathe 3.6s ease-in-out infinite;
+}
+.inv-root[data-motion="full"] .inv-env-seal::before {
+  animation: inv-env-sheen 5s ease-in-out 1.2s infinite;
+}
+/* A text crest (Tech Terminal's window) stays sharp: no idle motion. The
+   opening timeline comes later in this file at equal specificity, so the
+   seal still breaks when the envelope opens. */
+.inv-root[data-motion="full"] [data-seal-still] .inv-env-seal,
+.inv-root[data-motion="full"] [data-seal-still] .inv-env-seal::before {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv-root .inv-env-seal,
+  .inv-root .inv-env-seal::before {
+    animation: none;
+  }
 }
 
 /* Editor-only liner preview (CoverEnvelope `data-peek`): the flap lifts,

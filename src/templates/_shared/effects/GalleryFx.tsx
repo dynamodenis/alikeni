@@ -52,6 +52,11 @@ export function PhotoButton({
  * A gallery tile that tilts toward the pointer at motion "full". TiltedCard
  * becomes its own `role="button"` when given `onClick`, so it replaces the
  * plain button instead of nesting a figure inside one.
+ *
+ * TiltedCard fills 100% of its box. In layouts whose cells have a height
+ * (grid, mosaic) the wrapper's `h-full` wins; in masonry the cell's height is
+ * auto, so the wrapper falls back to the photo's aspect ratio instead of
+ * collapsing to nothing.
  */
 export function TiltedPhoto({
   photo,
@@ -73,26 +78,34 @@ export function TiltedPhoto({
   return (
     <ClientOnly fallback={plain}>
       <Suspense fallback={plain}>
-        <TiltedCard
-          imageSrc={photo.url}
-          altText={label}
-          captionText={label}
-          containerHeight="100%"
-          containerWidth="100%"
-          imageHeight="100%"
-          imageWidth="100%"
-          rotateAmplitude={9}
-          scaleOnHover={1.04}
-          glare={0.25}
-          showTooltip={false}
-          radius="var(--inv-radius)"
-          onClick={onOpen}
-          className={className}
-        />
+        <div
+          className={cn("h-full w-full", className)}
+          style={{ aspectRatio: photoRatio(photo) }}
+        >
+          <TiltedCard
+            imageSrc={photo.url}
+            altText={label}
+            captionText={label}
+            containerHeight="100%"
+            containerWidth="100%"
+            imageHeight="100%"
+            imageWidth="100%"
+            rotateAmplitude={9}
+            scaleOnHover={1.04}
+            glare={0.25}
+            showTooltip={false}
+            radius="var(--inv-radius)"
+            onClick={onOpen}
+          />
+        </div>
       </Suspense>
     </ClientOnly>
   )
 }
+
+/** "1200 / 1500", or portrait 4 / 5 when the size is unknown. */
+const photoRatio = (photo: MediaRef) =>
+  photo.width && photo.height ? `${photo.width} / ${photo.height}` : "4 / 5"
 
 type CarouselProps = {
   photos: ReadonlyArray<MediaRef>
