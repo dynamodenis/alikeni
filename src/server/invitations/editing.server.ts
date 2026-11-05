@@ -2,6 +2,7 @@
 // and the public read. Pure functions over a Drizzle db (tested on PGlite).
 import { and, eq, ne, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
+import { configForPlan, freeHasEnded } from "@/lib/plans"
 import { RESERVED_SLUGS, SLUG_PATTERN } from "@/lib/slug"
 import { invalidatePublishedCard } from "@/server/og/cache.server"
 import { loadTemplate } from "@/templates/registry"
@@ -178,14 +179,23 @@ export async function publishInvitation(
   }
 }
 
-/** The public page's data: published invitations only. */
-export async function getPublishedBySlug(db: AnyDb, slug: string) {
+/**
+ * A published invitation as guests may see it: the plan is applied (free:
+ * gift details removed) and `ended` is true once a free invitation's page has
+ * gone offline (see `src/lib/plans.ts`). Null when missing or not published.
+ */
+export async function findPublishedBySlug(
+  db: AnyDb,
+  slug: string,
+  now = new Date()
+) {
   const row = (
     await db
       .select({
         id: inv.id,
         templateId: inv.templateId,
         slug: inv.slug,
+        plan: inv.plan,
         config: inv.publishedConfig,
         publishedAt: inv.publishedAt,
       })
@@ -197,7 +207,25 @@ export async function getPublishedBySlug(db: AnyDb, slug: string) {
     id: row.id,
     templateId: row.templateId,
     slug: row.slug,
-    config: row.config,
+    plan: row.plan,
+    config: configForPlan(row.config, row.plan),
     publishedAt: row.publishedAt?.toISOString() ?? null,
+    ended: row.plan === "free" && freeHasEnded(row.config, now),
   }
+}
+
+/**
+ * The public page's data: published invitations that are still online. Every
+ * guest-facing path (page, RSVP, wishes, views, calendar, OG card) goes
+ * through here, so an ended free invitation is unavailable everywhere.
+ */
+export async function getPublishedBySlug(
+  db: AnyDb,
+  slug: string,
+  now = new Date()
+) {
+  const found = await findPublishedBySlug(db, slug, now)
+  if (!found || found.ended) return null
+  const { ended: _ended, ...invitation } = found
+  return invitation
 }

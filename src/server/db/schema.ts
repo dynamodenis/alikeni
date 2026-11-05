@@ -36,6 +36,9 @@ export const invitationStatus = pgEnum("invitation_status", [
   "archived",
 ])
 export const mediaKind = pgEnum("media_kind", ["image", "audio"])
+/** Free: limited (see `src/lib/plans.ts`). Premium: paid once per invitation. */
+export const invitationPlan = pgEnum("invitation_plan", ["free", "premium"])
+export const orderStatus = pgEnum("order_status", ["pending", "paid", "failed"])
 export const rsvpAttending = pgEnum("rsvp_attending", ["yes", "no", "maybe"])
 export const templateCategory = pgEnum("template_category", TEMPLATE_CATEGORIES)
 
@@ -138,6 +141,8 @@ export const invitations = pgTable(
     /** Null until first publish; unique once set. */
     slug: text("slug").unique(),
     status: invitationStatus("status").notNull().default("draft"),
+    /** Set to premium only by a verified payment (`src/server/payments`). */
+    plan: invitationPlan("plan").notNull().default("free"),
     draftConfig: jsonb("draft_config").$type<InvitationConfigBase>().notNull(),
     publishedConfig: jsonb("published_config").$type<InvitationConfigBase>(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -266,7 +271,8 @@ export const pageViewVisitors = pgTable(
 
 /**
  * Accepted hits per rate-limit key (sliding-window log, see
- * src/server/rate-limit/postgres.ts). Keys hold hashed identities only.
+ * src/server/rate-limit/postgres.ts). Keys hold hashed identities only
+ * (salted IP hash, hashed device id).
  * Rows older than the longest window are pruned as hits arrive.
  */
 export const rateLimitHits = pgTable(
@@ -278,6 +284,48 @@ export const rateLimitHits = pgTable(
   (t) => [
     index("rate_limit_hits_key_at_idx").on(t.key, t.at),
     index("rate_limit_hits_at_idx").on(t.at),
+  ]
+)
+
+/* ---------- payments ---------- */
+
+/**
+ * One checkout attempt (Paystack). Created pending before redirecting to
+ * Paystack; marked paid only after Paystack confirms (webhook or verify) with
+ * the same amount and currency. Kept when the invitation or user is deleted
+ * (accounting), hence `set null`.
+ */
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Our reference, sent to Paystack and echoed back in every event. */
+    reference: text("reference").notNull().unique(),
+    invitationId: uuid("invitation_id").references(() => invitations.id, {
+      onDelete: "set null",
+    }),
+    ownerId: text("owner_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    provider: text("provider").notNull().default("paystack"),
+    product: text("product").notNull().default("invitation_premium"),
+    /** In the currency's subunit (cents), as Paystack counts it. */
+    amount: integer("amount").notNull(),
+    currency: text("currency").notNull(),
+    status: orderStatus("status").notNull().default("pending"),
+    /** Paystack's transaction id and channel (card, mobile_money, …). */
+    providerTransactionId: text("provider_transaction_id"),
+    channel: text("channel"),
+    /** Why a payment was refused (amount or currency mismatch). */
+    failureReason: text("failure_reason"),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index("orders_invitation_idx").on(t.invitationId),
+    index("orders_owner_idx").on(t.ownerId),
+    check("orders_amount_positive", sql`${t.amount} > 0`),
   ]
 )
 

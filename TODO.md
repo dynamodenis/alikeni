@@ -187,12 +187,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Phase 9 — Payments (Paystack)
 
-- Free invitation: goes offline the day after the event, RSVP cap [?] number, no gift section (bank details / QR / registry not sent to guests)
-- Paid (one-time per invitation): no early expiry, unlimited RSVPs, gifts [?] other paid extras
-- [?] Price in KES and USD; KES (M-Pesa) for Kenyan visitors, USD elsewhere (`cf-ipcountry`)
-- [ ] `orders` table + `invitations.plan`; Paystack initialize → hosted checkout → webhook (`x-paystack-signature`, HMAC-SHA512) + verify on return, idempotent
-- [ ] Enforcement on the server: public page expiry, RSVP cap, gifts stripped from the published config on free
-- [ ] Editor and dashboard: plan badge, upgrade button, locked Gifts tab
+- [x] Plans in `src/lib/plans.ts`: free page offline after the day following the last event day (event time zone), 50 RSVPs (`FREE_RSVP_LIMIT`), no gift section; Premium one-time per invitation
+- [?] Prices are placeholders: KES 1,500 / USD 12 (`PREMIUM_PRICE`)
+- [x] Migration `0003_payments`: `invitations.plan` (free | premium), `orders` (reference, amount in subunits, currency, status pending | paid | failed, Paystack id + channel)
+- [x] Paystack client (`src/server/payments/paystack.server.ts`, fetch + Web Crypto): initialize, verify, webhook HMAC-SHA512 check in constant time
+- [x] Flow: `startCheckoutFn` (owner only) → hosted checkout (M-Pesa / card / Apple Pay) → webhook `POST /api/payments/paystack` and `?reference=` return both call `applyTransaction` (exact amount + currency, idempotent, editor `updated_at` untouched)
+- [x] Enforcement on the server: `getPublishedBySlug` hides ended free invitations from the page, RSVPs, wishes, calendar and OG card; gift details are removed before they leave the server; the RSVP cap is checked on submit. Ended pages show `EndedInvitation` in the invitation's language
+- [x] UI: `/dashboard/$invitationId/upgrade` (plans, KES for Kenyan visitors via `cf-ipcountry`, USD elsewhere, switchable), Premium badge + "online until" + Upgrade on dashboard cards, Gifts tab notice on free
+- [x] Tests: plan rules (time zones, sub-events), checkout, amount/currency mismatch, idempotency, webhook signatures, owner isolation, free limits on the public side
+- [ ] Try it end to end with Paystack test keys (M-Pesa test number, test card), then live keys on deploy
 
 ## Credits / licensing log
 

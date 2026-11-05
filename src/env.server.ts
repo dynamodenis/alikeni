@@ -89,6 +89,15 @@ const serverEnvSchema = z
      * a valid token (pair with VITE_TURNSTILE_SITE_KEY). Unset: skipped.
      */
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+    /**
+     * Paystack secret key (sk_test_… or sk_live_…) for Premium upgrades.
+     * Unset: the upgrade page says payments are not available. Also signs
+     * webhooks; set the webhook URL to <APP_ORIGIN>/api/payments/paystack.
+     */
+    PAYSTACK_SECRET_KEY: z
+      .string()
+      .regex(/^sk_(test|live)_\w+$/, "must start with sk_test_ or sk_live_")
+      .optional(),
     ALLOW_DEV_USER: z
       .enum(["true", "false", "1", "0"])
       .optional()

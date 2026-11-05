@@ -130,5 +130,5 @@ export async function resolveSoundCloud(
     )
   if (!res.ok)
     throw new SoundCloudError("SoundCloud did not respond. Please try again.")
-  return parseOEmbed((await res.json()) as OEmbed, permalink)
+  return parseOEmbed(await res.json<OEmbed>(), permalink)
 }

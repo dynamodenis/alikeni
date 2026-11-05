@@ -9,6 +9,7 @@ import {
 } from "@/server/public/public.functions"
 import { guestDeviceId } from "@/lib/guest-device"
 import { GuestRateLimitError } from "@/lib/guest-limit"
+import { EndedInvitation } from "@/components/public/EndedInvitation"
 import { TemplateRenderer } from "@/templates/TemplateRenderer"
 import type { InvitationActions } from "@/templates/_shared/context"
 import { ShareBar } from "@/templates/_shared/blocks/ShareBar"
@@ -34,7 +35,10 @@ import { resolvePalette } from "@/templates/_shared/theme/palettes"
  *   stored name; anything else is treated as a name and sanitized on the
  *   server (controls and `<>` stripped, spaces collapsed, ≤ 60 chars).
  * - RSVP and wishes post through `submitRsvpFn` / `submitWishFn` (Zod,
- *   honeypot, optional Turnstile, 5/min + 30/day per IP per invitation).
+ *   honeypot, optional Turnstile, rate limit per device + per IP; see
+ *   `src/server/rate-limit`). Refusals carry the numbers, worded here.
+ * - Free plan (`src/lib/plans.ts`): gift details are removed on the server;
+ *   after the day following the event the page shows `EndedInvitation`.
  * - `head()`: title, description, canonical, Open Graph + Twitter card with
  *   `/og/<slug>.png` (1200×630), theme-color from the palette primary.
  * - Below the template: `ShareBar` (Web Share API, or copy link + WhatsApp).
@@ -59,6 +63,14 @@ export const Route = createFileRoute("/i/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Invitation not found" }] }
+    if (loaderData.ended) {
+      return {
+        meta: [
+          { title: loaderData.title },
+          { name: "robots", content: "noindex" },
+        ],
+      }
+    }
     const { config, slug, origin } = loaderData
     const title = config.seo.title ?? config.event.title
     const description = truncate(
@@ -94,16 +106,28 @@ export const Route = createFileRoute("/i/$slug")({
   },
   headers: ({ loaderData }) =>
     loaderData ? { "Cache-Control": PUBLIC_CACHE_CONTROL } : undefined,
-  component: PublicInvitation,
+  component: PublicPage,
 })
+
+type LivePage = Extract<
+  NonNullable<Awaited<ReturnType<typeof getPublicPageFn>>>,
+  { ended: false }
+>
+
+function PublicPage() {
+  const page = Route.useLoaderData()
+  if (page.ended) {
+    return <EndedInvitation title={page.title} locale={page.locale} />
+  }
+  return <PublicInvitation page={page} />
+}
 
 function truncate(text: string, max: number): string {
   const clean = text.replace(/\s+/g, " ").trim()
   return clean.length <= max ? clean : `${clean.slice(0, max - 1).trimEnd()}…`
 }
 
-function PublicInvitation() {
-  const page = Route.useLoaderData()
+function PublicInvitation({ page }: { page: LivePage }) {
   const { slug, config } = page
 
   const actions = useMemo<InvitationActions>(

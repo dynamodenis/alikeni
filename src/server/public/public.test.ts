@@ -8,6 +8,8 @@ import * as schema from "@/server/db/schema"
 import { DEV_USER } from "@/server/db/seed"
 import { createDraft } from "@/server/invitations/drafts.server"
 import { publishInvitation } from "@/server/invitations/editing.server"
+import { FREE_RSVP_LIMIT } from "@/lib/plans"
+import { getPublishedBySlug } from "@/server/invitations/editing.server"
 import { MemoryRateLimiter } from "@/server/rate-limit"
 import { deepMerge } from "@/lib/deep-merge"
 import { icsResponse } from "./ics.server"
@@ -15,6 +17,7 @@ import {
   NOT_AVAILABLE,
   PublicError,
   RSVP_CLOSED,
+  RSVP_FULL,
   RateLimitedError,
   VERIFY_FAILED,
   listWishes,
@@ -91,11 +94,20 @@ beforeAll(async () => {
 }, 30_000)
 afterAll(async () => client.close())
 
+const setPlan = (plan: "free" | "premium") =>
+  db
+    .update(schema.invitations)
+    .set({ plan })
+    .where(eq(schema.invitations.id, invitationId))
+
 beforeEach(async () => {
   await patchConfig({
     features: { rsvp: true, wishes: true },
     texts: { rsvpDeadline: undefined },
   })
+  // Premium unless a test is about the free plan, so the RSVPs stored across
+  // this file never reach the free cap.
+  await setPlan("premium")
 })
 
 describe("submitRsvp", () => {
@@ -213,6 +225,74 @@ describe("submitRsvp", () => {
     await expect(
       submitRsvp(db, { ...rsvp, slug: "nope-nope" }, ctx())
     ).rejects.toThrow(NOT_AVAILABLE)
+  })
+})
+
+describe("free plan", () => {
+  const giftConfig = {
+    gifts: {
+      enabled: true,
+      accounts: [{ bank: "Equity", holder: "Amara", number: "0123456789" }],
+    },
+    features: { gifts: true },
+  }
+
+  it("never sends gift details to guests on free", async () => {
+    await patchConfig(giftConfig)
+    await setPlan("free")
+    const page = await loadPublicPage(db, { slug: SLUG })
+    if (!page || page.ended) throw new Error("expected a live page")
+    expect(page.config.features.gifts).toBe(false)
+    expect(JSON.stringify(page)).not.toContain("0123456789")
+
+    await setPlan("premium")
+    const premium = await loadPublicPage(db, { slug: SLUG })
+    if (!premium || premium.ended) throw new Error("expected a live page")
+    expect(premium.config.gifts.accounts[0]?.number).toBe("0123456789")
+  })
+
+  it(`stops taking RSVPs at ${FREE_RSVP_LIMIT}`, async () => {
+    await setPlan("free")
+    const existing = await countRsvps()
+    if (existing < FREE_RSVP_LIMIT) {
+      await db.insert(schema.rsvps).values(
+        Array.from({ length: FREE_RSVP_LIMIT - existing }, (_, i) => ({
+          invitationId,
+          guestName: `Guest ${i}`,
+          attending: "yes" as const,
+          partySize: 1,
+          ipHash: `seed-${i}`,
+          userAgentHash: "ua",
+        }))
+      )
+    }
+    await expect(
+      submitRsvp(db, rsvp, ctx({ ipHash: "late-guest" }))
+    ).rejects.toEqual(new PublicError(RSVP_FULL))
+    await setPlan("premium")
+    await expect(
+      submitRsvp(db, rsvp, ctx({ ipHash: "late-guest" }))
+    ).resolves.toEqual({ ok: true })
+  })
+
+  it("goes offline everywhere after the day following the event", async () => {
+    await setPlan("free")
+    // The template's sample event is on 12 June 2027.
+    const before = new Date("2027-06-01T12:00:00Z")
+    const after = new Date("2027-07-01T12:00:00Z")
+    const live = await loadPublicPage(db, { slug: SLUG }, before)
+    expect(live?.ended).toBe(false)
+    const ended = await loadPublicPage(db, { slug: SLUG }, after)
+    expect(ended).toMatchObject({ ended: true, slug: SLUG })
+    expect(ended && "config" in ended).toBe(false)
+    // RSVPs, wishes, calendar and OG all go through getPublishedBySlug.
+    expect(await getPublishedBySlug(db, SLUG, after)).toBeNull()
+    await expect(
+      submitRsvp(db, rsvp, ctx({ ipHash: "after", now: after }))
+    ).rejects.toEqual(new PublicError(NOT_AVAILABLE))
+
+    await setPlan("premium")
+    expect((await loadPublicPage(db, { slug: SLUG }, after))?.ended).toBe(false)
   })
 })
 
@@ -345,9 +425,10 @@ describe("loadPublicPage", () => {
     })
     // Rendering the page never counts a view (the client beacon does).
     expect(await db.select().from(schema.pageViews)).toEqual(before)
-    expect(page?.slug).toBe(SLUG)
-    expect(page?.guestName).toBe("Mr script Otieno")
-    expect(page?.wishes.length).toBeGreaterThan(0)
+    if (!page || page.ended) throw new Error("expected a live page")
+    expect(page.slug).toBe(SLUG)
+    expect(page.guestName).toBe("Mr script Otieno")
+    expect(page.wishes.length).toBeGreaterThan(0)
   })
 
   it("is null for unknown or archived slugs", async () => {

@@ -28,6 +28,8 @@ export type EditorApi = {
   ) => Promise<UploadedAudio>
   /** Which storage the server is using ("local" shows a dev badge). */
   storageDriver: "local" | "r2"
+  /** Free or Premium (`src/lib/plans.ts`); Gifts shows a notice on free. */
+  plan: "free" | "premium"
 }
 
 export const EditorContext = createContext<EditorApi | null>(null)

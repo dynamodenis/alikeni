@@ -141,6 +141,11 @@ export const en = {
     copied: "Link copied",
     copyFailed: "Could not copy the link",
   },
+  ended: {
+    title: "This invitation has ended",
+    body: "Thank you for celebrating with us.",
+    host: "Hosting this event? Keep the page online",
+  },
   limits: {
     title: "Please wait a little",
     responses: (n: number) => (n === 1 ? "1 response" : `${n} responses`),

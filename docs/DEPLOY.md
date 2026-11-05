@@ -103,6 +103,7 @@ pnpm exec wrangler secret put EMAIL_FROM              # "Festly <hello@yourdomai
 pnpm exec wrangler secret put STORAGE_SIGNING_SECRET  # openssl rand -base64 32 (required with binding)
 pnpm exec wrangler secret put ANALYTICS_SALT          # openssl rand -base64 32 (optional; falls back to BETTER_AUTH_SECRET)
 pnpm exec wrangler secret put TURNSTILE_SECRET_KEY    # optional; pair with VITE_TURNSTILE_SITE_KEY
+pnpm exec wrangler secret put PAYSTACK_SECRET_KEY     # Premium upgrades: sk_live_… (sk_test_… on a preview)
 pnpm exec wrangler secret put GOOGLE_CLIENT_ID        # optional Google sign-in (set both)
 pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
 pnpm exec wrangler secret put GOOGLE_GEOCODING_KEY    # only with GEOCODE_PROVIDER=google
@@ -125,6 +126,25 @@ of the machine that builds, e.g. `VITE_TURNSTILE_SITE_KEY`,
 
 Google sign-in: add `<APP_ORIGIN>/api/auth/callback/google` as an authorized
 redirect URI.
+
+Paystack: in Settings → API Keys & Webhooks, set the webhook URL to
+`<APP_ORIGIN>/api/payments/paystack` (separately for test and live mode).
+Enable the channels you want (M-Pesa, cards, Apple Pay) and USD if you
+charge in dollars; a currency the account cannot take fails at checkout with
+Paystack's message. Prices, the free RSVP cap and the free expiry live in
+`src/lib/plans.ts`.
+
+To test webhooks against `pnpm dev`, expose port 3000 with a Cloudflare quick
+tunnel (no account needed; `vite.config.ts` allows `*.trycloudflare.com`):
+
+```sh
+npx cloudflared tunnel --url http://localhost:3000
+```
+
+Paste the printed `https://….trycloudflare.com/api/payments/paystack` as the
+test-mode webhook URL in Paystack. The URL changes every run. Keep browsing on
+`http://localhost:3000` (APP_ORIGIN): the return from checkout verifies the
+transaction itself, the tunnel only carries the webhook.
 
 ### 4. Deploy
 

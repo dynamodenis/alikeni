@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router"
+import { useEditor } from "../EditorContext"
 import { ListEditor } from "../ListEditor"
 import { Group, TextField, ToggleField } from "../fields"
 import { ImageField } from "../media"
@@ -7,8 +9,23 @@ type Wallet = { provider: string; holder: string; number: string }
 type Link = { label: string; url: string }
 
 export function GiftsTab() {
+  const { plan, invitationId } = useEditor()
   return (
     <>
+      {plan === "free" && (
+        <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+          Guests see the gift section on Premium invitations only. You can fill
+          it in now; it appears once you{" "}
+          <Link
+            to="/dashboard/$invitationId/upgrade"
+            params={{ invitationId }}
+            className="font-medium underline underline-offset-4"
+          >
+            upgrade
+          </Link>
+          .
+        </p>
+      )}
       <Group
         title="Gifts"
         description="Optional. Guests see these behind an “Open envelope” button."

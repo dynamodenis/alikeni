@@ -32,6 +32,12 @@ const config = defineConfig({
   // Separate output so a Worker build never overwrites the Node build (dist/,
   // served by `pnpm start`). wrangler finds it via .wrangler/deploy/config.json.
   ...(workers ? { build: { outDir: "dist-worker" } } : {}),
+  server: {
+    // Vite answers 403 to hosts it does not know. Let a Cloudflare quick
+    // tunnel (`cloudflared tunnel --url http://localhost:3000`) reach the dev
+    // server so Paystack webhooks can be tested locally (docs/DEPLOY.md).
+    allowedHosts: [".trycloudflare.com"],
+  },
   resolve: {
     tsconfigPaths: true,
     alias: [

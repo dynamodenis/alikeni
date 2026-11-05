@@ -5,7 +5,11 @@ import { and, desc, eq, lt, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { z } from "zod"
 import * as schema from "@/server/db/schema"
-import { getPublishedBySlug } from "@/server/invitations/editing.server"
+import { FREE_RSVP_LIMIT } from "@/lib/plans"
+import {
+  findPublishedBySlug,
+  getPublishedBySlug,
+} from "@/server/invitations/editing.server"
 import { DEVICE_ID_PATTERN } from "@/lib/guest-device"
 import type { GuestRateLimit } from "@/lib/guest-limit"
 import {
@@ -38,6 +42,8 @@ export class RateLimitedError extends PublicError {
 
 export const NOT_AVAILABLE = "This invitation is not available."
 export const RSVP_CLOSED = "RSVPs are closed."
+export const RSVP_FULL =
+  "This invitation is not taking more responses. Please contact the host."
 export const WISHES_CLOSED = "Wishes are closed."
 export const TOO_MANY = "Too many responses. Please wait a moment."
 export const VERIFY_FAILED = "Please complete the verification and try again."
@@ -105,8 +111,8 @@ export type WishSubmission = z.input<typeof WishSubmission>
 
 /* ---------- helpers ---------- */
 
-async function requirePublished(db: AnyDb, slug: string) {
-  const invitation = await getPublishedBySlug(db, slug)
+async function requirePublished(db: AnyDb, slug: string, now?: Date) {
+  const invitation = await getPublishedBySlug(db, slug, now)
   if (!invitation) throw new PublicError(NOT_AVAILABLE)
   return invitation
 }
@@ -128,7 +134,11 @@ async function rateLimit(
   const network = `${scope}:ip:${ctx.ipHash}`
   const checks: Array<RateCheck> = device
     ? [
-        { key: `${scope}:device:${device}`, rules: GUEST_POST_RULES },
+        {
+          // Hashed like the IP, so the table holds no raw identifiers.
+          key: `${scope}:device:${await sha256Hex(`device:${device}`)}`,
+          rules: GUEST_POST_RULES,
+        },
         { key: network, rules: GUEST_NETWORK_RULES },
       ]
     : [{ key: network, rules: GUEST_POST_RULES }]
@@ -152,12 +162,19 @@ export async function submitRsvp(
   ctx: GuestContext
 ): Promise<{ ok: true }> {
   const input = RsvpSubmission.parse(raw)
-  const invitation = await requirePublished(db, input.slug)
-  const { features, texts } = invitation.config
   const now = ctx.now ?? new Date()
+  const invitation = await requirePublished(db, input.slug, now)
+  const { features, texts } = invitation.config
   if (!features.rsvp) throw new PublicError(RSVP_CLOSED)
   if (texts.rsvpDeadline && now.getTime() > Date.parse(texts.rsvpDeadline)) {
     throw new PublicError(RSVP_CLOSED)
+  }
+  if (invitation.plan === "free") {
+    const count = await db.$count(
+      schema.rsvps,
+      eq(schema.rsvps.invitationId, invitation.id)
+    )
+    if (count >= FREE_RSVP_LIMIT) throw new PublicError(RSVP_FULL)
   }
   await rateLimit("rsvp", invitation.id, input.device, ctx)
   // Honeypot filled: look successful so the bot moves on; store nothing.
@@ -200,7 +217,7 @@ export async function submitWish(
   ctx: GuestContext
 ): Promise<WishItem> {
   const input = WishSubmission.parse(raw)
-  const invitation = await requirePublished(db, input.slug)
+  const invitation = await requirePublished(db, input.slug, ctx.now)
   if (!invitation.config.features.wishes) throw new PublicError(WISHES_CLOSED)
   await rateLimit("wish", invitation.id, input.device, ctx)
   if (input.website) {
@@ -374,12 +391,26 @@ export async function recordViewBySlug(
  * Nothing here depends on who is asking (views are counted by the client
  * beacon), so the HTML is cacheable at the edge.
  */
+/**
+ * The public page: the invitation, approved wishes and the guest name; or,
+ * for a free invitation whose page has gone offline, only what the "ended"
+ * screen shows. Null when missing or not published.
+ */
 export async function loadPublicPage(
   db: AnyDb,
-  input: { slug: string; to?: string }
+  input: { slug: string; to?: string },
+  now = new Date()
 ) {
-  const invitation = await getPublishedBySlug(db, input.slug)
+  const invitation = await findPublishedBySlug(db, input.slug, now)
   if (!invitation) return null
+  if (invitation.ended) {
+    return {
+      ended: true as const,
+      slug: invitation.slug,
+      title: invitation.config.seo.title ?? invitation.config.event.title,
+      locale: invitation.config.locale,
+    }
+  }
   const [wishes, guestName] = await Promise.all([
     invitation.config.features.wishes
       ? listWishes(db, invitation.id)
@@ -387,6 +418,7 @@ export async function loadPublicPage(
     resolveGuestName(db, invitation.id, input.to),
   ])
   return {
+    ended: false as const,
     templateId: invitation.templateId,
     slug: invitation.slug,
     config: invitation.config,

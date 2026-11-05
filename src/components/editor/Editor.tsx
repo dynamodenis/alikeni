@@ -52,6 +52,7 @@ export type DraftData = {
   id: string
   templateId: string
   status: "draft" | "published" | "archived"
+  plan: "free" | "premium"
   slug: string | null
   draftConfig: EditorConfig
   updatedAt: string
@@ -298,6 +299,7 @@ function EditorLoaded({
       uploadImage,
       uploadAudio,
       storageDriver: draft.storageDriver,
+      plan: draft.plan,
     }),
     [
       draft.id,
@@ -309,6 +311,7 @@ function EditorLoaded({
       uploadImage,
       uploadAudio,
       draft.storageDriver,
+      draft.plan,
     ]
   )
 

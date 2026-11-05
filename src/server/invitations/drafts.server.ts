@@ -6,6 +6,7 @@ import { deepMerge } from "@/lib/deep-merge"
 import type { InvitationConfigBase } from "@/templates/_shared/schema"
 import { hasPalette } from "@/templates/_shared/theme/palettes"
 import { getTemplateMeta, loadTemplate } from "@/templates/registry"
+import { freeHasEnded, freeOnlineUntil } from "@/lib/plans"
 import * as schema from "@/server/db/schema"
 
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
@@ -71,6 +72,7 @@ export async function getOwnedInvitation(
       id: schema.invitations.id,
       templateId: schema.invitations.templateId,
       status: schema.invitations.status,
+      plan: schema.invitations.plan,
       slug: schema.invitations.slug,
       draftConfig: schema.invitations.draftConfig,
       updatedAt: schema.invitations.updatedAt,
@@ -92,20 +94,26 @@ export async function getOwnedInvitation(
  * Archived ones are included (the dashboard lists them separately so they
  * can be restored). Only the fields a card shows leave the db.
  */
-export async function listOwnedInvitations(db: AnyDb, ownerId: string) {
+export async function listOwnedInvitations(
+  db: AnyDb,
+  ownerId: string,
+  now = new Date()
+) {
   const rows = await db
     .select({
       id: schema.invitations.id,
       templateId: schema.invitations.templateId,
       status: schema.invitations.status,
+      plan: schema.invitations.plan,
       slug: schema.invitations.slug,
       draftConfig: schema.invitations.draftConfig,
+      publishedConfig: schema.invitations.publishedConfig,
       updatedAt: schema.invitations.updatedAt,
     })
     .from(schema.invitations)
     .where(eq(schema.invitations.ownerId, ownerId))
     .orderBy(desc(schema.invitations.updatedAt))
-  return rows.map(({ draftConfig, ...row }) => {
+  return rows.map(({ draftConfig, publishedConfig, ...row }) => {
     // Drafts are stored unparsed, so read defensively.
     const config = draftConfig as Partial<InvitationConfigBase>
     return {
@@ -113,6 +121,15 @@ export async function listOwnedInvitations(db: AnyDb, ownerId: string) {
       title: config.texts?.headline || config.event?.title || "Untitled",
       startsAt: config.datetime?.start ?? null,
       paletteId: config.theme?.paletteId ?? null,
+      // Free plan: when the public page goes offline (published dates rule).
+      freeUntil:
+        row.plan === "free" && publishedConfig
+          ? freeOnlineUntil(publishedConfig)
+          : null,
+      freeEnded:
+        row.plan === "free" && publishedConfig
+          ? freeHasEnded(publishedConfig, now)
+          : false,
     }
   })
 }

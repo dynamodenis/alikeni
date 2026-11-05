@@ -142,6 +142,11 @@ export const id: Messages = {
     copied: "Tautan tersalin",
     copyFailed: "Gagal menyalin tautan",
   },
+  ended: {
+    title: "Undangan ini telah berakhir",
+    body: "Terima kasih telah merayakan bersama kami.",
+    host: "Anda tuan rumahnya? Tetap tampilkan halaman ini",
+  },
   limits: {
     title: "Mohon tunggu sebentar",
     responses: (n: number) => `${n} konfirmasi kehadiran`,

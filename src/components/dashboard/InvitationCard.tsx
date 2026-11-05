@@ -12,6 +12,7 @@ import {
   MessageSquareText,
   MoreHorizontal,
   PencilLine,
+  Sparkles,
   Trash2,
   Users,
 } from "lucide-react"
@@ -33,6 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { FREE_RSVP_LIMIT } from "@/lib/plans"
 import { cn } from "@/lib/utils"
 import {
   deleteInvitationFn,
@@ -52,6 +54,14 @@ const updated = new Intl.DateTimeFormat("en", {
   month: "short",
   year: "numeric",
 })
+/** "13 Dec 2026" from "2026-12-13" (a calendar day, no time zone shift). */
+const formatDay = (value: string) =>
+  new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T00:00:00Z`))
 
 const STATUS = {
   published: { label: "Live", className: "bg-emerald-400/90 text-emerald-950" },
@@ -147,6 +157,12 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
         >
           {status.label}
         </span>
+        {row.plan === "premium" && (
+          <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-amber-300/90 px-2.5 py-1 text-xs font-medium text-amber-950">
+            <Sparkles className="size-3" aria-hidden="true" />
+            Premium
+          </span>
+        )}
       </Link>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <div className="flex items-start justify-between gap-2">
@@ -195,6 +211,16 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
                 </>
               )}
               <DropdownMenuSeparator />
+              {row.plan === "free" && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    to="/dashboard/$invitationId/upgrade"
+                    params={{ invitationId: row.id }}
+                  >
+                    <Sparkles aria-hidden="true" /> Upgrade to Premium
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
                 <Link
                   to="/dashboard/$invitationId/responses"
@@ -244,6 +270,20 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
             /i/{row.slug}
           </p>
         )}
+        {live && row.freeUntil && (
+          <p
+            className={cn(
+              "text-xs",
+              row.freeEnded
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-muted-foreground"
+            )}
+          >
+            {row.freeEnded
+              ? `Free: offline since ${formatDay(row.freeUntil)}. Upgrade to bring it back.`
+              : `Free: online until ${formatDay(row.freeUntil)}`}
+          </p>
+        )}
 
         <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
           <Stat icon={Eye} label="7-day views" value={stats.views7d} />
@@ -251,7 +291,11 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
             icon={MessageSquareText}
             label="Responses"
             value={stats.responses}
-            hint={`${stats.headcount} attending`}
+            hint={
+              row.plan === "free"
+                ? `${stats.headcount} attending · max ${FREE_RSVP_LIMIT}`
+                : `${stats.headcount} attending`
+            }
           />
           <Stat icon={Heart} label="Wishes" value={stats.wishes} />
         </dl>
@@ -283,6 +327,16 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
               <ExternalLink className="size-3.5" aria-hidden="true" />
               View live
             </a>
+          )}
+          {row.plan === "free" && (
+            <Link
+              to="/dashboard/$invitationId/upgrade"
+              params={{ invitationId: row.id }}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-primary/50 px-3 text-sm text-primary hover:bg-primary/10"
+            >
+              <Sparkles className="size-3.5" aria-hidden="true" />
+              Upgrade
+            </Link>
           )}
         </div>
       </div>
