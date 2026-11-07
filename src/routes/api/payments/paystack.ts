@@ -4,7 +4,7 @@
 // the Paystack dashboard (Settings → API Keys & Webhooks).
 import { createFileRoute } from "@tanstack/react-router"
 import { getDb } from "@/server/db/client.server"
-import { paymentsDeps } from "@/server/payments/payments.functions"
+import { paymentsDeps } from "@/server/payments/payments.deps.server"
 import { handlePaystackWebhook } from "@/server/payments/payments.server"
 
 const MAX_BODY = 64 * 1024

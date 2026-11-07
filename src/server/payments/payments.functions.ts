@@ -1,5 +1,6 @@
 // Server functions for Premium upgrades. Safe to import from routes: the
-// build replaces handlers with RPC stubs in the client bundle.
+// build replaces handlers with RPC stubs in the client bundle. Only use
+// server-only imports (env, db) inside handlers, never at the top level.
 import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { z } from "zod"
@@ -11,23 +12,13 @@ import {
   requireUserId,
 } from "@/server/auth/current-user.server"
 import { getDb } from "@/server/db/client.server"
+import { paymentsDeps } from "./payments.deps.server"
 import {
   PaymentError,
   confirmCheckout,
   getUpgradeInfo,
   startCheckout,
-  type PaymentsDeps,
 } from "./payments.server"
-
-export function paymentsDeps(): PaymentsDeps {
-  return {
-    paystack: serverEnv.PAYSTACK_SECRET_KEY
-      ? { secretKey: serverEnv.PAYSTACK_SECRET_KEY }
-      : null,
-    origin: serverEnv.APP_ORIGIN,
-    currencies: serverEnv.PAYSTACK_CURRENCIES,
-  }
-}
 
 /** Only `PaymentError` messages reach the host; the rest is logged. */
 function hostError(error: unknown): Error {
