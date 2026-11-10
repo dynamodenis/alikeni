@@ -36,31 +36,47 @@ const ICONS: Record<SocialId, React.ReactNode> = {
   ),
 }
 
+const circle =
+  "grid size-9 place-items-center rounded-full border border-gold/20 text-sand"
+
 /**
- * Icon links for the profiles that have a URL in `src/lib/social.ts`.
- * Renders nothing when none is set.
+ * The social profiles from `src/lib/social.ts` as icons. One with a URL is a
+ * link; one without is shown as a plain icon until its address is added.
  */
 export function SocialLinks({ className }: { className?: string }) {
-  const links = SOCIAL_LINKS.filter((link) => link.url)
-  if (links.length === 0) return null
   return (
-    <ul className={cn("flex items-center gap-3", className)}>
-      {links.map((link) => (
-        <li key={link.id}>
-          <a
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={link.label}
-            title={link.label}
-            className="grid size-11 place-items-center rounded-full border border-gold/20 text-sand transition-colors duration-300 hover:border-gold/60 hover:text-gold-soft focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              {ICONS[link.id]}
-            </svg>
-          </a>
-        </li>
-      ))}
+    <ul className={cn("flex items-center gap-2", className)}>
+      {SOCIAL_LINKS.map((link) => {
+        const icon = (
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            {ICONS[link.id]}
+          </svg>
+        )
+        return (
+          <li key={link.id}>
+            {link.url ? (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={link.label}
+                title={link.label}
+                className={cn(
+                  circle,
+                  "transition-colors duration-300 hover:border-gold/60 hover:text-gold-soft focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                )}
+              >
+                {icon}
+              </a>
+            ) : (
+              // No address yet: decoration only, hidden from screen readers.
+              <span aria-hidden="true" className={circle}>
+                {icon}
+              </span>
+            )}
+          </li>
+        )
+      })}
     </ul>
   )
 }

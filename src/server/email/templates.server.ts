@@ -180,15 +180,16 @@ export function contactEmail(input: {
   to: string
   name: string
   email: string
+  subject: string
   message: string
 }): Email {
-  const { to, name, email, message: text } = input
+  const { to, name, email, subject, message: text } = input
   return {
     ...message({
       to,
-      subject: `Contact form: ${name}`,
-      heading: `Message from ${name}`,
-      body: [...text.split(/\n{2,}/), `${name} · ${email}`],
+      subject: `Contact form: ${subject}`,
+      heading: subject,
+      body: [...text.split(/\n{2,}/), `From ${name} · ${email}`],
       action: `Reply to ${name}`,
       url: `mailto:${email}`,
       footer: "Sent from the contact form on alikeni.com.",

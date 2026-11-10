@@ -1,6 +1,7 @@
 // Alikeni's social profiles, shown as icons in the site footer and listed in
-// the Organization structured data. A profile with an empty `url` is hidden:
-// paste the address here when the account exists.
+// the Organization structured data. A profile with an empty `url` shows as a
+// plain icon that is not a link: paste the address here when the account
+// exists.
 
 export type SocialId = "instagram" | "facebook" | "x" | "tiktok"
 

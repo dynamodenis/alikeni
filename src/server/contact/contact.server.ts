@@ -25,6 +25,11 @@ export const ContactSubmission = z.object({
     .transform((value) => tidy(value).replace(/\n/g, " "))
     .pipe(z.string().min(1).max(80)),
   email: z.string().trim().max(120).pipe(z.email()),
+  subject: z
+    .string()
+    .max(300)
+    .transform((value) => tidy(value).replace(/\n/g, " "))
+    .pipe(z.string().min(3).max(120)),
   message: z
     .string()
     .max(8000)
@@ -66,6 +71,7 @@ export async function submitContact(
       to: CONTACT_EMAIL,
       name: input.name,
       email: input.email,
+      subject: input.subject,
       message: input.message,
     })
   )

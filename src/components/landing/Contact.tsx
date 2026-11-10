@@ -7,7 +7,7 @@ import { SectionHeading } from "./SectionHeading"
 import { SocialLinks } from "./SocialLinks"
 
 const fieldClass =
-  "w-full rounded-2xl border border-gold/20 bg-ink/60 px-4 py-3 text-base text-cream placeholder:text-sand/60 transition-colors duration-300 focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:outline-none"
+  "w-full rounded-xl border border-gold/20 bg-ink/60 px-3.5 py-2 text-sm text-cream placeholder:text-sand/60 transition-colors duration-300 focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:outline-none"
 
 type Status =
   { state: "idle" | "sending" | "sent" } | { state: "error"; message: string }
@@ -30,6 +30,7 @@ export function Contact() {
         data: {
           name: field("name"),
           email: field("email"),
+          subject: field("subject"),
           message: field("message"),
           website: field("website"),
         },
@@ -66,12 +67,12 @@ export function Contact() {
         description="A question, an idea or a problem with your invitation? Write to us and we will reply by email."
       />
 
-      <div className="mx-auto mt-14 grid max-w-5xl gap-10 lg:grid-cols-[1.4fr_1fr]">
+      <div className="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-[1.5fr_1fr]">
         <form
           onSubmit={onSubmit}
-          className="rounded-3xl border border-gold/10 bg-umber/40 p-6 sm:p-8"
+          className="rounded-3xl border border-gold/10 bg-umber/40 p-5 sm:p-6"
         >
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <label htmlFor="contact-name" className="label">
                 Your name
@@ -100,7 +101,20 @@ export function Contact() {
               />
             </div>
           </div>
-          <div className="mt-5 flex flex-col gap-2">
+          <div className="mt-4 flex flex-col gap-2">
+            <label htmlFor="contact-subject" className="label">
+              Subject
+            </label>
+            <input
+              id="contact-subject"
+              name="subject"
+              required
+              minLength={3}
+              maxLength={120}
+              className={fieldClass}
+            />
+          </div>
+          <div className="mt-4 flex flex-col gap-2">
             <label htmlFor="contact-message" className="label">
               Message
             </label>
@@ -110,7 +124,7 @@ export function Contact() {
               required
               minLength={10}
               maxLength={4000}
-              rows={6}
+              rows={4}
               className={`${fieldClass} resize-y`}
             />
           </div>
@@ -125,11 +139,11 @@ export function Contact() {
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4">
+          <div className="mt-5 flex flex-wrap items-center gap-4">
             <button
               type="submit"
               disabled={sending}
-              className={`${brandButton()} disabled:pointer-events-none disabled:opacity-60`}
+              className={`${brandButton({ size: "md" })} disabled:pointer-events-none disabled:opacity-60`}
             >
               {sending ? "Sending…" : "Send message"}
             </button>
@@ -146,20 +160,20 @@ export function Contact() {
           </div>
         </form>
 
-        <div className="flex flex-col gap-8 rounded-3xl border border-gold/10 bg-umber/40 p-6 sm:p-8">
+        <div className="flex flex-col gap-6 rounded-3xl border border-gold/10 bg-umber/40 p-5 sm:p-6">
           <div>
             <h3 className="label">Email</h3>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="mt-3 inline-flex items-center gap-2 text-lg text-cream transition-colors duration-300 hover:text-gold-soft"
+              className="mt-3 inline-flex items-center gap-2 text-sm text-cream transition-colors duration-300 hover:text-gold-soft"
             >
-              <Mail className="size-5 text-gold" aria-hidden="true" />
+              <Mail className="size-4 text-gold" aria-hidden="true" />
               {CONTACT_EMAIL}
             </a>
           </div>
           <div>
             <h3 className="label">Follow Alikeni</h3>
-            <SocialLinks className="mt-4" />
+            <SocialLinks className="mt-3" />
           </div>
         </div>
       </div>

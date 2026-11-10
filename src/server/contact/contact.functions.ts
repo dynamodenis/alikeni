@@ -10,7 +10,7 @@ export const submitContactFn = createServerFn({ method: "POST" })
   .validator((input: ContactSubmission) => {
     const result = ContactSubmission.safeParse(input)
     if (!result.success) {
-      throw new Error("Please check your name, email and message.")
+      throw new Error("Please check your name, email, subject and message.")
     }
     return input
   })

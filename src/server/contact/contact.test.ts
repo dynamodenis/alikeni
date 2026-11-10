@@ -13,6 +13,7 @@ const deps = () => ({ send, limiter: new MemoryRateLimiter(), ipHash: "ip-1" })
 const message = {
   name: "  Wanjiru   Kamau ",
   email: " Wanjiru@Example.com ",
+  subject: "  Changing   my link ",
   message: "Hello,\n\n\n\nCan I change my invitation   link after publishing?",
 }
 
@@ -27,11 +28,11 @@ describe("contact form", () => {
     const [email] = sent
     expect(email.to).toBe("info@alikeni.com")
     expect(email.replyTo).toBe("Wanjiru@Example.com")
-    expect(email.subject).toBe("Contact form: Wanjiru Kamau")
+    expect(email.subject).toBe("Contact form: Changing my link")
     expect(email.text).toContain(
       "Hello,\n\nCan I change my invitation link after publishing?"
     )
-    expect(email.text).toContain("Wanjiru Kamau · Wanjiru@Example.com")
+    expect(email.text).toContain("From Wanjiru Kamau · Wanjiru@Example.com")
   })
 
   it("escapes the visitor's text in the HTML", async () => {
@@ -49,6 +50,9 @@ describe("contact form", () => {
     ).rejects.toThrow()
     await expect(
       submitContact({ ...message, message: "   hi  " }, deps())
+    ).rejects.toThrow()
+    await expect(
+      submitContact({ ...message, subject: " " }, deps())
     ).rejects.toThrow()
     expect(sent).toHaveLength(0)
   })
