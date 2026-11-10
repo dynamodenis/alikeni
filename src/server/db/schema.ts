@@ -208,9 +208,17 @@ export const rsvps = pgTable(
     /** Salted hashes only; raw IPs and user agents are never stored. */
     ipHash: text("ip_hash").notNull(),
     userAgentHash: text("user_agent_hash").notNull(),
+    /** When the owner's "new RSVPs" email covered this row (null: pending). */
+    ownerNotifiedAt: timestamp("owner_notified_at", { withTimezone: true }),
+    /** When this guest got the event reminder (null: not sent). */
+    reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
   },
   (t) => [
     index("rsvps_invitation_idx").on(t.invitationId, t.createdAt),
+    // The notification job scans only rows still waiting for an email.
+    index("rsvps_owner_pending_idx")
+      .on(t.createdAt)
+      .where(sql`${t.ownerNotifiedAt} IS NULL`),
     check("rsvps_party_size_range", sql`${t.partySize} BETWEEN 0 AND 20`),
   ]
 )

@@ -26,6 +26,7 @@ import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as AuthedEditorInvitationIdRouteImport } from './routes/_authed/editor/$invitationId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiCronNotificationsRouteImport } from './routes/api/cron/notifications'
 import { Route as ApiExportFileRouteImport } from './routes/api/export/$file'
 import { Route as ApiPaymentsPaystackRouteImport } from './routes/api/payments/paystack'
 import { Route as ApiStorageUploadRouteImport } from './routes/api/storage/upload'
@@ -125,6 +126,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronNotificationsRoute = ApiCronNotificationsRouteImport.update({
+  id: '/api/cron/notifications',
+  path: '/api/cron/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiExportFileRoute = ApiExportFileRouteImport.update({
   id: '/api/export/$file',
   path: '/api/export/$file',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/templates/': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/export/$file': typeof ApiExportFileRoute
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/templates': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/export/$file': typeof ApiExportFileRoute
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/templates/': typeof TemplatesIndexRoute
   '/_authed/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/export/$file': typeof ApiExportFileRoute
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/templates/'
     | '/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/cron/notifications'
     | '/api/export/$file'
     | '/api/payments/paystack'
     | '/api/storage/upload'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/cron/notifications'
     | '/api/export/$file'
     | '/api/payments/paystack'
     | '/api/storage/upload'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/templates/'
     | '/_authed/editor/$invitationId'
     | '/api/auth/$'
+    | '/api/cron/notifications'
     | '/api/export/$file'
     | '/api/payments/paystack'
     | '/api/storage/upload'
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   OgChar123slugChar125DotpngRoute: typeof OgChar123slugChar125DotpngRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronNotificationsRoute: typeof ApiCronNotificationsRoute
   ApiExportFileRoute: typeof ApiExportFileRoute
   ApiPaymentsPaystackRoute: typeof ApiPaymentsPaystackRoute
   ApiStorageUploadRoute: typeof ApiStorageUploadRoute
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/notifications': {
+      id: '/api/cron/notifications'
+      path: '/api/cron/notifications'
+      fullPath: '/api/cron/notifications'
+      preLoaderRoute: typeof ApiCronNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export/$file': {
@@ -660,6 +680,7 @@ const rootRouteChildren: RootRouteChildren = {
   OgChar123slugChar125DotpngRoute: OgChar123slugChar125DotpngRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronNotificationsRoute: ApiCronNotificationsRoute,
   ApiExportFileRoute: ApiExportFileRoute,
   ApiPaymentsPaystackRoute: ApiPaymentsPaystackRoute,
   ApiStorageUploadRoute: ApiStorageUploadRoute,

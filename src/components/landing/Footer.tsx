@@ -1,5 +1,8 @@
 import { Logo, NAV_LINKS } from "./Nav"
 
+/** The inbox people write to (forwarded by Cloudflare Email Routing). */
+export const CONTACT_EMAIL = "info@alikeni.com"
+
 export function Footer() {
   return (
     <footer className="border-t border-gold/10 px-4 py-12 sm:px-6">
@@ -13,6 +16,11 @@ export function Footer() {
               </a>
             </li>
           ))}
+          <li>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="link">
+              {CONTACT_EMAIL}
+            </a>
+          </li>
         </ul>
         <p className="text-sm text-sand">
           © <span className="nums">{new Date().getFullYear()}</span> Alikeni

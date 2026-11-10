@@ -74,6 +74,8 @@ const serverEnvSchema = z
     RESEND_API_KEY: z.string().min(1).optional(),
     /** Sender, e.g. "Alikeni <hello@yourdomain.com>" (domain verified in Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
+    /** Reply-To on every outgoing email: an inbox a person reads. Optional. */
+    EMAIL_REPLY_TO: z.email().optional(),
     /**
      * When nobody is signed in, act as a fixed dev user instead of refusing.
      * Off unless set to "true"; for local demos and scripts, never a real

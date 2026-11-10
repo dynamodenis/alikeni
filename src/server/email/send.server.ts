@@ -27,7 +27,11 @@ export function createEmailSender(env: ServerEnv): EmailSender {
   const resend = new Resend(env.RESEND_API_KEY)
   const from = env.EMAIL_FROM ?? DEV_FROM
   return async (email) => {
-    const { error } = await resend.emails.send({ from, ...email })
+    const { error } = await resend.emails.send({
+      from,
+      replyTo: env.EMAIL_REPLY_TO,
+      ...email,
+    })
     if (error) throw new Error(`Email to ${email.to} failed: ${error.message}`)
   }
 }

@@ -29,6 +29,13 @@
       "when": 1793789028410,
       "tag": "0003_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794332276657,
+      "tag": "0004_rsvp_emails",
+      "breakpoints": true
     }
   ]
 }

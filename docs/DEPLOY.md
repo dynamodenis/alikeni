@@ -17,7 +17,7 @@ it) target Workers.
 | `pnpm build`          | Node    | `dist/`, served by `pnpm start` (`scripts/serve-dist.mjs`)                                                                            |
 | `pnpm build:worker`   | Workers | `ALIKENI_TARGET=workers`: `@cloudflare/vite-plugin` runs the SSR environment in workerd; output in `dist-worker/`                     |
 | `pnpm preview:worker` | Workers | `build:worker`, then `wrangler dev` (local workerd, local R2 simulation, Hyperdrive → `localConnectionString`)                        |
-| `pnpm run deploy`     | Workers | `build:worker`, then `wrangler deploy`                                                                                                |
+| `pnpm run deploy`     | Workers | `build:worker`, then `wrangler deploy` (run `pnpm db:migrate` against Neon first when `drizzle/` has a new migration)                 |
 | `pnpm cf-typegen`     | —       | Regenerates `worker-configuration.d.ts` (binding and runtime types) from `wrangler.jsonc` and `.dev.vars`; rerun after editing either |
 
 `vite.config.ts` reads `ALIKENI_TARGET`. With `workers` it adds
@@ -93,7 +93,18 @@ Non-secret vars live in `wrangler.jsonc` → `vars` (`NODE_ENV=production`,
 trailing slash); OG URLs, share links and auth callbacks use it.
 
 Add these too when you use them: `R2_PUBLIC_URL`, `GEOCODE_CONTACT_EMAIL`
-(Nominatim policy), `EMAIL_FROM` (it can also be a secret).
+(Nominatim policy), `EMAIL_FROM` (it can also be a secret), `EMAIL_REPLY_TO`
+(set to `info@alikeni.com`: replies to automatic emails reach a real inbox).
+
+The Worker is served on `alikeni.com` (`routes` with `custom_domain`; the
+zone is on the same Cloudflare account, so the DNS record and certificate are
+created on deploy). `workers_dev` stays on so links shared on the workers.dev
+URL keep opening; sign-in only works on `APP_ORIGIN`.
+
+Email addresses on the domain: `notifications@alikeni.com` is the sender of
+automatic emails (`EMAIL_FROM`, through Resend, no inbox);
+`info@alikeni.com` is the contact address in the landing page footer,
+forwarded to a personal inbox by Cloudflare Email Routing.
 
 Secrets (never in `wrangler.jsonc`):
 
@@ -175,6 +186,30 @@ Without `RESEND_API_KEY`, emails are printed to the wrangler log.
 
 Keep a `.dev.vars` file: without one, wrangler falls back to `.env`, which may
 hold your real Neon `DATABASE_URL`.
+
+## Scheduled emails
+
+`wrangler.jsonc` → `triggers.crons` runs the Worker's `scheduled` handler
+(`src/worker.ts`) every 15 minutes. It calls `POST /api/cron/notifications`
+inside the same isolate with a single-use in-memory token (the route answers
+404 to everyone else), which runs `src/server/email/notifications.server.ts`:
+
+- **RSVP updates**: one email per invitation to its owner with the responses
+  since the last one (`rsvps.owner_notified_at`). Only owners with a verified
+  email get them; responses older than 7 days are never announced.
+- **Event reminders**: one email to each guest who answered yes or maybe and
+  typed an email address as their contact, in the 24 hours before
+  `datetime.start` (`rsvps.reminder_sent_at`). Guests who replied inside those
+  24 hours are not reminded.
+
+At most 40 emails of each kind per run, about two per second (Resend's
+default rate limit); the rest go out on the next run, and a failed send is
+retried then. Watch the runs with `pnpm exec wrangler tail` (`[cron]` lines).
+Locally: `pnpm exec wrangler dev --test-scheduled`, then open
+`/cdn-cgi/handler/scheduled`. The Node server (`pnpm start`) has no cron.
+
+`www.alikeni.com` is attached to the Worker too and only redirects (301) to
+`APP_ORIGIN`.
 
 ## Caching and page views
 

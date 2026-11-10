@@ -10,11 +10,24 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "alikeni",
-  "main": "@tanstack/react-start/server-entry",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-10-20",
   // nodejs_compat: node:crypto, node:async_hooks, pg's net/tls sockets, and
   // vars/secrets in process.env (on by default from 2025-04-01).
   "compatibility_flags": ["nodejs_compat"],
+  // The public address. Cloudflare creates the DNS record and certificate for
+  // a custom domain on deploy (the zone is on this account).
+  // www only redirects to APP_ORIGIN (src/worker.ts).
+  "routes": [
+    { "pattern": "alikeni.com", "custom_domain": true },
+    { "pattern": "www.alikeni.com", "custom_domain": true },
+  ],
+  // Keep the workers.dev URL serving, so invitation links shared before the
+  // domain existed still open (sign-in only works on APP_ORIGIN).
+  "workers_dev": true,
+  // Every 15 minutes: RSVP updates to owners and event reminders to guests
+  // (src/worker.ts `scheduled`).
+  "triggers": { "crons": ["*/15 * * * *"] },
   "observability": {
     "enabled": true,
   },
@@ -38,8 +51,10 @@
   "vars": {
     "NODE_ENV": "production",
     "STORAGE_DRIVER": "binding",
-    // The deployed origin (no trailing slash); change it when a custom domain is added.
-    "APP_ORIGIN": "https://alikeni.dmbugua66.workers.dev",
+    // The deployed origin (no trailing slash).
+    "APP_ORIGIN": "https://alikeni.com",
+    // Where replies to automatic emails go (EMAIL_FROM itself has no inbox).
+    "EMAIL_REPLY_TO": "info@alikeni.com",
     "GEOCODE_PROVIDER": "nominatim",
     // Currencies the Paystack account can charge (KES, USD).
     "PAYSTACK_CURRENCIES": "KES",
