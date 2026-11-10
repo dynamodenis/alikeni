@@ -172,3 +172,27 @@ export function eventReminderEmail(input: {
       "You received this because you replied to this invitation with this email address. It is the only reminder.",
   })
 }
+
+/* ---------- contact form → our inbox ---------- */
+
+/** A message from the site's contact form. Replying answers the visitor. */
+export function contactEmail(input: {
+  to: string
+  name: string
+  email: string
+  message: string
+}): Email {
+  const { to, name, email, message: text } = input
+  return {
+    ...message({
+      to,
+      subject: `Contact form: ${name}`,
+      heading: `Message from ${name}`,
+      body: [...text.split(/\n{2,}/), `${name} · ${email}`],
+      action: `Reply to ${name}`,
+      url: `mailto:${email}`,
+      footer: "Sent from the contact form on alikeni.com.",
+    }),
+    replyTo: email,
+  }
+}

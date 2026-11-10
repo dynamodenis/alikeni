@@ -1,4 +1,5 @@
 import { MotionConfig } from "motion/react"
+import { Contact } from "./Contact"
 import { Features } from "./Features"
 import { FinalCta } from "./FinalCta"
 import { Footer } from "./Footer"
@@ -24,6 +25,7 @@ export function LandingPage() {
           <Showcase />
           <HomeFaq />
           <FinalCta />
+          <Contact />
         </main>
         <Footer />
       </div>

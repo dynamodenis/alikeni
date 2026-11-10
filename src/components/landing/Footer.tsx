@@ -1,15 +1,10 @@
+import { CONTACT_EMAIL } from "@/lib/social"
 import { Logo, NAV_LINKS } from "./Nav"
 import { SocialLinks } from "./SocialLinks"
-
-/** The inbox people write to (forwarded by Cloudflare Email Routing). */
-export const CONTACT_EMAIL = "info@alikeni.com"
 
 export function Footer() {
   return (
     <footer className="border-t border-gold/10 px-4 py-12 sm:px-6">
-      <div className="mx-auto mb-10 max-w-6xl border-b border-gold/10 pb-10">
-        <SocialLinks />
-      </div>
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
         <Logo />
         <ul className="flex flex-wrap items-center justify-center gap-8">
@@ -21,14 +16,22 @@ export function Footer() {
             </li>
           ))}
           <li>
+            <a href="/#contact" className="link">
+              Contact
+            </a>
+          </li>
+          <li>
             <a href={`mailto:${CONTACT_EMAIL}`} className="link">
               {CONTACT_EMAIL}
             </a>
           </li>
         </ul>
-        <p className="text-sm text-sand">
-          © <span className="nums">{new Date().getFullYear()}</span> Alikeni
-        </p>
+        <div className="flex flex-col items-center gap-4 md:items-end">
+          <SocialLinks />
+          <p className="text-sm text-sand">
+            © <span className="nums">{new Date().getFullYear()}</span> Alikeni
+          </p>
+        </div>
       </div>
     </footer>
   )

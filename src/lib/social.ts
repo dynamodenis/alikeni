@@ -19,3 +19,6 @@ export const SOCIAL_LINKS: ReadonlyArray<{
   { id: "x", label: "Alikeni on X (Twitter)", url: "" },
   { id: "tiktok", label: "Alikeni on TikTok", url: "" },
 ]
+
+/** The inbox people write to (forwarded by Cloudflare Email Routing). */
+export const CONTACT_EMAIL = "info@alikeni.com"

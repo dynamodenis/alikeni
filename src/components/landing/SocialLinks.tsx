@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import { SOCIAL_LINKS, type SocialId } from "@/lib/social"
 
 /** Brand glyphs on a 24 px grid (lucide no longer ships brand icons). */
@@ -36,38 +37,30 @@ const ICONS: Record<SocialId, React.ReactNode> = {
 }
 
 /**
- * "Follow us" icons for the profiles that have a URL in `src/lib/social.ts`.
+ * Icon links for the profiles that have a URL in `src/lib/social.ts`.
  * Renders nothing when none is set.
  */
-export function SocialLinks() {
+export function SocialLinks({ className }: { className?: string }) {
   const links = SOCIAL_LINKS.filter((link) => link.url)
   if (links.length === 0) return null
   return (
-    <div className="flex flex-col items-center gap-4">
-      <p className="label">Follow us</p>
-      <ul className="flex items-center gap-3">
-        {links.map((link) => (
-          <li key={link.id}>
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={link.label}
-              title={link.label}
-              className="grid size-11 place-items-center rounded-full border border-gold/20 text-sand transition-colors duration-300 hover:border-gold/60 hover:text-gold-soft focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                aria-hidden="true"
-              >
-                {ICONS[link.id]}
-              </svg>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className={cn("flex items-center gap-3", className)}>
+      {links.map((link) => (
+        <li key={link.id}>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={link.label}
+            title={link.label}
+            className="grid size-11 place-items-center rounded-full border border-gold/20 text-sand transition-colors duration-300 hover:border-gold/60 hover:text-gold-soft focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              {ICONS[link.id]}
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
   )
 }

@@ -10,6 +10,8 @@ export type Email = {
   /** Plain text: always sent, and what the dev log prints. */
   text: string
   html: string
+  /** Overrides EMAIL_REPLY_TO (contact form: the visitor's address). */
+  replyTo?: string
 }
 
 export type EmailSender = (email: Email) => Promise<void>
@@ -20,17 +22,18 @@ export function createEmailSender(env: ServerEnv): EmailSender {
   if (!env.RESEND_API_KEY) {
     return async (email) => {
       console.info(
-        `\n[email] (not sent: RESEND_API_KEY is unset)\n  to: ${email.to}\n  subject: ${email.subject}\n\n${email.text}\n`
+        `\n[email] (not sent: RESEND_API_KEY is unset)\n  to: ${email.to}${email.replyTo ? `\n  reply-to: ${email.replyTo}` : ""}\n  subject: ${email.subject}\n\n${email.text}\n`
       )
     }
   }
   const resend = new Resend(env.RESEND_API_KEY)
   const from = env.EMAIL_FROM ?? DEV_FROM
   return async (email) => {
+    const { replyTo, ...message } = email
     const { error } = await resend.emails.send({
       from,
-      replyTo: env.EMAIL_REPLY_TO,
-      ...email,
+      replyTo: replyTo ?? env.EMAIL_REPLY_TO,
+      ...message,
     })
     if (error) throw new Error(`Email to ${email.to} failed: ${error.message}`)
   }
