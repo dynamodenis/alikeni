@@ -1,4 +1,5 @@
 import { Logo, NAV_LINKS } from "./Nav"
+import { SocialLinks } from "./SocialLinks"
 
 /** The inbox people write to (forwarded by Cloudflare Email Routing). */
 export const CONTACT_EMAIL = "info@alikeni.com"
@@ -6,6 +7,9 @@ export const CONTACT_EMAIL = "info@alikeni.com"
 export function Footer() {
   return (
     <footer className="border-t border-gold/10 px-4 py-12 sm:px-6">
+      <div className="mx-auto mb-10 max-w-6xl border-b border-gold/10 pb-10">
+        <SocialLinks />
+      </div>
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
         <Logo />
         <ul className="flex flex-wrap items-center justify-center gap-8">

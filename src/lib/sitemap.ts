@@ -1,7 +1,8 @@
 // The pages meant for search results (home, the template gallery, one page
-// per occasion, one per template), served as /sitemap.xml. Built from the
+// per occasion, one per template, the blog), served as /sitemap.xml. Built from the
 // template registry, so a new template is listed as soon as it ships.
 // Invitations (/i/…), previews and account pages are deliberately absent.
+import { POSTS } from "@/blog/posts"
 import { absoluteUrl } from "@/lib/seo"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
@@ -10,6 +11,8 @@ export function sitemapPaths(): Array<string> {
   return [
     "/",
     "/templates",
+    "/blog",
+    ...POSTS.map((post) => `/blog/${post.slug}`),
     ...TEMPLATE_CATEGORIES.map((category) => `/templates/${category}`),
     ...TEMPLATE_METAS.map((meta) => `/templates/${meta.id}`),
   ]

@@ -18,6 +18,8 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthedConnectGoogleRouteImport } from './routes/_authed/connect-google'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as DevMapsRouteImport } from './routes/dev/maps'
 import { Route as DevSmokeRouteImport } from './routes/dev/smoke'
 import { Route as ISlugRouteImport } from './routes/i/$slug'
@@ -85,6 +87,16 @@ const AuthedConnectGoogleRoute = AuthedConnectGoogleRouteImport.update({
   id: '/connect-google',
   path: '/connect-google',
   getParentRoute: () => AuthedRoute,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DevMapsRoute = DevMapsRouteImport.update({
   id: '/maps',
@@ -216,11 +228,13 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/connect-google': typeof AuthedConnectGoogleRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
   '/ics/$slug': typeof IcsSlugRoute
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
+  '/blog/': typeof BlogIndexRoute
   '/templates/': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -249,11 +263,13 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/connect-google': typeof AuthedConnectGoogleRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
   '/ics/$slug': typeof IcsSlugRoute
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
+  '/blog': typeof BlogIndexRoute
   '/templates': typeof TemplatesIndexRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -284,11 +300,13 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authed/connect-google': typeof AuthedConnectGoogleRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
   '/ics/$slug': typeof IcsSlugRoute
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
+  '/blog/': typeof BlogIndexRoute
   '/templates/': typeof TemplatesIndexRoute
   '/_authed/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -319,11 +337,13 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/connect-google'
+    | '/blog/$slug'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
     | '/ics/$slug'
     | '/og/{$slug}.png'
+    | '/blog/'
     | '/templates/'
     | '/editor/$invitationId'
     | '/api/auth/$'
@@ -352,11 +372,13 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/connect-google'
+    | '/blog/$slug'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
     | '/ics/$slug'
     | '/og/{$slug}.png'
+    | '/blog'
     | '/templates'
     | '/editor/$invitationId'
     | '/api/auth/$'
@@ -386,11 +408,13 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/_authed/connect-google'
+    | '/blog/$slug'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
     | '/ics/$slug'
     | '/og/{$slug}.png'
+    | '/blog/'
     | '/templates/'
     | '/_authed/editor/$invitationId'
     | '/api/auth/$'
@@ -420,9 +444,11 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   ISlugRoute: typeof ISlugRoute
   IcsSlugRoute: typeof IcsSlugRoute
   OgChar123slugChar125DotpngRoute: typeof OgChar123slugChar125DotpngRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronNotificationsRoute: typeof ApiCronNotificationsRoute
@@ -500,6 +526,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/connect-google'
       preLoaderRoute: typeof AuthedConnectGoogleRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/dev/maps': {
       id: '/dev/maps'
@@ -716,9 +756,11 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BlogSlugRoute: BlogSlugRoute,
   ISlugRoute: ISlugRoute,
   IcsSlugRoute: IcsSlugRoute,
   OgChar123slugChar125DotpngRoute: OgChar123slugChar125DotpngRoute,
+  BlogIndexRoute: BlogIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronNotificationsRoute: ApiCronNotificationsRoute,

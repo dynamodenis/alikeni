@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { POSTS } from "@/blog/posts"
 import { CATEGORY_PAGES } from "@/templates/category-pages"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
@@ -103,9 +104,11 @@ describe("sitemap", () => {
     expect(paths).toContain("/")
     expect(paths).toContain("/templates")
     expect(paths).toContain("/templates/baby_shower")
+    expect(paths).toContain("/blog")
+    expect(paths).toContain(`/blog/${POSTS[0].slug}`)
     expect(paths).toContain("/templates/wedding/ivory-garden")
     expect(paths).toHaveLength(
-      2 + TEMPLATE_CATEGORIES.length + TEMPLATE_METAS.length
+      3 + POSTS.length + TEMPLATE_CATEGORIES.length + TEMPLATE_METAS.length
     )
     expect(new Set(paths).size).toBe(paths.length)
   })

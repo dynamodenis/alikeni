@@ -1,6 +1,7 @@
 // Search and sharing tags for the marketing pages, in one place: title,
 // description, canonical URL, Open Graph, Twitter card, robots and JSON-LD.
-// Routes spread the result into `head()`. Isomorphic and dependency-free.
+// Routes spread the result into `head()`. Isomorphic.
+import { SOCIAL_LINKS } from "./social"
 
 /** The one public address (APP_ORIGIN in production). Canonicals point here. */
 export const SITE_ORIGIN = "https://alikeni.com"
@@ -75,6 +76,7 @@ export const organizationJsonLd: JsonLd = {
   url: `${SITE_ORIGIN}/`,
   logo: `${SITE_ORIGIN}/icon-512.png`,
   email: "info@alikeni.com",
+  sameAs: SOCIAL_LINKS.filter((link) => link.url).map((link) => link.url),
 }
 
 export const websiteJsonLd: JsonLd = {
@@ -132,5 +134,26 @@ export function itemListJsonLd(
       name: item.name,
       url: absoluteUrl(item.path),
     })),
+  }
+}
+
+/** A blog post. */
+export function articleJsonLd(post: {
+  title: string
+  description: string
+  date: string
+  path: string
+}): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: absoluteUrl(post.path),
+    image: DEFAULT_OG_IMAGE,
+    author: { "@id": ORGANIZATION_ID },
+    publisher: { "@id": ORGANIZATION_ID },
   }
 }
