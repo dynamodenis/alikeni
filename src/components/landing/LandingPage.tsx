@@ -3,6 +3,7 @@ import { Features } from "./Features"
 import { FinalCta } from "./FinalCta"
 import { Footer } from "./Footer"
 import { Hero } from "./Hero"
+import { HomeFaq } from "./HomeFaq"
 import { HowItWorks } from "./HowItWorks"
 import { Marquee } from "./Marquee"
 import { Nav } from "./Nav"
@@ -21,6 +22,7 @@ export function LandingPage() {
           <Features />
           <Numbers />
           <Showcase />
+          <HomeFaq />
           <FinalCta />
         </main>
         <Footer />

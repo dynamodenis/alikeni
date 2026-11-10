@@ -16,7 +16,9 @@ import { UseTemplateButton } from "@/components/gallery/UseTemplateButton"
 import { DEVICE_IDS } from "@/lib/devices"
 import { cn } from "@/lib/utils"
 import { postToWindow, usePreviewMessages } from "@/lib/preview-bridge"
+import { absoluteUrl, breadcrumbJsonLd, seo } from "@/lib/seo"
 import { CATEGORY_LABELS } from "@/templates/catalog"
+import { CATEGORY_PAGES } from "@/templates/category-pages"
 import { getFontPair } from "@/templates/_shared/theme/fonts"
 import { hasPalette } from "@/templates/_shared/theme/palettes"
 import { getTemplateMeta } from "@/templates/registry"
@@ -41,25 +43,32 @@ export const Route = createFileRoute("/templates/$category/$slug")({
       name: meta.name,
       category: meta.category,
       description: meta.description,
+      thumbnail: meta.thumbnail,
     }
   },
-  head: ({ loaderData }) => {
-    const meta = loaderData
-    return {
-      meta: meta
-        ? [
-            {
-              title: `${meta.name} · ${CATEGORY_LABELS[meta.category]} invitation template · Alikeni`,
-            },
-            { name: "description", content: meta.description },
-            {
-              property: "og:title",
-              content: `${meta.name} invitation template`,
-            },
-            { property: "og:description", content: meta.description },
-          ]
-        : [{ title: "Template · Alikeni" }],
-    }
+  // Canonical without ?device= / ?palette=: one indexed URL per template.
+  head: ({ loaderData: meta }) => {
+    if (!meta) return { meta: [{ title: "Template · Alikeni" }] }
+    const label = CATEGORY_LABELS[meta.category]
+    const path = `/templates/${meta.id}`
+    return seo({
+      title: `${meta.name}: ${label} Invitation Template · Alikeni`,
+      description: `${meta.description} Online ${label.toLowerCase()} invitation with RSVP, countdown and map.`,
+      path,
+      image: absoluteUrl(meta.thumbnail),
+      imageAlt: `${meta.name} ${label.toLowerCase()} invitation template`,
+      jsonLd: [
+        breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Invitation templates", path: "/templates" },
+          {
+            name: CATEGORY_PAGES[meta.category].linkLabel,
+            path: `/templates/${meta.category}`,
+          },
+          { name: meta.name, path },
+        ]),
+      ],
+    })
   },
   component: TemplateDetailPage,
 })
@@ -145,12 +154,12 @@ function TemplateDetailPage() {
       <div className="mx-auto grid max-w-7xl gap-12 px-4 pt-28 pb-20 sm:px-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-16 lg:pt-32">
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <Link
-            to="/templates"
-            search={{ category: meta.category }}
+            to="/templates/$category"
+            params={{ category: meta.category }}
             className="inline-flex items-center gap-1 link"
           >
             <ChevronLeft className="size-4" aria-hidden="true" />
-            {CATEGORY_LABELS[meta.category]} templates
+            {CATEGORY_PAGES[meta.category].linkLabel}
           </Link>
 
           <p className="mt-8 eyebrow">{CATEGORY_LABELS[meta.category]}</p>

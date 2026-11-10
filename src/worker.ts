@@ -7,10 +7,18 @@ import { canonicalRedirect } from "@/server/platform/canonical"
 import { issueCronToken } from "@/server/platform/cron-token.server"
 
 export default {
-  fetch(request: Request): Response | Promise<Response> {
+  async fetch(request: Request): Promise<Response> {
     const target = canonicalRedirect(request.url, env.APP_ORIGIN)
     if (target) return Response.redirect(target, 301)
-    return handler.fetch(request)
+    const response = await handler.fetch(request)
+    // The workers.dev address serves the same pages as APP_ORIGIN; only
+    // APP_ORIGIN belongs in search results.
+    if (new URL(request.url).hostname.endsWith(".workers.dev")) {
+      const copy = new Response(response.body, response)
+      copy.headers.set("X-Robots-Tag", "noindex")
+      return copy
+    }
+    return response
   },
 
   /**

@@ -11,6 +11,8 @@ import { SearchField } from "@/components/gallery/SearchField"
 import { SiteShell } from "@/components/gallery/SiteShell"
 import { TemplateCard, UpcomingCard } from "@/components/gallery/TemplateCard"
 import { Ornament } from "@/components/landing/InvitationCard"
+import { OccasionLinks } from "@/components/landing/OccasionLinks"
+import { breadcrumbJsonLd, seo } from "@/lib/seo"
 import {
   CATEGORY_FILTERS,
   CATEGORY_LABELS,
@@ -31,16 +33,20 @@ const GallerySearch = z.object({
 export const Route = createFileRoute("/templates/")({
   validateSearch: GallerySearch,
   search: { middlewares: [stripSearchParams(SEARCH_DEFAULTS)] },
-  head: () => ({
-    meta: [
-      { title: "Invitation templates · Alikeni" },
-      {
-        name: "description",
-        content:
-          "Browse Alikeni invitation templates for weddings, birthdays, graduations and more. Preview each one live, then make it yours.",
-      },
-    ],
-  }),
+  // One canonical URL: filtered views (?category=, ?q=) are the same page to
+  // search engines. Each occasion has its own page at /templates/<category>.
+  head: () =>
+    seo({
+      title: "Invitation Templates for Every Occasion · Alikeni",
+      description: `Browse ${TEMPLATE_METAS.length} online invitation templates for weddings, birthdays, graduations, baby showers and more. Preview each one live, then make it yours with RSVP built in.`,
+      path: "/templates",
+      jsonLd: [
+        breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Invitation templates", path: "/templates" },
+        ]),
+      ],
+    }),
   component: GalleryPage,
 })
 
@@ -162,6 +168,16 @@ function GalleryPage() {
             </ul>
           </div>
         )}
+      </section>
+
+      <section
+        aria-labelledby="occasions-heading"
+        className="border-t border-gold/10 px-4 py-16 sm:px-6"
+      >
+        <h2 id="occasions-heading" className="text-center heading-3">
+          Browse invitations by occasion
+        </h2>
+        <OccasionLinks className="mt-8" />
       </section>
     </SiteShell>
   )

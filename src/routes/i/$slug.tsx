@@ -39,7 +39,8 @@ import { resolvePalette } from "@/templates/_shared/theme/palettes"
  *   `src/server/rate-limit`). Refusals carry the numbers, worded here.
  * - Free plan (`src/lib/plans.ts`): gift details are removed on the server;
  *   after the day following the event the page shows `EndedInvitation`.
- * - `head()`: title, description, canonical, Open Graph + Twitter card with
+ * - `head()`: title, description, canonical, `noindex` (invitations are
+ *   private to the people they are sent to), Open Graph + Twitter card with
  *   `/og/<slug>.png` (1200×630), theme-color from the palette primary.
  * - Below the template: `ShareBar` (Web Share API, or copy link + WhatsApp).
  */
@@ -100,6 +101,9 @@ export const Route = createFileRoute("/i/$slug")({
           : []),
         { name: "twitter:image", content: image },
         { name: "theme-color", content: resolvePalette(config.theme).primary },
+        // A guest's invitation is for the people it was sent to: link
+        // previews work (the tags above), search engines stay out.
+        { name: "robots", content: "noindex" },
       ],
       links: [{ rel: "canonical", href: url }],
     }

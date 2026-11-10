@@ -1,3 +1,4 @@
+import { NOINDEX } from "@/lib/seo"
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { z } from "zod"
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/reset-password")({
     token: z.string().max(200).optional().catch(undefined),
     error: z.string().max(60).optional().catch(undefined),
   }),
-  head: () => ({ meta: [{ title: "Choose a new password · Alikeni" }] }),
+  head: () => ({
+    meta: [{ title: "Choose a new password · Alikeni" }, NOINDEX],
+  }),
   component: ResetPassword,
 })
 

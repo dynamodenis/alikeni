@@ -33,7 +33,7 @@ export function TemplateCard({
           >
             <img
               src={meta.thumbnail}
-              alt=""
+              alt={`${meta.name}, ${CATEGORY_LABELS[meta.category].toLowerCase()} invitation template`}
               width={390}
               height={844}
               loading={priority ? "eager" : "lazy"}

@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthedConnectGoogleRouteImport } from './routes/_authed/connect-google'
 import { Route as DevMapsRouteImport } from './routes/dev/maps'
 import { Route as DevSmokeRouteImport } from './routes/dev/smoke'
@@ -34,6 +35,7 @@ import { Route as DevTemplatesIndexRouteImport } from './routes/dev/templates/in
 import { Route as DevTemplatesSplatRouteImport } from './routes/dev/templates/$'
 import { Route as MediaLibrarySplatRouteImport } from './routes/media/library/$'
 import { Route as PreviewCategorySlugRouteImport } from './routes/preview/$category/$slug'
+import { Route as TemplatesCategoryIndexRouteImport } from './routes/templates/$category/index'
 import { Route as TemplatesCategorySlugRouteImport } from './routes/templates/$category/$slug'
 import { Route as AuthedDashboardInvitationIdGuestsRouteImport } from './routes/_authed/dashboard/$invitationId/guests'
 import { Route as AuthedDashboardInvitationIdResponsesRouteImport } from './routes/_authed/dashboard/$invitationId/responses'
@@ -72,6 +74,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedConnectGoogleRoute = AuthedConnectGoogleRouteImport.update({
@@ -166,6 +173,11 @@ const PreviewCategorySlugRoute = PreviewCategorySlugRouteImport.update({
   path: '/preview/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemplatesCategoryIndexRoute = TemplatesCategoryIndexRouteImport.update({
+  id: '/templates/$category/',
+  path: '/templates/$category/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesCategorySlugRoute = TemplatesCategorySlugRouteImport.update({
   id: '/templates/$category/$slug',
   path: '/templates/$category/$slug',
@@ -202,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
@@ -221,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
+  '/templates/$category/': typeof TemplatesCategoryIndexRoute
   '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -233,6 +247,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
@@ -252,6 +267,7 @@ export interface FileRoutesByTo {
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/dev/templates': typeof DevTemplatesIndexRoute
+  '/templates/$category': typeof TemplatesCategoryIndexRoute
   '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -266,6 +282,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authed/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
@@ -285,6 +302,7 @@ export interface FileRoutesById {
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
+  '/templates/$category/': typeof TemplatesCategoryIndexRoute
   '/_authed/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/_authed/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/_authed/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -299,6 +317,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/sitemap.xml'
     | '/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
@@ -318,6 +337,7 @@ export interface FileRouteTypes {
     | '/templates/$category/$slug'
     | '/dashboard/'
     | '/dev/templates/'
+    | '/templates/$category/'
     | '/dashboard/$invitationId/guests'
     | '/dashboard/$invitationId/responses'
     | '/dashboard/$invitationId/upgrade'
@@ -330,6 +350,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/sitemap.xml'
     | '/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
@@ -349,6 +370,7 @@ export interface FileRouteTypes {
     | '/templates/$category/$slug'
     | '/dashboard'
     | '/dev/templates'
+    | '/templates/$category'
     | '/dashboard/$invitationId/guests'
     | '/dashboard/$invitationId/responses'
     | '/dashboard/$invitationId/upgrade'
@@ -362,6 +384,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/sitemap.xml'
     | '/_authed/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
@@ -381,6 +404,7 @@ export interface FileRouteTypes {
     | '/templates/$category/$slug'
     | '/_authed/dashboard/'
     | '/dev/templates/'
+    | '/templates/$category/'
     | '/_authed/dashboard/$invitationId/guests'
     | '/_authed/dashboard/$invitationId/responses'
     | '/_authed/dashboard/$invitationId/upgrade'
@@ -395,6 +419,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ISlugRoute: typeof ISlugRoute
   IcsSlugRoute: typeof IcsSlugRoute
   OgChar123slugChar125DotpngRoute: typeof OgChar123slugChar125DotpngRoute
@@ -407,6 +432,7 @@ export interface RootRouteChildren {
   MediaLibrarySplatRoute: typeof MediaLibrarySplatRoute
   PreviewCategorySlugRoute: typeof PreviewCategorySlugRoute
   TemplatesCategorySlugRoute: typeof TemplatesCategorySlugRoute
+  TemplatesCategoryIndexRoute: typeof TemplatesCategoryIndexRoute
   ApiStorageFileSplatRoute: typeof ApiStorageFileSplatRoute
 }
 
@@ -459,6 +485,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/connect-google': {
@@ -587,6 +620,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreviewCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/templates/$category/': {
+      id: '/templates/$category/'
+      path: '/templates/$category'
+      fullPath: '/templates/$category/'
+      preLoaderRoute: typeof TemplatesCategoryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates/$category/$slug': {
       id: '/templates/$category/$slug'
       path: '/templates/$category/$slug'
@@ -675,6 +715,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ISlugRoute: ISlugRoute,
   IcsSlugRoute: IcsSlugRoute,
   OgChar123slugChar125DotpngRoute: OgChar123slugChar125DotpngRoute,
@@ -687,6 +728,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediaLibrarySplatRoute: MediaLibrarySplatRoute,
   PreviewCategorySlugRoute: PreviewCategorySlugRoute,
   TemplatesCategorySlugRoute: TemplatesCategorySlugRoute,
+  TemplatesCategoryIndexRoute: TemplatesCategoryIndexRoute,
   ApiStorageFileSplatRoute: ApiStorageFileSplatRoute,
 }
 export const routeTree = rootRouteImport

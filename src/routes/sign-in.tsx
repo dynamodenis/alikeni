@@ -1,3 +1,4 @@
+import { NOINDEX } from "@/lib/seo"
 import {
   Link,
   createFileRoute,
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/sign-in")({
     return { methods }
   },
   loader: ({ context }) => context.methods,
-  head: () => ({ meta: [{ title: "Sign in · Alikeni" }] }),
+  head: () => ({ meta: [{ title: "Sign in · Alikeni" }, NOINDEX] }),
   component: SignIn,
 })
 

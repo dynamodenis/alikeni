@@ -1,17 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { LandingPage } from "@/components/landing/LandingPage"
+import {
+  organizationJsonLd,
+  seo,
+  webApplicationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo"
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Alikeni · Invitations your guests will never forget" },
-      {
-        name: "description",
-        content:
-          "Beautiful invitation websites for weddings, birthdays and every celebration, with RSVP, countdown, map, music and wishes built in.",
-      },
-      { name: "theme-color", content: "#110b07" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Alikeni: Online Invitation Maker with RSVP",
+      description:
+        "Create a beautiful invitation website for your wedding, birthday or any event. RSVP, countdown, map, music and guest wishes built in. Free to start.",
+      path: "/",
+      imageAlt: "Alikeni, online invitations with RSVP",
+      jsonLd: [organizationJsonLd, websiteJsonLd, webApplicationJsonLd],
+    }),
   component: LandingPage,
 })

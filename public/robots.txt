@@ -1,3 +1,10 @@
-# https://www.robotstxt.org/robotstxt.html
+# https://alikeni.com
 User-agent: *
-Disallow:
+Allow: /
+# Account pages, private tools and machine endpoints.
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /dev/
+
+Sitemap: https://alikeni.com/sitemap.xml

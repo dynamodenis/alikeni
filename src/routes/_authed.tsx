@@ -1,4 +1,5 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
+import { NOINDEX } from "@/lib/seo"
 import { getSessionFn } from "@/server/auth/auth.functions"
 
 /**
@@ -14,5 +15,6 @@ export const Route = createFileRoute("/_authed")({
     }
     return { user }
   },
+  head: () => ({ meta: [NOINDEX] }),
   component: Outlet,
 })

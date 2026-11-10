@@ -1,3 +1,4 @@
+import { NOINDEX } from "@/lib/seo"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import {
@@ -10,7 +11,7 @@ import {
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset your password · Alikeni" }] }),
+  head: () => ({ meta: [{ title: "Reset your password · Alikeni" }, NOINDEX] }),
   component: ForgotPassword,
 })
 

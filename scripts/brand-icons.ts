@@ -11,6 +11,7 @@
 //   logo.svg               mark + "Alikeni" wordmark (cream) for dark grounds:
 //                          the site header
 //   logo-email.png         the same with a dark wordmark, for email headers
+//   og-default.png         1200×630 share card for the marketing pages
 //
 // The letter is converted to an outline (satori), so no file depends on a
 // font being installed. Rerun after changing the constants below.
@@ -182,6 +183,30 @@ await writeFile(
       .asPng()
   )
 )
+// The share card (og:image) for the home and template pages: 1200×630.
+const tagline = await outline(
+  "Online invitations with RSVP",
+  upright,
+  "normal",
+  60
+)
+const lockupSvg = lockup(CREAM)
+const lockupWidth = Number(/viewBox="0 0 (\d+) 512"/.exec(lockupSvg)?.[1])
+const lockupScale = 190 / 512
+const card = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+<defs><radialGradient id="glow" cx="50%" cy="0%" r="90%"><stop offset="0" stop-color="#3a2716"/><stop offset="0.6" stop-color="#1a120c"/><stop offset="1" stop-color="${INK}"/></radialGradient></defs>
+<rect width="1200" height="630" fill="url(#glow)"/>
+<rect x="28" y="28" width="1144" height="574" rx="28" fill="none" stroke="${GOLD}" stroke-opacity="0.35" stroke-width="2"/>
+<g transform="translate(${(600 - (lockupWidth * lockupScale) / 2).toFixed(1)} 170) scale(${lockupScale.toFixed(4)})">
+${lockupSvg
+  .replace(/<svg[^>]*>/, "")
+  .replace("</svg>", "")
+  .trim()}
+</g>
+${place(tagline, 600, 450, 44, GOLD)}
+</svg>
+`
+await writeFile(out("og-default.png"), png(card, 1200))
 console.log(
-  "Wrote favicon.svg, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png, logo.svg, logo-email.png to public/"
+  "Wrote favicon.svg, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png, logo.svg, logo-email.png, og-default.png to public/"
 )
