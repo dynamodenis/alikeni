@@ -9,6 +9,13 @@ const escape = (value: string) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
 
+/**
+ * The header logo (public/logo-email.png, from `pnpm brand:icons`). Always
+ * the production URL: an email client cannot load an image from localhost.
+ * Clients that block images show the alt text in the old header style.
+ */
+const LOGO_URL = "https://alikeni.com/logo-email.png"
+
 const ACCOUNT_FOOTER =
   "You received this because someone used this address on Alikeni. If it was not you, ignore this email."
 
@@ -36,7 +43,7 @@ function layout({ heading, body, action, url, footer }: Message) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border:1px solid #e9dcc4;border-radius:12px">
 <tr><td style="padding:32px">
-<p style="margin:0 0 24px;font-family:Georgia,serif;font-size:22px;color:#a8783a">Alikeni</p>
+<p style="margin:0 0 24px"><img src="${LOGO_URL}" alt="Alikeni" width="122" height="40" style="display:block;border:0;height:40px;width:122px;font-family:Georgia,serif;font-size:22px;color:#a8783a"></p>
 <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:24px;font-weight:normal">${escape(heading)}</h1>
 ${paragraphs}
 <a href="${escape(url)}" style="display:inline-block;background:#a8783a;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:15px">${escape(action)}</a>

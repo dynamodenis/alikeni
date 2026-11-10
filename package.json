@@ -19,6 +19,7 @@
     "smoke:check": "node scripts/smoke-check.mjs",
     "thumbs": "tsx scripts/thumbs.ts",
     "contact-sheet": "tsx scripts/contact-sheet.ts",
+    "brand:icons": "tsx scripts/brand-icons.ts",
     "gen:template": "tsx scripts/gen-template.ts",
     "music:add": "tsx --env-file-if-exists=.env scripts/music-library.ts add",
     "music:placeholders": "tsx --env-file-if-exists=.env scripts/music-library.ts placeholders",
