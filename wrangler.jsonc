@@ -38,8 +38,8 @@
   "vars": {
     "NODE_ENV": "production",
     "STORAGE_DRIVER": "binding",
-    // Replace with the deployed origin (no trailing slash).
-    "APP_ORIGIN": "https://alikeni.example.workers.dev",
+    // The deployed origin (no trailing slash); change it when a custom domain is added.
+    "APP_ORIGIN": "https://alikeni.dmbugua66.workers.dev",
     "GEOCODE_PROVIDER": "nominatim",
     // Currencies the Paystack account can charge (KES, USD).
     "PAYSTACK_CURRENCIES": "KES",

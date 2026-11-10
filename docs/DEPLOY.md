@@ -17,7 +17,7 @@ it) target Workers.
 | `pnpm build`          | Node    | `dist/`, served by `pnpm start` (`scripts/serve-dist.mjs`)                                                                            |
 | `pnpm build:worker`   | Workers | `ALIKENI_TARGET=workers`: `@cloudflare/vite-plugin` runs the SSR environment in workerd; output in `dist-worker/`                     |
 | `pnpm preview:worker` | Workers | `build:worker`, then `wrangler dev` (local workerd, local R2 simulation, Hyperdrive → `localConnectionString`)                        |
-| `pnpm deploy`         | Workers | `build:worker`, then `wrangler deploy`                                                                                                |
+| `pnpm run deploy`     | Workers | `build:worker`, then `wrangler deploy`                                                                                                |
 | `pnpm cf-typegen`     | —       | Regenerates `worker-configuration.d.ts` (binding and runtime types) from `wrangler.jsonc` and `.dev.vars`; rerun after editing either |
 
 `vite.config.ts` reads `ALIKENI_TARGET`. With `workers` it adds
@@ -152,7 +152,7 @@ transaction itself, the tunnel only carries the webhook.
 ### 4. Deploy
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
 
 Check: `/`, `/templates`, sign-up (the confirmation email arrives via
