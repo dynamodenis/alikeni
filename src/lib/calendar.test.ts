@@ -83,12 +83,12 @@ describe("ics", () => {
     const ics = buildIcs(
       [
         {
-          uid: "amara-1@festly",
+          uid: "amara-1@alikeni",
           title: "Akad, Nikah",
           start: "2027-06-12T09:00:00+03:00",
           location: "Hall; Main",
           description: "Line 1\nLine 2",
-          url: "https://festly.app/i/amara",
+          url: "https://alikeni.app/i/amara",
         },
       ],
       { now: new Date("2027-01-01T00:00:00Z"), name: "Amara & Kofi" }
@@ -96,13 +96,13 @@ describe("ics", () => {
     expect(ics.startsWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n")).toBe(true)
     expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true)
     expect(ics).not.toMatch(/[^\r]\n/)
-    expect(ics).toContain("UID:amara-1@festly")
+    expect(ics).toContain("UID:amara-1@alikeni")
     expect(ics).toContain("DTSTAMP:20270101T000000Z")
     expect(ics).toContain("DTSTART:20270612T060000Z")
     expect(ics).toContain("DTEND:20270612T080000Z")
     expect(ics).toContain("SUMMARY:Akad\\, Nikah")
     expect(ics).toContain("LOCATION:Hall\\; Main")
     expect(ics).toContain("DESCRIPTION:Line 1\\nLine 2")
-    expect(ics).toContain("URL:https://festly.app/i/amara")
+    expect(ics).toContain("URL:https://alikeni.app/i/amara")
   })
 })

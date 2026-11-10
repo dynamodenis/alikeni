@@ -74,7 +74,7 @@ export function Footer({ className }: { className?: string }) {
           href="/"
           className="underline-offset-4 hover:text-inv-fg hover:underline"
         >
-          Festly
+          Alikeni
         </a>
       </p>
     </footer>

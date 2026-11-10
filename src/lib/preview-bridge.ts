@@ -8,7 +8,7 @@ import { MotionLevel } from "@/templates/_shared/schema"
 export const PreviewMessage = z.discriminatedUnion("type", [
   /** Parent → preview: override theme fields without reloading. */
   z.object({
-    type: z.literal("festly:theme"),
+    type: z.literal("alikeni:theme"),
     paletteId: z.string().max(60).optional(),
     fontPairId: z.string().max(60).optional(),
     motionLevel: MotionLevel.optional(),
@@ -18,13 +18,16 @@ export const PreviewMessage = z.discriminatedUnion("type", [
    * renderer (resolveConfig), so it is only shape-checked here.
    */
   z.object({
-    type: z.literal("festly:config"),
+    type: z.literal("alikeni:config"),
     config: z.record(z.string(), z.unknown()),
   }),
-  /** Parent → preview: "are you there?" (the preview answers `festly:ready`). */
-  z.object({ type: z.literal("festly:ping") }),
+  /** Parent → preview: "are you there?" (the preview answers `alikeni:ready`). */
+  z.object({ type: z.literal("alikeni:ping") }),
   /** Preview → parent: the template has rendered and can take messages. */
-  z.object({ type: z.literal("festly:ready"), templateId: z.string().max(80) }),
+  z.object({
+    type: z.literal("alikeni:ready"),
+    templateId: z.string().max(80),
+  }),
 ])
 export type PreviewMessage = z.infer<typeof PreviewMessage>
 

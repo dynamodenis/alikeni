@@ -8,7 +8,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Festly brand: espresso browns + one gold. Used by the marketing site. */
+/* Alikeni brand: espresso browns + one gold. Used by the marketing site. */
 @theme {
   --font-display: "Playfair Display Variable", Georgia, serif;
   --color-ink: #110b07;
@@ -795,7 +795,7 @@
   }
 }
 
-/* ---- Festly brand type & interaction system (marketing pages) ----
+/* ---- Alikeni brand type & interaction system (marketing pages) ----
    One definition per role so headings, labels, links and numbers match. */
 @utility heading-1 {
   @apply font-display text-5xl leading-[1.05] font-normal tracking-tight text-cream sm:text-6xl lg:text-7xl;
@@ -832,11 +832,11 @@
   font-variant-numeric: lining-nums;
 }
 
-/* ---- Festly app chrome (editor) ----
+/* ---- Alikeni app chrome (editor) ----
    Remaps shadcn's tokens to the brand so ui/* components render espresso and
    gold. Applied on the editor root and on <body> while the editor is open
    (so portalled popovers match). */
-.theme-festly {
+.theme-alikeni {
   color-scheme: dark;
   --background: #110b07;
   --foreground: #f3e8d6;

@@ -28,7 +28,7 @@ re-implemented inside our block system.
 
 Research: `reports/Background music catalogs for invitations.md` (2026-10-20).
 
-- **Festly library** (R2): curated CC BY / Pixabay-licensed tracks; credit line shown in the invitation footer.
+- **Alikeni library** (R2): curated CC BY / Pixabay-licensed tracks; credit line shown in the invitation footer.
 - **Host uploads** (R2): host confirms rights (`rightsConfirmedAt` stored with the source).
 - **SoundCloud**: reference only (permalink, track id, title, artist via keyless oEmbed); played in SoundCloud's own visible widget with credit and backlink, per SoundCloud's terms.
 - Ruled out by terms: Spotify (Widget Terms forbid commercial use), YouTube (no background players), Apple Music, Deezer, Jamendo free API.

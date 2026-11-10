@@ -26,7 +26,7 @@ const DEVICE_MAX = {
 /**
  * Bare, chrome-free render of a template with its sample content. Used by the
  * gallery iframe, the full-screen preview link and `pnpm thumbs`. Theme
- * fields can be overridden by query string or, live, by `festly:theme`
+ * fields can be overridden by query string or, live, by `alikeni:theme`
  * messages from the parent page.
  */
 export const Route = createFileRoute("/preview/$category/$slug")({
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/preview/$category/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.name ?? "Template"} preview · Festly` },
+      { title: `${loaderData?.name ?? "Template"} preview · Alikeni` },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -62,15 +62,15 @@ function PreviewPage() {
     (message) => {
       // Either page may hydrate first, so readiness is a handshake: the
       // preview announces itself on mount and answers every ping.
-      if (message.type === "festly:ping") {
-        postToWindow(window.parent, { type: "festly:ready", templateId: id })
+      if (message.type === "alikeni:ping") {
+        postToWindow(window.parent, { type: "alikeni:ready", templateId: id })
         return
       }
-      if (message.type === "festly:config") {
+      if (message.type === "alikeni:config") {
         setPushed(message.config)
         return
       }
-      if (message.type !== "festly:theme") return
+      if (message.type !== "alikeni:theme") return
       setLive({
         paletteId:
           message.paletteId && hasPalette(message.paletteId)
@@ -113,7 +113,7 @@ function PreviewPage() {
 function ReadySignal({ templateId }: { templateId: string }) {
   useEffect(() => {
     if (window.parent !== window) {
-      postToWindow(window.parent, { type: "festly:ready", templateId })
+      postToWindow(window.parent, { type: "alikeni:ready", templateId })
     }
   }, [templateId])
   return null

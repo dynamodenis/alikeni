@@ -1,6 +1,6 @@
 # Major streaming platforms as host-selected background music on a public invitation page (as of 2026-10-20)
 
-Use case: Festly (commercial) public invitation page; guest taps "Open invitation"; music starts and keeps playing while they scroll; host picks a song; Festly stores only a reference (id/title/artist/url).
+Use case: Alikeni (commercial) public invitation page; guest taps "Open invitation"; music starts and keeps playing while they scroll; host picks a song; Alikeni stores only a reference (id/title/artist/url).
 
 Research date: 2026-10-20. Pages checked live that day. YouTube Developer Policies and the quota page both show "Last updated 2026-10-15 UTC".
 
@@ -17,7 +17,7 @@ Technically, the IFrame API can do almost everything needed: play after a click,
 - Autoplay param note: "If you enable Autoplay, playback will occur without any user interaction with the player; playback data collection and sharing will therefore occur upon page load." — [Player Parameters](https://developers.google.com/youtube/player_parameters)
 - The IFrame API has `mute()`/`unMute()` and `setVolume()` ("Accepts an integer between 0 and 100"), plus `loadVideoById` with start/end seconds. — [IFrame Player API reference](https://developers.google.com/youtube/iframe_api_reference)
 - There is an `onAutoplayBlocked` event. Browsers may block calls such as `playVideo`: "Instances where this policy may be triggered include unmuted playback without user interaction." — [IFrame Player API reference](https://developers.google.com/youtube/iframe_api_reference)
-- "A playback only counts toward a video's official view count if it is initiated via a native play button in the player." This means a programmatic `playVideo()` from Festly's "Open invitation" button would not count views. — [IFrame Player API reference](https://developers.google.com/youtube/iframe_api_reference)
+- "A playback only counts toward a video's official view count if it is initiated via a native play button in the player." This means a programmatic `playVideo()` from Alikeni's "Open invitation" button would not count views. — [IFrame Player API reference](https://developers.google.com/youtube/iframe_api_reference)
 
 **Required Minimum Functionality (size / visibility / autoplay / overlays)**
 - "Embedded players must have a viewport that is at least 200px by 200px." "If the player displays controls, it must be large enough to fully display the controls without shrinking the viewport below the minimum size." "We recommend 16:9 players be at least 480 pixels wide and 270 pixels tall." — [YouTube RMF](https://developers.google.com/youtube/terms/required-minimum-functionality)
@@ -47,8 +47,8 @@ Technically, the IFrame API can do almost everything needed: play after a click,
 - A visible player of at least 200x200 that the guest can see and control while scrolling (e.g., sticky or floating) looks consistent with the RMF text if nothing overlays it and the "Open invitation" tap counts as user-initiated playback. A 200x200 floating video box is a heavy UI element on a phone-sized invitation, though.
 - The bigger policy risk is the concept itself. Presenting a music video purely as page background audio (video hidden, scrolled away or de-emphasized) arguably "isolate[s] the audio ... components" (III.I.7). That is a judgment call, and the policies have no explicit "background music for a website" clause.
 - Once the guest scrolls the player off-screen, a page-anchored player arguably becomes "not displayed in the page ... the user is viewing". The definition targets players not displayed in the page/tab, so a sticky player stays safer.
-- Festly can sell its own product (III.G.2), but it should not market "YouTube music" as a paid feature, which edges toward III.G.1.b.
-- Mobile: a guest's tap on Festly's own button followed by `player.playVideo()` (via postMessage into the cross-origin iframe) is the standard pattern and usually works in Chrome. iOS Safari is stricter about user-activation crossing into cross-origin iframes. Expect cases where `onAutoplayBlocked` fires and the guest must tap the native YouTube play button. Pre-creating the player before the tap and calling `playVideo()` synchronously in the click handler improves odds. This is engineering knowledge, not from an official source.
+- Alikeni can sell its own product (III.G.2), but it should not market "YouTube music" as a paid feature, which edges toward III.G.1.b.
+- Mobile: a guest's tap on Alikeni's own button followed by `player.playVideo()` (via postMessage into the cross-origin iframe) is the standard pattern and usually works in Chrome. iOS Safari is stricter about user-activation crossing into cross-origin iframes. Expect cases where `onAutoplayBlocked` fires and the guest must tap the native YouTube play button. Pre-creating the player before the tap and calling `playVideo()` synchronously in the click handler improves odds. This is engineering knowledge, not from an official source.
 
 ### Gaps
 - Found no official Google statement on whether `playVideo()` triggered by a parent-page click reliably starts unmuted audio on iOS Safari / Android Chrome. Needs device testing.
@@ -94,7 +94,7 @@ Spotify is a poor fit. Since 27 Nov 2024, new apps lose 30-second preview URLs (
 
 ### Inferences
 - An embed shown visibly on the invitation, started by the guest's tap via `controller.play()`, is technically feasible. Most anonymous guests would hear only about 30s and then get a login prompt, which fails the "keeps playing while they scroll" goal.
-- Festly is a commercial product (likely selling invitation websites), so "Play Button may not be used for commercial purposes" and the Policy's "no commercial use for SDAs" plus "no sync with visual media" create real legal risk. The carve-out "embedding ... on Websites that contain advertising" is narrow. A plain link-out or visible "Listen on Spotify" embed as a non-autoplaying extra is the conservative option.
+- Alikeni is a commercial product (likely selling invitation websites), so "Play Button may not be used for commercial purposes" and the Policy's "no commercial use for SDAs" plus "no sync with visual media" create real legal risk. The carve-out "embedding ... on Websites that contain advertising" is narrow. A plain link-out or visible "Listen on Spotify" embed as a non-autoplaying extra is the conservative option.
 - Hiding the embed (to use it as background audio) would breach "shall not obfuscate".
 - Preview-URL-based audio (an `<audio>` element) is not available to new apps and would breach V.2.2 ("only to promote the underlying content") anyway.
 
@@ -107,7 +107,7 @@ Spotify is a poor fit. Since 27 Nov 2024, new apps lose 30-second preview URLs (
 ## Deezer (widget, simple API previews, terms)
 
 ### Takeaway
-The public "simple API" still works without a key as of 2026-10-20 and returns a `preview` MP3 URL (30s clip) on tracks. The widget at widget.deezer.com embeds track/album/playlist/artist/podcast iframes. However, Deezer's developer Terms restrict use to non-commercial, "strictly private use within a family scope," with other uses requiring prior approval. That blocks Festly without a deal.
+The public "simple API" still works without a key as of 2026-10-20 and returns a `preview` MP3 URL (30s clip) on tracks. The widget at widget.deezer.com embeds track/album/playlist/artist/podcast iframes. However, Deezer's developer Terms restrict use to non-commercial, "strictly private use within a family scope," with other uses requiring prior approval. That blocks Alikeni without a deal.
 
 ### Cited Findings
 - Live test 2026-10-20: `GET https://api.deezer.com/search?q=perfect%20ed%20sheeran&limit=1` (no auth) returned track `id` 142986206, `title`, `isrc`, `link`, `duration`, artist/picture fields, and `preview: https://cdnt-preview.dzcdn.net/api/1/1/f/...mp3?hdnea=exp=1792511172~...~hmac=...`. The preview URL is a signed, expiring token URL (`exp=` / `hmac=`), so it should be re-fetched rather than stored. — [Deezer API search](https://api.deezer.com/search?q=perfect%20ed%20sheeran&limit=1)
@@ -117,7 +117,7 @@ The public "simple API" still works without a key as of 2026-10-20 and returns a
 - Widget: embeds Album, Playlist, Track, Artist, Podcast, Episode. Theme, size and tracklist options. The sample iframe grants `encrypted-media; clipboard-write` but not `autoplay`. The page lists no JS control API and no autoplay option. — [Deezer Widget](https://widget.deezer.com/)
 
 ### Inferences
-- Technically the easiest route to a legal-looking 30s clip without keys. Contractually, Festly (commercial, public) falls outside "strictly private use within a family scope" and the "no moneys" clause, so it would need Deezer's prior approval.
+- Technically the easiest route to a legal-looking 30s clip without keys. Contractually, Alikeni (commercial, public) falls outside "strictly private use within a family scope" and the "no moneys" clause, so it would need Deezer's prior approval.
 - A 30-second clip doesn't meet "keeps playing while they scroll" unless looped. Looping a preview as background is even further from "promote the underlying content"-style norms.
 - The widget has no documented programmatic play, so the guest would tap play inside the widget itself.
 

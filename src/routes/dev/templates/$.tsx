@@ -28,7 +28,7 @@ export const Route = createFileRoute("/dev/templates/$")({
     return { id, name: module.meta.name, defaults: module.defaults }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? "Template"} · Festly dev` }],
+    meta: [{ title: `${loaderData?.name ?? "Template"} · Alikeni dev` }],
   }),
   component: TemplatePage,
 })

@@ -78,7 +78,7 @@ class FakeBucket implements BucketLike {
 }
 
 const SECRET = "binding-test-secret-1234567890"
-const ORIGIN = "https://festly.example.com"
+const ORIGIN = "https://alikeni.example.com"
 const KEY = "u/user-1/image/abc.webp"
 
 function driver(publicUrl?: string) {
@@ -268,7 +268,7 @@ describe("binding storage configuration", () => {
     NODE_ENV: "production",
     BETTER_AUTH_SECRET: "x".repeat(32),
     RESEND_API_KEY: "re_test",
-    EMAIL_FROM: "Festly <hello@example.com>",
+    EMAIL_FROM: "Alikeni <hello@example.com>",
   }
 
   it("selects the binding when asked, or when bound and R2 keys are absent", () => {

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authed/dashboard/$invitationId/guests")(
     },
     head: () => ({
       meta: [
-        { title: "Guests · Festly" },
+        { title: "Guests · Alikeni" },
         { name: "robots", content: "noindex" },
       ],
     }),

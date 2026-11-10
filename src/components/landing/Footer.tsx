@@ -15,7 +15,7 @@ export function Footer() {
           ))}
         </ul>
         <p className="text-sm text-sand">
-          © <span className="nums">{new Date().getFullYear()}</span> Festly
+          © <span className="nums">{new Date().getFullYear()}</span> Alikeni
         </p>
       </div>
     </footer>

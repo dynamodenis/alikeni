@@ -7,7 +7,7 @@ import { listMyInvitationsFn } from "@/server/invitations/invitations.functions"
 
 export const Route = createFileRoute("/_authed/dashboard/")({
   loader: () => listMyInvitationsFn(),
-  head: () => ({ meta: [{ title: "My invitations · Festly" }] }),
+  head: () => ({ meta: [{ title: "My invitations · Alikeni" }] }),
   component: Dashboard,
 })
 

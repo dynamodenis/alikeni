@@ -16,12 +16,12 @@ export function DashboardShell({
 }) {
   // Portalled menus and dialogs render on <body>; give them the brand tokens too.
   useEffect(() => {
-    document.body.classList.add("theme-festly")
-    return () => document.body.classList.remove("theme-festly")
+    document.body.classList.add("theme-alikeni")
+    return () => document.body.classList.remove("theme-alikeni")
   }, [])
 
   return (
-    <div className="theme-festly min-h-svh bg-background text-foreground">
+    <div className="theme-alikeni min-h-svh bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Logo />

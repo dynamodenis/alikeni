@@ -28,14 +28,14 @@ export function EditorPreview({
 
   const send = () =>
     postToWindow(frame.current?.contentWindow, {
-      type: "festly:config",
+      type: "alikeni:config",
       config: latest.current,
     })
 
   usePreviewMessages(
     () => frame.current?.contentWindow,
     (message) => {
-      if (message.type === "festly:ready") {
+      if (message.type === "alikeni:ready") {
         setReady(true)
         send()
       }
@@ -56,7 +56,7 @@ export function EditorPreview({
   }, [config, ready])
 
   useEffect(() => {
-    postToWindow(frame.current?.contentWindow, { type: "festly:ping" })
+    postToWindow(frame.current?.contentWindow, { type: "alikeni:ping" })
   }, [])
 
   return (
@@ -76,7 +76,7 @@ export function EditorPreview({
         title="Live preview of your invitation"
         className="h-full w-full border-0"
         onLoad={() =>
-          postToWindow(frame.current?.contentWindow, { type: "festly:ping" })
+          postToWindow(frame.current?.contentWindow, { type: "alikeni:ping" })
         }
       />
     </DeviceFrame>

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/reset-password")({
     token: z.string().max(200).optional().catch(undefined),
     error: z.string().max(60).optional().catch(undefined),
   }),
-  head: () => ({ meta: [{ title: "Choose a new password · Festly" }] }),
+  head: () => ({ meta: [{ title: "Choose a new password · Alikeni" }] }),
   component: ResetPassword,
 })
 

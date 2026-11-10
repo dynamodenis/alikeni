@@ -15,7 +15,7 @@ export function EndedInvitation({
   return (
     <main
       lang={INTL_LOCALE[locale]}
-      className="theme-festly grain flex min-h-svh flex-col items-center justify-center bg-ink px-4 py-10 text-center text-cream"
+      className="theme-alikeni grain flex min-h-svh flex-col items-center justify-center bg-ink px-4 py-10 text-center text-cream"
     >
       <div className="w-full max-w-sm rounded-2xl border border-gold/15 bg-[#1a120c]/80 p-6 sm:p-8">
         <div className="mb-8 flex justify-center">

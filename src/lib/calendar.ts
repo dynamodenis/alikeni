@@ -106,7 +106,7 @@ export function buildIcs(
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Festly//Invitations//EN",
+    "PRODID:-//Alikeni//Invitations//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     ...(options.name ? [`X-WR-CALNAME:${escapeIcsText(options.name)}`] : []),

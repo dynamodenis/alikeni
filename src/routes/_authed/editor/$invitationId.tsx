@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authed/editor/$invitationId")({
   },
   head: () => ({
     meta: [
-      { title: "Editor · Festly" },
+      { title: "Editor · Alikeni" },
       { name: "robots", content: "noindex" },
     ],
   }),

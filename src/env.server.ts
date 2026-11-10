@@ -72,7 +72,7 @@ const serverEnvSchema = z
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     /** Resend API key. Without it, development prints emails to the server log. */
     RESEND_API_KEY: z.string().min(1).optional(),
-    /** Sender, e.g. "Festly <hello@yourdomain.com>" (domain verified in Resend). */
+    /** Sender, e.g. "Alikeni <hello@yourdomain.com>" (domain verified in Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
     /**
      * When nobody is signed in, act as a fixed dev user instead of refusing.

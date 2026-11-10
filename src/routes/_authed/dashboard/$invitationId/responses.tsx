@@ -16,7 +16,7 @@ export const Route = createFileRoute(
   },
   head: () => ({
     meta: [
-      { title: "Responses · Festly" },
+      { title: "Responses · Alikeni" },
       { name: "robots", content: "noindex" },
     ],
   }),

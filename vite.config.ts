@@ -8,12 +8,12 @@ import tailwindcss from "@tailwindcss/vite"
 
 /**
  * Build target. `pnpm dev`, `pnpm build` and Vitest run on Node (the default).
- * `pnpm build:worker` sets FESTLY_TARGET=workers: the Cloudflare plugin runs
+ * `pnpm build:worker` sets ALIKENI_TARGET=workers: the Cloudflare plugin runs
  * the SSR environment in workerd, and the platform module switches to the
  * Workers adapters (Hyperdrive per request, R2 binding, precompiled WASM).
  * See docs/DEPLOY.md.
  */
-const workers = process.env.FESTLY_TARGET === "workers"
+const workers = process.env.ALIKENI_TARGET === "workers"
 
 const runtimeFile = fileURLToPath(
   new URL(

@@ -219,13 +219,13 @@ export function Editor({ draft }: { draft: DraftData }) {
 
   // Popovers portal to <body>; give them the brand theme too.
   useEffect(() => {
-    document.body.classList.add("theme-festly")
-    return () => document.body.classList.remove("theme-festly")
+    document.body.classList.add("theme-alikeni")
+    return () => document.body.classList.remove("theme-alikeni")
   }, [])
 
   if (!module) {
     return (
-      <div className="theme-festly grid min-h-svh place-items-center bg-background text-muted-foreground">
+      <div className="theme-alikeni grid min-h-svh place-items-center bg-background text-muted-foreground">
         <LoaderCircle
           className="size-8 animate-spin text-primary"
           aria-label="Loading editor"
@@ -333,7 +333,7 @@ function EditorLoaded({
 
   return (
     <EditorContext.Provider value={api}>
-      <div className="theme-festly flex h-svh flex-col bg-background text-foreground">
+      <div className="theme-alikeni flex h-svh flex-col bg-background text-foreground">
         <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-4">
             <Logo />
@@ -515,7 +515,7 @@ function EditorLoaded({
       </div>
 
       <Dialog open={autosave.state === "conflict"}>
-        <DialogContent showCloseButton={false} className="theme-festly">
+        <DialogContent showCloseButton={false} className="theme-alikeni">
           <DialogHeader>
             <DialogTitle>This invitation changed somewhere else</DialogTitle>
             <DialogDescription>

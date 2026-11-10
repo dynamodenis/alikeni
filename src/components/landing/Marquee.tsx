@@ -16,7 +16,7 @@ export function Marquee() {
     <div className="relative overflow-hidden border-y border-gold/10 bg-umber/50 [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)] py-6">
       <ul
         className="flex w-max animate-marquee items-center gap-10"
-        aria-label="Events Festly is made for"
+        aria-label="Events Alikeni is made for"
       >
         {items.map((event, i) => (
           <li

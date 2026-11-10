@@ -30,7 +30,7 @@ import { verifySignature, type PaystackTransaction } from "./paystack.server"
 const client = new PGlite()
 const db = drizzle(client, { schema, casing: "snake_case" })
 const SECRET = "sk_test_abc123"
-const ORIGIN = "https://festly.test"
+const ORIGIN = "https://alikeni.test"
 const OTHER = { id: "other-user", email: "other@example.com", name: "Other" }
 let invitationId = ""
 

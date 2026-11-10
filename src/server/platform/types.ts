@@ -1,4 +1,4 @@
-// The seam between Festly and the host runtime. Two implementations exist:
+// The seam between Alikeni and the host runtime. Two implementations exist:
 // `runtime.node.ts` (dev server, Node build, Vitest) and `runtime.workers.ts`
 // (Cloudflare Workers build). Code imports `@/server/platform/runtime`; the
 // Vite alias in vite.config.ts picks the file, so no runtime `if` decides it.
@@ -7,7 +7,7 @@ import type * as schema from "@/server/db/schema"
 
 export type Db = NodePgDatabase<typeof schema>
 
-/** The subset of an R2 object's metadata Festly reads. */
+/** The subset of an R2 object's metadata Alikeni reads. */
 export type BucketObjectInfo = {
   size: number
   httpMetadata?: { contentType?: string }

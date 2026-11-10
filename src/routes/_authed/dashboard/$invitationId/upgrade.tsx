@@ -33,7 +33,7 @@ export const Route = createFileRoute(
   },
   head: () => ({
     meta: [
-      { title: "Premium · Festly" },
+      { title: "Premium · Alikeni" },
       { name: "robots", content: "noindex" },
     ],
   }),

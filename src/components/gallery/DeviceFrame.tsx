@@ -81,7 +81,7 @@ export function DeviceFrame({
               <span className="size-3 rounded-full bg-[#febc2e]" />
               <span className="size-3 rounded-full bg-[#28c840]" />
               <span className="mx-auto w-1/3 rounded-md bg-white/5 py-1 text-center text-xs text-white/40">
-                festly.app
+                alikeni.app
               </span>
             </div>
           )}

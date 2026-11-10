@@ -1,4 +1,4 @@
-# SoundCloud as a background-music source for Festly invitation pages (state as of Oct 2026)
+# SoundCloud as a background-music source for Alikeni invitation pages (state as of Oct 2026)
 
 Research date: 2026-10-20. Primary sources: developers.soundcloud.com (docs, API Terms of Use, blog), soundcloud.com/terms-of-use (fetched raw HTML 2026-10-20), help.soundcloud.com, live oEmbed call. Some help-center pages returned HTTP 403 to the fetcher; their content is reported only from search-result snippets and is flagged.
 
@@ -19,7 +19,7 @@ The HTML5 Widget (iframe at `w.soundcloud.com/player/` + `https://w.soundcloud.c
 
 ### Inferences
 - Loop pattern: `widget.bind(SC.Widget.Events.FINISH, () => { widget.seekTo(0); widget.play(); })`.
-- For a "now playing" chip in Festly, use `getCurrentSound` (returns a sound object with title/user/permalink) after `READY`.
+- For a "now playing" chip in Alikeni, use `getCurrentSound` (returns a sound object with title/user/permalink) after `READY`.
 - 166px compact (visual=false) is the smallest official form. `visual=true` at ~300–450px gives the big artwork player.
 
 ### Gaps
@@ -45,10 +45,10 @@ No SoundCloud document explicitly permits or forbids a hidden or tiny widget use
 - Custom players must credit the uploader and SoundCloud and link to the track URL. — [API Guide](https://developers.soundcloud.com/docs/api/guide)
 
 ### Inferences
-- A plain oEmbed/widget embed (no API key) is governed mainly by the consumer ToU player clause. An invitation site is not "dedicated to a particular artist or genre" and is not a "content service of which Content ... forms a material part". That holds as long as music is incidental and Festly doesn't build a SoundCloud music browser/streaming product. Risk: a host-facing in-app search of the SoundCloud catalogue, plus paid tiers, could be read as Festly aggregating SoundCloud content into a commercial service. That would bring in the API Terms §06 restrictions, under which "some commercial purposes" are decided case by case.
+- A plain oEmbed/widget embed (no API key) is governed mainly by the consumer ToU player clause. An invitation site is not "dedicated to a particular artist or genre" and is not a "content service of which Content ... forms a material part". That holds as long as music is incidental and Alikeni doesn't build a SoundCloud music browser/streaming product. Risk: a host-facing in-app search of the SoundCloud catalogue, plus paid tiers, could be read as Alikeni aggregating SoundCloud content into a commercial service. That would bring in the API Terms §06 restrictions, under which "some commercial purposes" are decided case by case.
 - Hiding the widget (0px, display:none, offscreen) is not expressly banned. It does sit badly with the "clearly visible backlinks" attribution rule (API Terms), with the no-interference-with-ads rule, and with SoundCloud's discretionary block right. Recommended: keep a visible compact player, or a small visible mini-player with artwork, title, artist, "SoundCloud" credit and a link to the permalink. Avoid styling that implies the artist endorses the event.
-- Storing only the track URL/id/title/artist/permalink (metadata, not audio) fits §05. Festly should re-validate references, since uploaders can delete tracks or disable embeds, and handle ERROR gracefully.
-- If Festly sells premium invitations, don't gate SoundCloud music behind a paywall ("in-app purchases which allow access to content ... already available via the SoundCloud platform").
+- Storing only the track URL/id/title/artist/permalink (metadata, not audio) fits §05. Alikeni should re-validate references, since uploaders can delete tracks or disable embeds, and handle ERROR gracefully.
+- If Alikeni sells premium invitations, don't gate SoundCloud music behind a paywall ("in-app purchases which allow access to content ... already available via the SoundCloud platform").
 
 ### Gaps
 - No official guidance found on minimum visible size, opacity or "background-only" widget use. Written consent from SoundCloud would be the only certain route.
@@ -71,12 +71,12 @@ Registration reopened as self-service on 18 May 2026, but only for Artist Pro su
 - Older figure: secondary reporting of a 15,000 play-requests per 24h cap. — [Tiny Mix Tapes](https://tinymixtapes.com/node/146204%3Fver%3Damp) (old, undated in result; superseded by the rate-limits page above)
 
 ### Inferences
-- Festly would need an Artist Pro subscription on a company account to get keys. Host-side search should be proxied server-side (TanStack Start server function) with one cached client-credentials token per hour, to stay within 50 tokens per 12h.
-- 1,500 stream requests/day across all guests makes self-hosted streaming (section 4) unworkable at scale without the 10× approval. Widget plays don't touch Festly's API quota (see gap).
+- Alikeni would need an Artist Pro subscription on a company account to get keys. Host-side search should be proxied server-side (TanStack Start server function) with one cached client-credentials token per hour, to stay within 50 tokens per 12h.
+- 1,500 stream requests/day across all guests makes self-hosted streaming (section 4) unworkable at scale without the 10× approval. Widget plays don't touch Alikeni's API quota (see gap).
 
 ### Gaps
 - Artist Pro price and whether a business may hold it for API purposes: not stated on the docs page.
-- Whether widget plays count toward any app quota: the "Play Request Limit" section exists in the nav, but its content wasn't retrieved. The widget uses no Festly client_id, so presumably no.
+- Whether widget plays count toward any app quota: the "Play Request Limit" section exists in the nav, but its content wasn't retrieved. The widget uses no Alikeni client_id, so presumably no.
 - Whether `/tracks?q=` search falls under the 3,000/h "search" bucket or the general bucket: unclear.
 
 ## 4. Stream URLs in your own `<audio>`, formats, Go+/snippets, streamable, embeddable_by, geo
@@ -94,7 +94,7 @@ Technically yes: `/tracks/{urn}/streams` returns HLS AAC (`hls_aac_160_url`, `hl
 - When a creator disables embedding, embed requests fail (WordPress ticket closed as creator preference). — [WordPress Trac #46843](https://core.trac.wordpress.org/ticket/46843)
 
 ### Inferences
-- For Festly, the widget is the far better route. It needs no API key, no stream quota, no hls.js, and handles Go+/geo/monetization itself. Its ads are SoundCloud's, so you aren't "interfering". Uploader settings are respected automatically.
+- For Alikeni, the widget is the far better route. It needs no API key, no stream quota, no hls.js, and handles Go+/geo/monetization itself. Its ads are SoundCloud's, so you aren't "interfering". Uploader settings are respected automatically.
 - In host-side search results, filter to `access=playable`. Warn hosts when a pick is a preview-only (Go+) track, because guests would hear 30s and then FINISH. Looping would replay the snippet.
 - `streamable` / `embeddable_by` fields: legacy track fields. Not found in current docs (see gap). Use `access` plus a widget ERROR/oEmbed failure as the practical signals.
 
@@ -113,7 +113,7 @@ Technically yes: `/tracks/{urn}/streams` returns HLS AAC (`hls_aac_160_url`, `hl
 - Live response (2026-10-20, no auth, HTTP 200): `{"version":1.0,"type":"rich","provider_name":"SoundCloud","height":166,"width":"100%","title":"Flickermood by Forss","description":...,"thumbnail_url":"https://i1.sndcdn.com/artworks-...-t500x500.jpg","html":"<iframe ... src=\"https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F293&show_artwork=true&maxheight=166\"></iframe>","author_name":"Forss","author_url":"https://soundcloud.com/forss"}` — [oEmbed live call](https://soundcloud.com/oembed?format=json&url=https://soundcloud.com/forss/flickermood)
 
 ### Inferences
-- Festly can store `{permalink, trackId (parsed from html src), title, author_name, author_url, thumbnail_url}`. The `title` is "Track by Artist", so author_name gives the artist. Re-call oEmbed on publish/open to detect removed or embed-disabled tracks (expect a non-200).
+- Alikeni can store `{permalink, trackId (parsed from html src), title, author_name, author_url, thumbnail_url}`. The `title` is "Track by Artist", so author_name gives the artist. Re-call oEmbed on publish/open to detect removed or embed-disabled tracks (expect a non-200).
 - A paste-link picker avoids the Artist Pro requirement entirely. Only in-app catalogue search needs API keys.
 
 ### Gaps

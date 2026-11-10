@@ -1,5 +1,5 @@
 /**
- * Festly's curated music library. Metadata lives in music-library.json (managed
+ * Alikeni's curated music library. Metadata lives in music-library.json (managed
  * by `pnpm music:add` / `pnpm music:placeholders`); the audio files live in
  * storage under `library/` and are played from the stable route
  * /media/library/<file>, which redirects to storage. Invitations store only the

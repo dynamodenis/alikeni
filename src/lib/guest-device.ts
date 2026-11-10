@@ -7,7 +7,7 @@
 /** What the server accepts as a device id (base64url, 16–64 chars). */
 export const DEVICE_ID_PATTERN = /^[A-Za-z0-9_-]{16,64}$/
 
-const STORAGE_KEY = "festly:device"
+const STORAGE_KEY = "alikeni:device"
 let memo: string | undefined
 
 function randomId(): string {

@@ -19,7 +19,7 @@ const r2Config = {
   accountId: "acc123",
   accessKeyId: "AKIDEXAMPLE",
   secretAccessKey: "secret",
-  bucket: "festly",
+  bucket: "alikeni",
   publicUrl: "https://media.example.com/",
 }
 
@@ -33,7 +33,7 @@ describe("R2 driver", () => {
     })
     const url = new URL(target.url)
     expect(url.host).toBe("acc123.r2.cloudflarestorage.com")
-    expect(url.pathname).toBe("/festly/u/dev-user/image/a%20b.webp")
+    expect(url.pathname).toBe("/alikeni/u/dev-user/image/a%20b.webp")
     expect(url.searchParams.get("X-Amz-Expires")).toBe("600")
     expect(url.searchParams.get("X-Amz-Algorithm")).toBe("AWS4-HMAC-SHA256")
     expect(url.searchParams.get("X-Amz-SignedHeaders")).toContain(
@@ -80,7 +80,7 @@ describe("R2 driver", () => {
     await r2.put("og/inv-1.png", new Uint8Array([7, 8]), "image/png")
     const put = fetchMock.mock.calls[0][0] as Request
     expect(put.method).toBe("PUT")
-    expect(new URL(put.url).pathname).toBe("/festly/og/inv-1.png")
+    expect(new URL(put.url).pathname).toBe("/alikeni/og/inv-1.png")
     expect(put.headers.get("content-type")).toBe("image/png")
     expect(put.headers.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /)
     expect(new Uint8Array(await put.arrayBuffer())).toEqual(
@@ -154,7 +154,7 @@ describe("local driver", () => {
   })
 
   it("round-trips an object through write, head, read and delete", async () => {
-    root = await mkdtemp(join(tmpdir(), "festly-storage-"))
+    root = await mkdtemp(join(tmpdir(), "alikeni-storage-"))
     const driver = createLocalDriver({
       secret,
       origin: "http://localhost:3000",
@@ -251,7 +251,7 @@ describe("storage configuration", () => {
       NODE_ENV: "production",
       BETTER_AUTH_SECRET: "x".repeat(32),
       RESEND_API_KEY: "re_test",
-      EMAIL_FROM: "Festly <hello@example.com>",
+      EMAIL_FROM: "Alikeni <hello@example.com>",
     }
     expect(() =>
       parseServerEnv({ ...production, STORAGE_DRIVER: "local" })

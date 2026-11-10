@@ -1,4 +1,4 @@
-# Festly — Build Tracker
+# Alikeni — Build Tracker
 
 Phase-gated build. Only one phase runs per "Run Phase N". Commit after each phase passes its acceptance criteria.
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs decision
@@ -92,7 +92,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [x] `/templates`: hero search (debounced, `/` to focus), sticky category pills with live counts, phone-shaped cards (thumbnail, palette dots, shine + "Live preview" on hover), result count (`aria-live`), empty state, "Coming soon" list from the Phase 7 roadmap (`UPCOMING_TEMPLATES`, kept disjoint from the registry by a test)
 - [x] Typed search params: `validateSearch` with Zod 4 (`.default().catch()`), `stripSearchParams` keeps URLs clean; bad values fall back instead of throwing
 - [x] `/templates/$category/$slug`: info panel (tags, palette radio group with arrow keys, type + motion specs), live preview in a scaled phone / tablet / browser frame (`DeviceFrame`, real CSS widths 390 / 820 / 1440), device toggle in `?device=`, palette in `?palette=`
-- [x] `/preview/$category/$slug`: bare render with sample content, `noindex`, `?palette|font|motion|device` overrides; listens for `festly:theme` messages
+- [x] `/preview/$category/$slug`: bare render with sample content, `noindex`, `?palette|font|motion|device` overrides; listens for `alikeni:theme` messages
 - [x] `src/lib/preview-bridge.ts`: typed, same-origin, Zod-validated postMessage channel (`theme`, `ping`, `ready` handshake); palette switches recolor the iframe without reloading (Phase 4 editor reuses it)
 - [x] "Use this template": `createDraftFn` (POST, Zod validator) → `createDraft()` (template defaults + chosen palette, re-parsed with the template schema; upserts the `templates_meta` FK row) → `/editor/$invitationId` stub that loads the draft via `getDraftFn` (owner-scoped)
 - [x] Auth stub: `requireUserId()` in `src/server/auth/current-user.server.ts` returns the dev user outside production (`ALLOW_DEV_USER=true` to allow in prod demos); Phase 5 swaps the body
@@ -109,13 +109,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 
 ## Phase 4 — Editor ✅ 2026-10-20
 
-- [x] Decisions: storage **Cloudflare R2** via aws4fetch (no AWS SDK); music = Festly library + host uploads (own `<audio>`, start on the cover tap) + SoundCloud link (visible widget). Research: `reports/Background music catalogs for invitations.md`
+- [x] Decisions: storage **Cloudflare R2** via aws4fetch (no AWS SDK); music = Alikeni library + host uploads (own `<audio>`, start on the cover tap) + SoundCloud link (visible widget). Research: `reports/Background music catalogs for invitations.md`
 - [x] Storage (`src/server/storage`): `StorageDriver` with R2 (presigned PUT, Content-Type signed, 10-min TTL, HEAD/DELETE) and a dev-only local driver (`.storage/`, HMAC-signed PUT route, Range-capable file route). Setup guide: `docs/STORAGE.md`
 - [x] Uploads: `createUploadUrlFn` → browser PUT → `confirmUploadFn` (owner-prefix check, HEAD re-check of size/type, delete on violation, `media_assets` row). Client resize to ≤ 2400 px WebP, quality stepping to ≤ 800 KB (JPEG fallback where WebP encoding is missing)
 - [x] Music: schema `source` = library | upload (`rightsConfirmedAt`) | soundcloud (reference only). Music controller in context so `play()` runs inside the cover tap; Samsung pointerdown unlock; pause on hidden tab; "Tap to play" fallback. SoundCloud resolver (keyless oEmbed, short links, playlist rejection) + docked visible widget (loops on FINISH, "Tap ▶" hint after 1.5 s, minimizing pauses). Footer credit line. Library manifest (`src/lib/music-library.json`, Zod-validated) + `pnpm music:add|list|placeholders`; `/media/library/<file>` redirects to storage
 - [x] Maps (rule 11): display adapters google-embed (default, SSR iframe) · google-js · mapbox · radar (plugin-maps) · leaflet (OSM), lazy registry with key checks + address-card fallback; geocoders nominatim (UA + contact, global 1 req/s) · google · mapbox · radar with a contract test; `geocode_cache` by sha256 of normalized query; Google Maps link parser (pin/viewport/query/OSM) + server-side short-link expansion; `/dev/maps`
-- [x] Editor (`/editor/$invitationId`): 11 tabs (Basics, People, Event & Venue, Design, Music, Texts, Sections, Gallery, Story, Gifts, Sharing), template extension fields via `fieldsUi`, per-field Zod errors + tab badges, brand theme (`.theme-festly`), Edit/Preview toggle on phones
-- [x] Live preview: device frame iframe fed by `festly:config` postMessage (throttled 200 ms); invalid edits repair only the failing fields (`resolveConfig` "repaired") instead of jumping to sample content
+- [x] Editor (`/editor/$invitationId`): 11 tabs (Basics, People, Event & Venue, Design, Music, Texts, Sections, Gallery, Story, Gifts, Sharing), template extension fields via `fieldsUi`, per-field Zod errors + tab badges, brand theme (`.theme-alikeni`), Edit/Preview toggle on phones
+- [x] Live preview: device frame iframe fed by `alikeni:config` postMessage (throttled 200 ms); invalid edits repair only the failing fields (`resolveConfig` "repaired") instead of jumping to sample content
 - [x] Autosave 1.5 s → `saveDraftFn` (template-schema Zod, ownership, ms-precision `updated_at` conflict → Reload / Keep mine), Ctrl/Cmd+S, unload warning
 - [x] Design: 20 palettes + custom 5 tokens with live WCAG AA check (body, accents, tint bands), font pairs previewed in their faces, motion level, ornament
 - [x] Sections: dnd-kit reorder (pointer + keyboard) + feature toggles; Gallery: multi-upload, sortable grid, alt text, 30 max; Story/Gifts/People lists with keyboard reordering

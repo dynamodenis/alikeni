@@ -7,11 +7,11 @@ import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 // WebGL stays out of the SSR pass and the initial client bundle.
 const Aurora = lazy(() => import("@/components/reactbits/Aurora"))
 
-const HEADLINE = "Festly renders on the server"
+const HEADLINE = "Alikeni renders on the server"
 const AURORA_STOPS = ["#f5c16c", "#e879a9", "#7c6cf5"]
 
 export const Route = createFileRoute("/dev/smoke")({
-  head: () => ({ meta: [{ title: "Smoke test · Festly" }] }),
+  head: () => ({ meta: [{ title: "Smoke test · Alikeni" }] }),
   component: SmokePage,
 })
 

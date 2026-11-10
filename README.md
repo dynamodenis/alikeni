@@ -1,4 +1,4 @@
-# Festly
+# Alikeni
 
 Configurable invitation websites: pick one of ~50 templates, edit it live,
 publish to `/i/<slug>` with RSVP, wishes, countdown, map, gallery and music.
@@ -25,7 +25,7 @@ in production builds unless `VITE_ENABLE_DEV_ROUTES=true`).
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm dev`                          | Vite dev server on port 3000                                                                                                     |
 | `pnpm build` / `pnpm start`         | Node production build to `dist/`, then serve it with `scripts/serve-dist.mjs` (local checks; production runs on Workers)         |
-| `pnpm build:worker`                 | Cloudflare Workers build to `dist-worker/` (`FESTLY_TARGET=workers`, see `docs/DEPLOY.md`)                                       |
+| `pnpm build:worker`                 | Cloudflare Workers build to `dist-worker/` (`ALIKENI_TARGET=workers`, see `docs/DEPLOY.md`)                                      |
 | `pnpm preview:worker`               | `build:worker`, then `wrangler dev` on http://localhost:8787 (local workerd; needs `.dev.vars` and `pnpm db:local --port 55435`) |
 | `pnpm deploy`                       | `build:worker`, then `wrangler deploy` (needs `wrangler login` and the setup in `docs/DEPLOY.md`)                                |
 | `pnpm cf-typegen`                   | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc` and `.dev.vars`                                                     |

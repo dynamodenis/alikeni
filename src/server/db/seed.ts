@@ -13,8 +13,8 @@ type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
 export const DEV_USER = {
   id: "dev-user",
-  email: "dev@festly.local",
-  name: "Festly Dev",
+  email: "dev@alikeni.local",
+  name: "Alikeni Dev",
 } as const
 
 /**

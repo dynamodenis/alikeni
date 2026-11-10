@@ -1,6 +1,6 @@
-# Deploying Festly (Cloudflare Workers)
+# Deploying Alikeni (Cloudflare Workers)
 
-Festly runs on **Cloudflare Workers** (decided in Phase 8): TanStack Start's
+Alikeni runs on **Cloudflare Workers** (decided in Phase 8): TanStack Start's
 server entry runs in the Worker, static assets are served by Workers Static
 Assets, Postgres (Neon) is reached through **Hyperdrive**, uploads live in
 **R2** through a Worker binding.
@@ -15,12 +15,12 @@ it) target Workers.
 | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm dev`            | Node    | Vite dev server                                                                                                                       |
 | `pnpm build`          | Node    | `dist/`, served by `pnpm start` (`scripts/serve-dist.mjs`)                                                                            |
-| `pnpm build:worker`   | Workers | `FESTLY_TARGET=workers`: `@cloudflare/vite-plugin` runs the SSR environment in workerd; output in `dist-worker/`                      |
+| `pnpm build:worker`   | Workers | `ALIKENI_TARGET=workers`: `@cloudflare/vite-plugin` runs the SSR environment in workerd; output in `dist-worker/`                     |
 | `pnpm preview:worker` | Workers | `build:worker`, then `wrangler dev` (local workerd, local R2 simulation, Hyperdrive → `localConnectionString`)                        |
 | `pnpm deploy`         | Workers | `build:worker`, then `wrangler deploy`                                                                                                |
 | `pnpm cf-typegen`     | —       | Regenerates `worker-configuration.d.ts` (binding and runtime types) from `wrangler.jsonc` and `.dev.vars`; rerun after editing either |
 
-`vite.config.ts` reads `FESTLY_TARGET`. With `workers` it adds
+`vite.config.ts` reads `ALIKENI_TARGET`. With `workers` it adds
 `cloudflare({ viteEnvironment: { name: "ssr" } })` before `tanstackStart()`,
 writes to `dist-worker/` (so it never overwrites the Node build), and aliases
 `@/server/platform/runtime` to `src/server/platform/runtime.workers.ts`
@@ -58,8 +58,8 @@ pnpm exec wrangler login
    save-conflict check and the dashboard must read fresh rows):
 
    ```bash
-   pnpm exec wrangler hyperdrive create festly-db \
-     --connection-string="postgresql://USER:PASSWORD@ep-xxx.REGION.aws.neon.tech/festly?sslmode=require" \
+   pnpm exec wrangler hyperdrive create alikeni-db \
+     --connection-string="postgresql://USER:PASSWORD@ep-xxx.REGION.aws.neon.tech/alikeni?sslmode=require" \
      --caching-disabled
    ```
 
@@ -70,7 +70,7 @@ Hyperdrive needs `pg` ≥ 8.16.3; the lockfile has 8.23.1.
 
 ### 2. Storage (R2 binding)
 
-1. Create the bucket: `pnpm exec wrangler r2 bucket create festly-media`
+1. Create the bucket: `pnpm exec wrangler r2 bucket create alikeni`
    (or use another name and update `r2_buckets[0].bucket_name`).
 2. Optional but recommended: enable public access on the bucket (r2.dev
    subdomain or a custom domain) and set `R2_PUBLIC_URL` (as a var) so media
@@ -100,7 +100,7 @@ Secrets (never in `wrangler.jsonc`):
 ```bash
 pnpm exec wrangler secret put BETTER_AUTH_SECRET      # openssl rand -base64 32 (required)
 pnpm exec wrangler secret put RESEND_API_KEY          # required in production
-pnpm exec wrangler secret put EMAIL_FROM              # "Festly <hello@yourdomain.com>" (required)
+pnpm exec wrangler secret put EMAIL_FROM              # "Alikeni <hello@yourdomain.com>" (required)
 pnpm exec wrangler secret put STORAGE_SIGNING_SECRET  # openssl rand -base64 32 (required with binding)
 pnpm exec wrangler secret put ANALYTICS_SALT          # openssl rand -base64 32 (optional; falls back to BETTER_AUTH_SECRET)
 pnpm exec wrangler secret put TURNSTILE_SECRET_KEY    # optional; pair with VITE_TURNSTILE_SITE_KEY

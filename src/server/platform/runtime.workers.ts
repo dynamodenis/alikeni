@@ -141,7 +141,7 @@ export async function initOgWasm(
 /**
  * Close this request's pool after the response is produced. `pool.end()`
  * waits for checked-out clients; `waitUntil` keeps the isolate alive for it.
- * Loaders run before streaming starts and Festly has no deferred loader
+ * Loaders run before streaming starts and Alikeni has no deferred loader
  * data, so no query runs after this point.
  */
 export function endRequest(request: Request): Promise<void> {

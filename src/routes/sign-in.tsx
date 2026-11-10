@@ -40,7 +40,7 @@ export const Route = createFileRoute("/sign-in")({
     return { methods }
   },
   loader: ({ context }) => context.methods,
-  head: () => ({ meta: [{ title: "Sign in · Festly" }] }),
+  head: () => ({ meta: [{ title: "Sign in · Alikeni" }] }),
   component: SignIn,
 })
 
@@ -128,7 +128,7 @@ function SignIn() {
       subtitle="Sign in to keep working on your invitations."
       footer={
         <>
-          New to Festly?{" "}
+          New to Alikeni?{" "}
           <Link
             to="/sign-up"
             search={{ redirect: target }}
@@ -154,7 +154,7 @@ function SignIn() {
           ) : (
             <>
               <p>
-                This address already has a Festly account with a password, but
+                This address already has an Alikeni account with a password, but
                 the email was never verified, so Google can't be connected to it
                 yet. Enter the email below and send yourself a verification
                 link, then sign in with Google again. You can also sign in with

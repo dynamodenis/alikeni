@@ -15,13 +15,13 @@ function layout(heading: string, body: string, action: string, url: string) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border:1px solid #e9dcc4;border-radius:12px">
 <tr><td style="padding:32px">
-<p style="margin:0 0 24px;font-family:Georgia,serif;font-size:22px;color:#a8783a">Festly</p>
+<p style="margin:0 0 24px;font-family:Georgia,serif;font-size:22px;color:#a8783a">Alikeni</p>
 <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:24px;font-weight:normal">${escape(heading)}</h1>
 <p style="margin:0 0 24px;font-size:15px;line-height:1.6">${escape(body)}</p>
 <a href="${escape(url)}" style="display:inline-block;background:#a8783a;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:15px">${escape(action)}</a>
 <p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#7a6a58">If the button does not work, paste this link into your browser:<br>${escape(url)}</p>
 </td></tr></table>
-<p style="margin:16px 0 0;font-size:12px;color:#7a6a58">You received this because someone used this address on Festly. If it was not you, ignore this email.</p>
+<p style="margin:16px 0 0;font-size:12px;color:#7a6a58">You received this because someone used this address on Alikeni. If it was not you, ignore this email.</p>
 </td></tr></table>
 </body></html>`
 }
@@ -45,7 +45,7 @@ function message(
 export const resetPasswordEmail = (to: string, url: string) =>
   message(
     to,
-    "Reset your Festly password",
+    "Reset your Alikeni password",
     "Reset your password",
     "Use the button below to choose a new password. The link expires in one hour.",
     "Choose a new password",
@@ -55,7 +55,7 @@ export const resetPasswordEmail = (to: string, url: string) =>
 export const verifyEmail = (to: string, url: string) =>
   message(
     to,
-    "Confirm your email for Festly",
+    "Confirm your email for Alikeni",
     "Confirm your email",
     "Confirm this address so we can send you RSVP updates and receipts.",
     "Confirm email",

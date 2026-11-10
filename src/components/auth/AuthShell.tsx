@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Sign-in, sign-up and password pages: one card on the espresso + gold
- * marketing background. `theme-festly` maps shadcn inputs to the brand.
+ * marketing background. `theme-alikeni` maps shadcn inputs to the brand.
  */
 export function AuthShell({
   title,
@@ -22,7 +22,7 @@ export function AuthShell({
   footer?: ReactNode
 }) {
   return (
-    <div className="theme-festly grain flex min-h-svh flex-col items-center justify-center bg-ink px-4 py-10 text-cream">
+    <div className="theme-alikeni grain flex min-h-svh flex-col items-center justify-center bg-ink px-4 py-10 text-cream">
       <main
         id="main"
         className="w-full max-w-sm rounded-2xl border border-gold/15 bg-[#1a120c]/80 p-6 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)] sm:p-8"

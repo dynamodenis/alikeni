@@ -458,7 +458,7 @@ describe("/ics/$slug", () => {
         ],
       },
     })
-    const response = await icsResponse(db, SLUG, "https://festly.test")
+    const response = await icsResponse(db, SLUG, "https://alikeni.test")
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toBe(
       "text/calendar; charset=utf-8"
@@ -468,12 +468,12 @@ describe("/ics/$slug", () => {
     )
     const body = await response.text()
     expect(body.match(/BEGIN:VEVENT/g)).toHaveLength(2)
-    expect(body).toContain(`UID:${SLUG}-1@festly`)
-    expect(body).toContain(`UID:${SLUG}-2@festly`)
+    expect(body).toContain(`UID:${SLUG}-1@alikeni`)
+    expect(body).toContain(`UID:${SLUG}-2@alikeni`)
     expect(body).toContain("DTSTART:20270612T060000Z")
     expect(body).toContain("DTEND:20270612T200000Z")
     expect(body).toContain("LOCATION:Garden Hall")
-    expect(body).toContain(`URL:https://festly.test/i/${SLUG}`)
+    expect(body).toContain(`URL:https://alikeni.test/i/${SLUG}`)
   })
 
   it("404s for unknown slugs", async () => {

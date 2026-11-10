@@ -1,0 +1,109 @@
+# Database migrations (Drizzle → Neon).
+#
+# Pull request: checks the migration history and applies every migration to a
+#   throwaway Postgres, so a broken migration fails before it is merged.
+# Push to main (when drizzle/ changed) or a manual run: applies pending
+#   migrations to production Neon.
+#
+# Setup (once): repository secret NEON_DATABASE_URL = Neon's *direct*
+# connection string (host without "-pooler"), e.g.
+#   gh secret set NEON_DATABASE_URL
+name: Database migrations
+
+on:
+  pull_request:
+    paths:
+      - "drizzle/**"
+      - "drizzle.config.ts"
+      - "src/server/db/schema.ts"
+      - ".github/workflows/db-migrate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "drizzle/**"
+      - "drizzle.config.ts"
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Also run the idempotent seed (templates) after migrating"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify migrations
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check migration history
+        run: pnpm db:check
+      - name: Schema and migrations are in sync
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            echo "::error::src/server/db/schema.ts changed without a migration. Run 'pnpm db:generate' and commit the result."
+            git status --short drizzle
+            exit 1
+          fi
+      - name: Apply all migrations to a fresh Postgres
+        run: pnpm db:migrate
+
+  migrate:
+    name: Migrate production (Neon)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # Never run two migrations at once, and never cancel one halfway.
+    concurrency:
+      group: db-migrate-production
+      cancel-in-progress: false
+    env:
+      DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Require the connection string
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Repository secret NEON_DATABASE_URL is not set."
+            exit 1
+          fi
+      - name: Check migration history
+        run: pnpm db:check
+      - name: Apply pending migrations
+        run: pnpm db:migrate
+      - name: Seed templates
+        if: github.event_name == 'workflow_dispatch' && inputs.seed
+        run: pnpm db:seed

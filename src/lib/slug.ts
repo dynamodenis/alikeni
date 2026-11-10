@@ -13,7 +13,7 @@ export const RESERVED_SLUGS = new Set([
   "dashboard",
   "dev",
   "editor",
-  "festly",
+  "alikeni",
   "help",
   "i",
   "ics",

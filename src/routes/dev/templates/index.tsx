@@ -3,7 +3,7 @@ import { TEMPLATE_METAS } from "@/templates/registry"
 import { getPalette } from "@/templates/_shared/theme/palettes"
 
 export const Route = createFileRoute("/dev/templates/")({
-  head: () => ({ meta: [{ title: "Templates · Festly dev" }] }),
+  head: () => ({ meta: [{ title: "Templates · Alikeni dev" }] }),
   component: TemplatesIndex,
 })
 

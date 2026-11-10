@@ -6,7 +6,7 @@
 // (`ssr.nonce`), but Start 1.169 has no per-request hook to set it, and the
 // public invitation HTML is cached at the edge for 60 s, which would reuse a
 // nonce across visitors anyway. Everything else is locked down: no eval, no
-// plugins, no foreign framing of Festly, and an explicit host list for the
+// plugins, no foreign framing of Alikeni, and an explicit host list for the
 // few third parties (maps, SoundCloud widget, Turnstile).
 // style-src 'unsafe-inline': invitations set their palette as inline
 // `--inv-*` custom properties, and motion/map libraries write style attributes.

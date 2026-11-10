@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authed/connect-google")({
       throw redirect({ href: next })
     }
   },
-  head: () => ({ meta: [{ title: "Connect Google · Festly" }] }),
+  head: () => ({ meta: [{ title: "Connect Google · Alikeni" }] }),
   component: ConnectGoogle,
 })
 

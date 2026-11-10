@@ -1,6 +1,6 @@
 # Template authoring
 
-How to add a template to Festly. The kit under `src/templates/_shared` does
+How to add a template to Alikeni. The kit under `src/templates/_shared` does
 the heavy lifting; a template is a `meta`, a `schema`, sample `defaults` and
 one `index.tsx` that composes shared blocks. Target: under 200 lines, visibly
 different from every other template in its category, and indistinguishable in

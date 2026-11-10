@@ -22,7 +22,7 @@ import {
 
 // Public on purpose: env validation refuses to start production without a
 // real BETTER_AUTH_SECRET.
-const DEV_SECRET = "festly-dev-only-auth-secret-never-use-in-production"
+const DEV_SECRET = "alikeni-dev-only-auth-secret-never-use-in-production"
 
 /** Any Drizzle Postgres database (node-postgres in the app, PGlite in tests). */
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
@@ -66,7 +66,7 @@ export function createAuth(db: AnyDb, env: ServerEnv, send: EmailSender) {
       : undefined
 
   return betterAuth({
-    appName: "Festly",
+    appName: "Alikeni",
     baseURL: env.APP_ORIGIN,
     secret: env.BETTER_AUTH_SECRET ?? DEV_SECRET,
     database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),

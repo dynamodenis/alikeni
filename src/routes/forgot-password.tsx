@@ -10,7 +10,7 @@ import {
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset your password · Festly" }] }),
+  head: () => ({ meta: [{ title: "Reset your password · Alikeni" }] }),
   component: ForgotPassword,
 })
 
@@ -48,7 +48,7 @@ function ForgotPassword() {
     return (
       <AuthShell
         title="Check your email"
-        subtitle={`If ${sentTo} has a Festly account, a link to choose a new password is on its way. It expires in one hour.`}
+        subtitle={`If ${sentTo} has an Alikeni account, a link to choose a new password is on its way. It expires in one hour.`}
         footer={back}
       >
         <p className="text-sm text-muted-foreground">

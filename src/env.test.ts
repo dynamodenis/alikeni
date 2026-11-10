@@ -15,11 +15,11 @@ describe("server env", () => {
     expect(
       parseServerEnv({
         DATABASE_URL:
-          "postgresql://user:pw@ep-x-pooler.eu-central-1.aws.neon.tech/festly?sslmode=require",
+          "postgresql://user:pw@ep-x-pooler.eu-central-1.aws.neon.tech/alikeni?sslmode=require",
       }).DATABASE_URL
     ).toContain("neon.tech")
     expect(() =>
-      parseServerEnv({ DATABASE_URL: "mysql://localhost/festly" })
+      parseServerEnv({ DATABASE_URL: "mysql://localhost/alikeni" })
     ).toThrow(/DATABASE_URL/)
   })
 
@@ -38,7 +38,7 @@ describe("auth env", () => {
     NODE_ENV: "production",
     BETTER_AUTH_SECRET: "x".repeat(32),
     RESEND_API_KEY: "re_test",
-    EMAIL_FROM: "Festly <hello@example.com>",
+    EMAIL_FROM: "Alikeni <hello@example.com>",
   }
 
   it("requires the auth secret and email settings in production", () => {
@@ -82,7 +82,7 @@ describe("storage env", () => {
     NODE_ENV: "production",
     BETTER_AUTH_SECRET: "x".repeat(32),
     RESEND_API_KEY: "re_test",
-    EMAIL_FROM: "Festly <hello@example.com>",
+    EMAIL_FROM: "Alikeni <hello@example.com>",
   }
 
   it("accepts the Workers binding driver with only R2_PUBLIC_URL", () => {
@@ -125,7 +125,7 @@ describe("public env", () => {
     expect(
       parsePublicEnv({ VITE_ENABLE_DEV_ROUTES: "1" }).VITE_ENABLE_DEV_ROUTES
     ).toBe(true)
-    expect(parsePublicEnv({}).VITE_APP_NAME).toBe("Festly")
+    expect(parsePublicEnv({}).VITE_APP_NAME).toBe("Alikeni")
   })
 })
 

@@ -14,7 +14,7 @@ export type Email = {
 
 export type EmailSender = (email: Email) => Promise<void>
 
-const DEV_FROM = "Festly <onboarding@resend.dev>"
+const DEV_FROM = "Alikeni <onboarding@resend.dev>"
 
 export function createEmailSender(env: ServerEnv): EmailSender {
   if (!env.RESEND_API_KEY) {

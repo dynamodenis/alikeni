@@ -11,7 +11,7 @@ const booleanString = z
   .transform((value) => value === "true" || value === "1")
 
 const publicEnvSchema = z.object({
-  VITE_APP_NAME: z.string().min(1).default("Festly"),
+  VITE_APP_NAME: z.string().min(1).default("Alikeni"),
   /** Google Maps Embed API key (free, unlimited). Restrict by HTTP referrer in Google Cloud. */
   VITE_GOOGLE_MAPS_EMBED_KEY: z.string().optional(),
   /** Map display adapter (rule 11). google-embed needs no key. */

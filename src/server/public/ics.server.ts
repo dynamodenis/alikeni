@@ -22,7 +22,7 @@ export function invitationEvents(
     return [
       {
         ...base,
-        uid: `${slug}-1@festly`,
+        uid: `${slug}-1@alikeni`,
         title: event.title,
         start: datetime.start,
         end: datetime.end,
@@ -32,7 +32,7 @@ export function invitationEvents(
   }
   return event.subEvents.map((sub, index) => ({
     ...base,
-    uid: `${slug}-${index + 1}@festly`,
+    uid: `${slug}-${index + 1}@alikeni`,
     title: `${event.title} · ${sub.label}`,
     start: sub.start,
     end: sub.end,

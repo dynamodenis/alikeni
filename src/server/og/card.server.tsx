@@ -125,7 +125,7 @@ export function OgCard(props: OgCardProps) {
               color: colors.primary,
             }}
           >
-            festly
+            alikeni
           </div>
         </div>
       </div>

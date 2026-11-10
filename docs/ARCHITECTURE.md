@@ -1,6 +1,6 @@
 # Architecture (Phase 4 snapshot)
 
-Festly is a single TanStack Start app that serves the marketing site, the
+Alikeni is a single TanStack Start app that serves the marketing site, the
 template gallery, the editor, the owner dashboard and every published
 invitation. One rendering engine draws ~50 templates from a shared,
 Zod-validated `InvitationConfig`.
@@ -114,7 +114,7 @@ Every handler resolves the user through `requireUserId()` (dev user until Phase 
 
 Production runs on **Cloudflare Workers** (`wrangler.jsonc`,
 `main: "@tanstack/react-start/server-entry"`, `nodejs_compat`). The build
-target is chosen in `vite.config.ts` by `FESTLY_TARGET`: Node by default
+target is chosen in `vite.config.ts` by `ALIKENI_TARGET`: Node by default
 (`pnpm dev`, `pnpm build`, Vitest), Workers for `pnpm build:worker`, which
 adds `@cloudflare/vite-plugin` and aliases `@/server/platform/runtime` to
 `runtime.workers.ts`. That platform module is the only runtime-specific code:

@@ -1,11 +1,11 @@
-# Royalty-free / CC / licensed-library music catalogs for Festly background music (as of 2026-10-20)
+# Royalty-free / CC / licensed-library music catalogs for Alikeni background music (as of 2026-10-20)
 
 Method note: I checked primary sources where they loaded, and called the live APIs on 2026-10-20 (Audius search and stream; Openverse `/v1/audio/stats/`). Some official pages render only with JavaScript (Audius API Terms, docs.audius.co API reference) and could not be read. They are listed as gaps. Figures attributed to third-party aggregators are marked as unverified.
 
 ## Q1. Audius: API access, delivery, licence and terms for commercial third-party streaming
 
 ### Takeaway
-Audius has an open REST API. A live search worked with only an `app_name` query parameter, and its `/stream` endpoint redirects to a signed, time-stamped MP3 URL on a content node, which fits a plain HTML `<audio>` element. Legally, tracks are API-accessible by default under the Audius Open Music License (OML). The OML lets "Music Players" stream tracks, and any commercial use requires attribution (artist, copyright notice, OML notice, link). However, many tracks carry an "All rights reserved" licence field, and the separate API Terms could not be read. So whether Festly can use Audius commercially is plausible but not confirmed.
+Audius has an open REST API. A live search worked with only an `app_name` query parameter, and its `/stream` endpoint redirects to a signed, time-stamped MP3 URL on a content node, which fits a plain HTML `<audio>` element. Legally, tracks are API-accessible by default under the Audius Open Music License (OML). The OML lets "Music Players" stream tracks, and any commercial use requires attribution (artist, copyright notice, OML notice, link). However, many tracks carry an "All rights reserved" licence field, and the separate API Terms could not be read. So whether Alikeni can use Audius commercially is plausible but not confirmed.
 
 ### Cited Findings
 - Live call `GET https://api.audius.co/v1/tracks/search?query=wedding%20piano&app_name=festly_research` returned JSON with no API key. Fields included `id`, `title`, `duration`, `genre`, `mood`, `license`, `is_streamable`, `is_stream_gated`, `allowed_api_keys`, `artwork` (CDN URLs) and `permalink`. — [Audius API live response](https://api.audius.co/v1/tracks/search?query=wedding%20piano&app_name=festly_research) (fetched 2026-10-20)
@@ -22,7 +22,7 @@ Audius has an open REST API. A live search worked with only an `app_name` query 
 - The Terms of Use PDF links the API Terms at https://audius.co/legal/api-terms. That page is a JavaScript single-page app and returned no readable text to a non-browser fetch. — [Audius Terms of Use PDF](https://audius.co/documents/TermsOfUse.pdf)
 
 ### Inferences
-- Under the OML, Festly would likely count as a "Music Player" (software that plays back Audius audio). The OML grants streaming rights and says nothing to rule out commercial operators, so commercial streaming with OML attribution looks permitted. This is an inference from the licence text, not legal advice.
+- Under the OML, Alikeni would likely count as a "Music Player" (software that plays back Audius audio). The OML grants streaming rights and says nothing to rule out commercial operators, so commercial streaming with OML attribution looks permitted. This is an inference from the licence text, not legal advice.
 - The `license` field in track metadata ("All rights reserved") may be the artist's general label and not an "Alternative License" under OML §1.3. How the two interact for API consumers is unclear. A conservative build filters out stream-gated tracks (`is_stream_gated`) and tracks restricted by `allowed_api_keys`, re-checks `is_streamable`/`is_available` at play time, and shows the OML attribution.
 - The OML does not grant permission to copy files into R2 in so many words. "reproduce … distribute" in §1.2 arguably covers it, but caching works against the artist opt-out mechanism. Streaming via the `/stream` endpoint is the safer pattern.
 - Content quality and suitability for weddings varies: the catalogue is user-uploaded, mostly electronic and hip-hop, and includes explicit tracks.
@@ -56,7 +56,7 @@ Openverse aggregates about 5.2 million audio items from only three sources: Wiki
 ## Q3. Jamendo: developer API, free non-commercial tier, commercial path
 
 ### Takeaway
-Jamendo's API is free only for non-commercial apps (35,000 requests/month), and any commercial use requires contacting Jamendo. It also requires credit and a backlink per track and forbids apps designed to cache content. A commercial web app like Festly cannot use the free tier as-is. The Jamendo Licensing catalogue sells per-project sync licences, a model built for single creators and not for a platform letting many end users pick tracks.
+Jamendo's API is free only for non-commercial apps (35,000 requests/month), and any commercial use requires contacting Jamendo. It also requires credit and a backlink per track and forbids apps designed to cache content. A commercial web app like Alikeni cannot use the free tier as-is. The Jamendo Licensing catalogue sells per-project sync licences, a model built for single creators and not for a platform letting many end users pick tracks.
 
 ### Cited Findings
 - Developer portal: Non-Commercial Apps plan, "Access our whole library", "Up to 35,000 API requests per month". It also advertises "Monetize your app", without stated terms. — [Jamendo developer portal v3.0](https://developer.jamendo.com/v3.0)
@@ -68,7 +68,7 @@ Jamendo's API is free only for non-commercial apps (35,000 requests/month), and 
 - Jamendo Licensing individual licences are "a one-off purchase for one of the tracks featured on our website, linked to a single project". — [Jamendo Licensing: individual licenses](https://support-licensing.jamendo.com/individual-licenses)
 
 ### Inferences
-- Festly would need a negotiated commercial API agreement with Jamendo. Even with one, CC BY-NC tracks probably can't be played on a commercial site without a Jamendo Licensing deal, and many Jamendo tracks are NC.
+- Alikeni would need a negotiated commercial API agreement with Jamendo. Even with one, CC BY-NC tracks probably can't be played on a commercial site without a Jamendo Licensing deal, and many Jamendo tracks are NC.
 - Copying files to R2 conflicts with the "must not be specifically designed to cache" clause.
 
 ### Gaps
@@ -90,7 +90,7 @@ I found no evidence of a current public FMA API. FMA nearly shut down in 2018 an
 ## Q5. Pixabay Music: API and licence for use in an app or website
 
 ### Takeaway
-The official Pixabay API has no music or audio endpoint, only images (`/api/`) and videos (`/api/videos/`). The Content License allows free commercial use without attribution, but it bans standalone distribution, replicating a competing service and systematic copying. A Festly feature that lets hosts browse Pixabay's music catalogue would need scraping (prohibited) or a hand-curated set of downloaded tracks stored in R2.
+The official Pixabay API has no music or audio endpoint, only images (`/api/`) and videos (`/api/videos/`). The Content License allows free commercial use without attribution, but it bans standalone distribution, replicating a competing service and systematic copying. An Alikeni feature that lets hosts browse Pixabay's music catalogue would need scraping (prohibited) or a hand-curated set of downloaded tracks stored in R2.
 
 ### Cited Findings
 - The Pixabay API docs link only `https://pixabay.com/api/` (images) and `https://pixabay.com/api/videos/` (videos). — [Pixabay API docs](https://pixabay.com/api/docs/) (fetched 2026-10-20)
@@ -100,7 +100,7 @@ The official Pixabay API has no music or audio endpoint, only images (`/api/`) a
 - The Pixabay FAQ advises keeping download records and linking to the licence when disputing claims, for example Content ID claims on music. — [Pixabay FAQ](https://pixabay.com/service/faq/)
 
 ### Inferences
-- Playing a Pixabay track behind an invitation page combines it with a creative work, which arguably is not "Standalone". Exposing a big searchable Pixabay music library inside Festly risks the "competing service" and "systematic copying" clauses. A small curated set (for example 30 to 100 tracks downloaded manually and stored in R2) is the lowest-risk use.
+- Playing a Pixabay track behind an invitation page combines it with a creative work, which arguably is not "Standalone". Exposing a big searchable Pixabay music library inside Alikeni risks the "competing service" and "systematic copying" clauses. A small curated set (for example 30 to 100 tracks downloaded manually and stored in R2) is the lowest-risk use.
 - Pixabay audio URLs are not offered via API, and the API docs forbid permanent hotlinking for images. By analogy, music should be self-hosted in R2.
 
 ### Gaps
@@ -121,8 +121,8 @@ Only Epidemic Sound (licensed library) and Mubert (AI) publicly advertise APIs w
 - Soundstripe consumer and business pricing (for example "$299 per quarter or $999 per year" business) appears in comparisons; no API information was found. — [The Post Flow comparison](https://thepostflow.com/post-production/video-editing/music-subscriptions-compared/)
 
 ### Inferences
-- For Festly, Epidemic Sound is the most credible "licensed library with an API and end-user sublicensing" option. Pricing needs a sales conversation once past the prototype tier.
-- With AI generators (Mubert, Soundraw, Beatoven), Festly can generate tracks once and store them in R2, if the plan grants distribution or sublicensing rights. Mubert's lower tiers exclude sublicensing.
+- For Alikeni, Epidemic Sound is the most credible "licensed library with an API and end-user sublicensing" option. Pricing needs a sales conversation once past the prototype tier.
+- With AI generators (Mubert, Soundraw, Beatoven), Alikeni can generate tracks once and store them in R2, if the plan grants distribution or sublicensing rights. Mubert's lower tiers exclude sublicensing.
 
 ### Gaps
 - Artlist, Uppbeat, Musicbed: no primary-source information on APIs or platform licensing was retrieved. They are believed to be creator-subscription licences only, but this is unverified.
@@ -132,15 +132,15 @@ Only Epidemic Sound (licensed library) and Mubert (AI) publicly advertise APIs w
 ## Q7. Incompetech (Kevin MacLeod) and YouTube Audio Library
 
 ### Takeaway
-Incompetech offers its music free under Creative Commons with required credit, or under a paid Standard License with no attribution. There is no API. Festly could download selected tracks into R2 and show the credit line. YouTube's Audio Library is framed for YouTube videos. Its help page disclaims anything off-platform and requires CC credit in the video description, so it should not be relied on for a web app.
+Incompetech offers its music free under Creative Commons with required credit, or under a paid Standard License with no attribution. There is no API. Alikeni could download selected tracks into R2 and show the credit line. YouTube's Audio Library is framed for YouTube videos. Its help page disclaims anything off-platform and requires CC credit in the video description, so it should not be relied on for a web app.
 
 ### Cited Findings
 - Incompetech licences: Creative Commons, "No charge. Requires that you credit the music." Standard License "For projects where attribution is not wanted or is impossible (radio/TV ads, corporate presentations, on-hold music, etc.)", paid via PayPal; price not shown. — [Incompetech licenses](https://incompetech.com/music/royalty-free/licenses/)
 - YouTube Help: "YouTube can't give legal guidance, including guidance on issues with music that can occur off the platform." "If you're using a track with a Creative Commons license, you must credit the artist in your video's description." — [YouTube Help: Audio Library](https://support.google.com/youtube/answer/3376882)
 
 ### Inferences
-- Incompetech is CC BY (version believed to be 4.0, not confirmed on the fetched page). Self-hosting in R2 with on-page credit, for example "Title by Kevin MacLeod (incompetech.com), Licensed under CC BY 4.0", is permitted by CC BY. CC BY allows redistribution, and Festly would not need to hotlink.
-- YouTube Audio Library: no off-YouTube grant was found, so treat it as unusable for Festly.
+- Incompetech is CC BY (version believed to be 4.0, not confirmed on the fetched page). Self-hosting in R2 with on-page credit, for example "Title by Kevin MacLeod (incompetech.com), Licensed under CC BY 4.0", is permitted by CC BY. CC BY allows redistribution, and Alikeni would not need to hotlink.
+- YouTube Audio Library: no off-YouTube grant was found, so treat it as unusable for Alikeni.
 
 ### Gaps
 - Incompetech Standard License price, exact CC version text, and catalogue size were not retrieved. Incompetech has no API, so search would rely on a manually curated list.

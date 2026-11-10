@@ -13,7 +13,7 @@ import {
 import { geocodeFn } from "@/server/geo/geo.functions"
 
 export const Route = createFileRoute("/dev/maps")({
-  head: () => ({ meta: [{ title: "Maps · Festly dev" }] }),
+  head: () => ({ meta: [{ title: "Maps · Alikeni dev" }] }),
   component: MapsPage,
 })
 

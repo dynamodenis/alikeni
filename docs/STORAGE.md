@@ -53,9 +53,9 @@ which streams from the binding with HTTP Range support. Setup:
 
 ## Setting up R2
 
-1. Cloudflare dashboard → R2 → **Create bucket** (e.g. `festly-media`).
+1. Cloudflare dashboard → R2 → **Create bucket** (e.g. `alikeni`).
 2. Bucket → Settings → **Public access**: enable the `r2.dev` subdomain, or
-   connect a custom domain (recommended for production, e.g. `media.festly.app`).
+   connect a custom domain (recommended for production, e.g. `media.alikeni.app`).
 3. R2 → **Manage API tokens** → Create token with **Object Read & Write**,
    scoped to this bucket. Copy the Access Key ID and Secret Access Key.
 4. Bucket → Settings → **CORS policy**:
@@ -80,7 +80,7 @@ which streams from the binding with HTTP Range support. Setup:
    R2_ACCOUNT_ID=<account id from the R2 overview page>
    R2_ACCESS_KEY_ID=...
    R2_SECRET_ACCESS_KEY=...
-   R2_BUCKET=festly-media
+   R2_BUCKET=alikeni
    R2_PUBLIC_URL=https://pub-xxxx.r2.dev   # or your custom domain
    ```
 

@@ -342,7 +342,7 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
       </div>
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent className="theme-festly">
+        <DialogContent className="theme-alikeni">
           <DialogHeader>
             <DialogTitle>Delete “{row.title}”?</DialogTitle>
             <DialogDescription>

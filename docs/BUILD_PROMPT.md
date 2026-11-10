@@ -1,4 +1,4 @@
-# Festly build prompt (authoritative phase spec)
+# Alikeni build prompt (authoritative phase spec)
 
 Saved 2026-10-14 from the user's research brief so later sessions can read the
 exact phase spec from disk. Workflow: the user says **"Run Phase N"**; do only

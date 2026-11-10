@@ -72,7 +72,7 @@ export function Logo() {
         f
       </span>
       <span className="font-display text-xl tracking-wide text-cream">
-        Festly
+        Alikeni
       </span>
     </a>
   )

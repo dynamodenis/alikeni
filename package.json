@@ -1,5 +1,5 @@
 {
-  "name": "festly",
+  "name": "alikeni",
   "private": true,
   "type": "module",
   "scripts": {
@@ -30,7 +30,7 @@
     "db:check": "drizzle-kit check",
     "db:local": "tsx scripts/dev-db.ts",
     "db:claim-dev": "tsx --env-file-if-exists=.env scripts/claim-dev-drafts.ts",
-    "build:worker": "FESTLY_TARGET=workers vite build",
+    "build:worker": "ALIKENI_TARGET=workers vite build",
     "preview:worker": "pnpm build:worker && wrangler dev",
     "deploy": "pnpm build:worker && wrangler deploy",
     "cf-typegen": "wrangler types",

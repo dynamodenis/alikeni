@@ -66,7 +66,7 @@ const html = `<!doctype html>
   figcaption { display: grid; gap: 2px; margin-top: 10px; }
   figcaption span { color: #6b5a4a; font-size: 11px; }
 </style>
-<h1>Festly · ${escape(category ?? "all templates")} · ${metas.length} templates</h1>
+<h1>Alikeni · ${escape(category ?? "all templates")} · ${metas.length} templates</h1>
 <div class="grid">${cards}</div>`
 
 async function main() {

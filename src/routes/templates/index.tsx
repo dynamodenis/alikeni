@@ -33,11 +33,11 @@ export const Route = createFileRoute("/templates/")({
   search: { middlewares: [stripSearchParams(SEARCH_DEFAULTS)] },
   head: () => ({
     meta: [
-      { title: "Invitation templates · Festly" },
+      { title: "Invitation templates · Alikeni" },
       {
         name: "description",
         content:
-          "Browse Festly invitation templates for weddings, birthdays, graduations and more. Preview each one live, then make it yours.",
+          "Browse Alikeni invitation templates for weddings, birthdays, graduations and more. Preview each one live, then make it yours.",
       },
     ],
   }),

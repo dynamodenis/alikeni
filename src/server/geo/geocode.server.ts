@@ -28,7 +28,7 @@ export function queryHash(provider: string, query: string): string {
 export function selectGeocoder(env: ServerEnv = serverEnv): GeocodeProvider {
   const nominatim = () =>
     nominatimProvider({
-      userAgent: `Festly/0.1 (${env.APP_ORIGIN}${env.GEOCODE_CONTACT_EMAIL ? `; ${env.GEOCODE_CONTACT_EMAIL}` : ""})`,
+      userAgent: `Alikeni/0.1 (${env.APP_ORIGIN}${env.GEOCODE_CONTACT_EMAIL ? `; ${env.GEOCODE_CONTACT_EMAIL}` : ""})`,
       email: env.GEOCODE_CONTACT_EMAIL,
     })
   switch (env.GEOCODE_PROVIDER) {

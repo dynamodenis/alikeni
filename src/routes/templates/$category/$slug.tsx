@@ -49,7 +49,7 @@ export const Route = createFileRoute("/templates/$category/$slug")({
       meta: meta
         ? [
             {
-              title: `${meta.name} · ${CATEGORY_LABELS[meta.category]} invitation template · Festly`,
+              title: `${meta.name} · ${CATEGORY_LABELS[meta.category]} invitation template · Alikeni`,
             },
             { name: "description", content: meta.description },
             {
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/templates/$category/$slug")({
             },
             { property: "og:description", content: meta.description },
           ]
-        : [{ title: "Template · Festly" }],
+        : [{ title: "Template · Alikeni" }],
     }
   },
   component: TemplateDetailPage,
@@ -98,7 +98,7 @@ function TemplateDetailPage() {
   const sendTheme = useCallback(
     (next: string) =>
       postToWindow(frame.current?.contentWindow, {
-        type: "festly:theme",
+        type: "alikeni:theme",
         paletteId: next,
       }),
     []
@@ -106,7 +106,7 @@ function TemplateDetailPage() {
   usePreviewMessages(
     () => frame.current?.contentWindow,
     (message) => {
-      if (message.type === "festly:ready") {
+      if (message.type === "alikeni:ready") {
         setLoaded(true)
         sendTheme(paletteId)
       }
@@ -116,7 +116,7 @@ function TemplateDetailPage() {
   // Ask the preview to announce itself in case its own "ready" fired before
   // this page hydrated; the iframe load event is the last-resort fallback.
   useEffect(() => {
-    postToWindow(frame.current?.contentWindow, { type: "festly:ping" })
+    postToWindow(frame.current?.contentWindow, { type: "alikeni:ping" })
   }, [])
 
   const pickPalette = (next: string) => {
@@ -249,7 +249,7 @@ function TemplateDetailPage() {
               src={src}
               onLoad={() => {
                 postToWindow(frame.current?.contentWindow, {
-                  type: "festly:ping",
+                  type: "alikeni:ping",
                 })
                 window.setTimeout(() => setLoaded(true), 1500)
               }}

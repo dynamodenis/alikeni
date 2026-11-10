@@ -38,8 +38,8 @@ const FIXTURES: Array<{
   {
     name: "nominatim",
     provider: nominatimProvider({
-      userAgent: "Festly/test (dev@festly.local)",
-      email: "dev@festly.local",
+      userAgent: "Alikeni/test (dev@alikeni.local)",
+      email: "dev@alikeni.local",
     }),
     urlPrefix: "https://nominatim.openstreetmap.org/search?",
     body: [
@@ -108,7 +108,9 @@ describe.each(FIXTURES)(
       const [url, init] = fetchMock.mock.calls[0]
       expect(String(url).startsWith(urlPrefix)).toBe(true)
       if (name === "nominatim") {
-        expect(new Headers(init?.headers).get("User-Agent")).toContain("Festly")
+        expect(new Headers(init?.headers).get("User-Agent")).toContain(
+          "Alikeni"
+        )
         expect(String(url)).toContain("format=jsonv2")
       }
     })

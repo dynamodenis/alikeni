@@ -26,7 +26,7 @@ export const Route = createFileRoute("/sign-up")({
     return { methods }
   },
   loader: ({ context }) => context.methods,
-  head: () => ({ meta: [{ title: "Create your account · Festly" }] }),
+  head: () => ({ meta: [{ title: "Create your account · Alikeni" }] }),
   component: SignUp,
 })
 

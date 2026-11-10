@@ -86,7 +86,7 @@ test.beforeAll(async ({ browser }) => {
       await openEditorTab(page, "Music")
       const toggle = page.getByRole("switch", { name: "Play music" })
       if (!(await toggle.isChecked())) await toggle.click()
-      await page.getByRole("radio", { name: /Festly library/ }).click()
+      await page.getByRole("radio", { name: /Alikeni library/ }).click()
       // Pick a library track other than the current one, so autosave runs.
       const tracks = page.getByRole("radiogroup", { name: "Library tracks" })
       const title = await tracks

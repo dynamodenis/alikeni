@@ -3,23 +3,25 @@
 // config next to the bundle; `wrangler deploy` picks that up.
 //
 // Before the first deploy, replace every `<replace-me>` (see docs/DEPLOY.md):
-//   - hyperdrive[0].id: `wrangler hyperdrive create festly-db --connection-string=<neon url>`
-//   - r2_buckets[0].bucket_name ("festly-media"): your R2 bucket for uploads
+//   - hyperdrive[0].id: from `wrangler hyperdrive create alikeni-db --connection-string=<neon url>`
+//   - r2_buckets[0].bucket_name ("alikeni"): your R2 bucket for uploads
 //   - vars.APP_ORIGIN: the public origin (workers.dev URL or custom domain)
 // Secrets never go here: `wrangler secret put <NAME>` (list in docs/DEPLOY.md).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "festly",
+  "name": "alikeni",
   "main": "@tanstack/react-start/server-entry",
   "compatibility_date": "2026-10-20",
   // nodejs_compat: node:crypto, node:async_hooks, pg's net/tls sockets, and
   // vars/secrets in process.env (on by default from 2025-04-01).
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true,
+  },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "<replace-me>",
+      "id": "04e4fc5682d446569ac3875b9b8a901e",
       // `wrangler dev` / `pnpm preview:worker` connect here instead of the
       // real Hyperdrive: `pnpm db:local --port 55435`.
       "localConnectionString": "postgresql://postgres:postgres@127.0.0.1:55435/postgres",
@@ -27,13 +29,17 @@
   ],
   // `wrangler dev` simulates this bucket locally (.wrangler/state); it never
   // touches the real one.
-  // bucket_name: replace "festly-media" with your bucket's name.
-  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "festly-media" }],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "alikeni",
+    },
+  ],
   "vars": {
     "NODE_ENV": "production",
     "STORAGE_DRIVER": "binding",
     // Replace with the deployed origin (no trailing slash).
-    "APP_ORIGIN": "https://festly.example.workers.dev",
+    "APP_ORIGIN": "https://alikeni.example.workers.dev",
     "GEOCODE_PROVIDER": "nominatim",
     // Currencies the Paystack account can charge (KES, USD).
     "PAYSTACK_CURRENCIES": "KES",

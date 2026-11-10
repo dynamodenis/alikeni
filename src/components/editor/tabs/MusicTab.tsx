@@ -29,7 +29,7 @@ const KINDS: Array<{
 }> = [
   {
     kind: "library",
-    label: "Festly library",
+    label: "Alikeni library",
     icon: Library,
     note: "Starts the moment guests open the invitation.",
   },

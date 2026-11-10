@@ -9,7 +9,7 @@ import type { Db, OgWasm, Runtime } from "./types"
 
 type Cache = { pool?: Pool; db?: Db }
 // Survive Vite HMR in dev so each reload does not open a new pool.
-const cache = ((globalThis as { __festlyDb?: Cache }).__festlyDb ??= {})
+const cache = ((globalThis as { __alikeniDb?: Cache }).__alikeniDb ??= {})
 
 export function getDb(): Db {
   if (cache.db) return cache.db

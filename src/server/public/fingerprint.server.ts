@@ -10,7 +10,7 @@ type SaltEnv = Pick<
   "NODE_ENV" | "ANALYTICS_SALT" | "BETTER_AUTH_SECRET"
 >
 
-const DEV_SALT = "festly-dev-analytics-salt-not-secret"
+const DEV_SALT = "alikeni-dev-analytics-salt-not-secret"
 
 /**
  * ANALYTICS_SALT, else BETTER_AUTH_SECRET, else a fixed development value.

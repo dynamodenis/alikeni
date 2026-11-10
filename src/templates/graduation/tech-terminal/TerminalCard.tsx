@@ -43,7 +43,7 @@ export function TerminalCard({
         <span className="size-2.5 rounded-full bg-inv-primary" />
         <span className="size-2.5 rounded-full bg-inv-muted" />
         <span className="ml-2 text-[0.6rem] tracking-[0.2em] text-inv-muted uppercase">
-          festly — bash
+          alikeni — bash
         </span>
       </div>
       <pre

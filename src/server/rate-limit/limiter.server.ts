@@ -9,8 +9,8 @@ import type { RateLimiter } from "./types"
 type Cache = { db?: RateLimiter; memory?: RateLimiter }
 // Survive Vite HMR in dev so reloads keep counting.
 const cache = ((
-  globalThis as { __festlyRateLimit?: Cache }
-).__festlyRateLimit ??= {})
+  globalThis as { __alikeniRateLimit?: Cache }
+).__alikeniRateLimit ??= {})
 
 export function getRateLimiter(): RateLimiter {
   if (hasDatabase()) return (cache.db ??= new PostgresRateLimiter(getDb))

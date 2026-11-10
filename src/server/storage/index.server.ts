@@ -6,7 +6,7 @@ import { createLocalDriver } from "./local.server"
 import { createR2Driver } from "./r2.server"
 import type { ServerStorage } from "./types"
 
-const DEV_SECRET = "festly-local-storage-dev-secret"
+const DEV_SECRET = "alikeni-local-storage-dev-secret"
 
 /**
  * STORAGE_DRIVER=binding → R2 through the Worker's BUCKET binding (Workers).
