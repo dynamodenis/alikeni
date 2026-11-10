@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { parseServerEnv } from "@/env.server"
 import * as schema from "@/server/db/schema"
 import type { Email } from "@/server/email/send.server"
-import { createAuth } from "./auth.server"
+import { EMAIL_SEND_FAILED, createAuth } from "./auth.server"
 
 const client = new PGlite()
 const db = drizzle(client, { schema, casing: "snake_case" })
@@ -147,5 +147,57 @@ describe("email + password", () => {
     })
     expect(reset.status).toBe(400)
     expect(reset.headers.getSetCookie()).toHaveLength(0)
+  })
+})
+
+describe("when email can't be sent", () => {
+  const broken = createAuth(
+    db,
+    parseServerEnv({ NODE_ENV: "test" }),
+    async () => {
+      throw new Error("mail provider rejected the message")
+    }
+  )
+  const ORIGIN = "http://localhost:3000"
+  const json = (path: string, body: unknown) =>
+    broken.handler(
+      new Request(`${ORIGIN}/api/auth${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: ORIGIN },
+        body: JSON.stringify(body),
+      })
+    )
+
+  it("still completes sign-up; the confirmation can be resent later", async () => {
+    const response = await json("/sign-up/email", {
+      name: "Wanjiru Kamau",
+      email: "wanjiru@example.com",
+      password: "another fine passphrase",
+    })
+    expect(response.status).toBe(200)
+    const user = (
+      await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.email, "wanjiru@example.com"))
+    ).at(0)
+    expect(user).toBeDefined()
+  })
+
+  it("tells an explicit resend that it failed", async () => {
+    const response = await json("/send-verification-email", {
+      email: "wanjiru@example.com",
+      callbackURL: "/dashboard",
+    })
+    expect(response.status).toBe(503)
+    expect(await response.json()).toMatchObject({ code: EMAIL_SEND_FAILED })
+  })
+
+  it("keeps a password reset request silent, as for unknown emails", async () => {
+    const response = await json("/request-password-reset", {
+      email: "wanjiru@example.com",
+      redirectTo: "/reset-password",
+    })
+    expect(response.status).toBe(200)
   })
 })

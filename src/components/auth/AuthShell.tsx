@@ -214,6 +214,8 @@ const MESSAGES: Record<string, string> = {
   INVALID_TOKEN:
     "This link has expired or was already used. Request a new one.",
   TOO_MANY_REQUESTS: "Too many attempts. Wait a minute and try again.",
+  EMAIL_SEND_FAILED:
+    "We couldn't send the email right now. Try again in a few minutes, or sign in with your password.",
 }
 
 export function authErrorMessage(

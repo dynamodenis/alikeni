@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as AuthedConnectGoogleRouteImport } from './routes/_authed/connect-google'
 import { Route as DevMapsRouteImport } from './routes/dev/maps'
 import { Route as DevSmokeRouteImport } from './routes/dev/smoke'
 import { Route as ISlugRouteImport } from './routes/i/$slug'
@@ -71,6 +72,11 @@ const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedConnectGoogleRoute = AuthedConnectGoogleRouteImport.update({
+  id: '/connect-google',
+  path: '/connect-google',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const DevMapsRoute = DevMapsRouteImport.update({
   id: '/maps',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/_authed/connect-google': typeof AuthedConnectGoogleRoute
   '/dev/maps': typeof DevMapsRoute
   '/dev/smoke': typeof DevSmokeRoute
   '/i/$slug': typeof ISlugRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/_authed/connect-google'
     | '/dev/maps'
     | '/dev/smoke'
     | '/i/$slug'
@@ -435,6 +447,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/connect-google': {
+      id: '/_authed/connect-google'
+      path: '/connect-google'
+      fullPath: '/connect-google'
+      preLoaderRoute: typeof AuthedConnectGoogleRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/dev/maps': {
       id: '/dev/maps'
@@ -605,6 +624,7 @@ const DevRouteRouteWithChildren = DevRouteRoute._addFileChildren(
 )
 
 interface AuthedRouteChildren {
+  AuthedConnectGoogleRoute: typeof AuthedConnectGoogleRoute
   AuthedEditorInvitationIdRoute: typeof AuthedEditorInvitationIdRoute
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
   AuthedDashboardInvitationIdGuestsRoute: typeof AuthedDashboardInvitationIdGuestsRoute
@@ -613,6 +633,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedConnectGoogleRoute: AuthedConnectGoogleRoute,
   AuthedEditorInvitationIdRoute: AuthedEditorInvitationIdRoute,
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
   AuthedDashboardInvitationIdGuestsRoute:

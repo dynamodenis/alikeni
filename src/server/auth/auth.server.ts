@@ -3,14 +3,18 @@
 // so routes that never touch auth still boot without DATABASE_URL.
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { createAuthMiddleware } from "better-auth/api"
+import { APIError, createAuthMiddleware } from "better-auth/api"
 import { setSessionCookie } from "better-auth/cookies"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { serverEnv, type ServerEnv } from "@/env.server"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { getDb } from "@/server/db/client.server"
 import * as schema from "@/server/db/schema"
-import { sendEmail, type EmailSender } from "@/server/email/send.server"
+import {
+  sendEmail,
+  type Email,
+  type EmailSender,
+} from "@/server/email/send.server"
 import {
   resetPasswordEmail,
   verifyEmail,
@@ -26,6 +30,29 @@ type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
 // Who a /reset-password request is for, handed from the before hook to the
 // after hook: the endpoint consumes the token, so `after` can't look it up.
 const resettingUser = new WeakMap<object, string>()
+
+/** Error code the sign-in page maps to a message when mail can't go out. */
+export const EMAIL_SEND_FAILED = "EMAIL_SEND_FAILED"
+
+/**
+ * Sends, or tells the caller it couldn't. A plain throw becomes a bodyless
+ * 500 that the client can't explain; an APIError carries a code the sign-in
+ * page can show. Sign-up and password-reset mails run as Better Auth
+ * background tasks, which log and swallow this, so those flows still succeed
+ * and the person can ask for the mail again; only an explicit
+ * `/send-verification-email` awaits it and reports the failure.
+ */
+async function deliver(send: EmailSender, email: Email) {
+  try {
+    await send(email)
+  } catch (error) {
+    console.error(`[auth] email to ${email.to} failed:`, error)
+    throw new APIError("SERVICE_UNAVAILABLE", {
+      code: EMAIL_SEND_FAILED,
+      message: "We couldn't send the email. Try again in a few minutes.",
+    })
+  }
+}
 
 export function createAuth(db: AnyDb, env: ServerEnv, send: EmailSender) {
   const google =
@@ -50,14 +77,14 @@ export function createAuth(db: AnyDb, env: ServerEnv, send: EmailSender) {
       // required, so the first invitation is never blocked on an inbox.
       requireEmailVerification: false,
       sendResetPassword: async ({ user, url }) => {
-        await send(resetPasswordEmail(user.email, url))
+        await deliver(send, resetPasswordEmail(user.email, url))
       },
     },
     emailVerification: {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
-        await send(verifyEmail(user.email, url))
+        await deliver(send, verifyEmail(user.email, url))
       },
     },
     socialProviders: google,

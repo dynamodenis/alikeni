@@ -92,3 +92,43 @@ test("sign out ends the session", async ({ page }) => {
   const session = await page.request.get("/api/auth/get-session")
   expect(await session.text()).toMatch(/^(null)?$/)
 })
+
+test("Google on an unverified password account offers a verification link", async ({
+  page,
+}) => {
+  const owner = newOwner()
+  await signUpViaApi(page.context(), owner)
+  await page.context().clearCookies()
+
+  // Where Better Auth lands after refusing to link Google to an unverified user.
+  await page.goto("/sign-in?error=account_not_linked")
+  const notice = page.getByRole("status")
+  await expect(notice).toContainText("Verify your email to connect Google")
+  const send = page.getByRole("button", { name: "Send verification link" })
+  await hydrated(send)
+  await send.click()
+  await expect(notice.getByRole("alert")).toContainText("Enter your email")
+  await page.getByLabel("Email", { exact: true }).fill(owner.email)
+  await send.click()
+  await expect(notice).toContainText(`Check ${owner.email} for the link`)
+})
+
+test("connect-google needs a session and explains a failed link", async ({
+  page,
+}) => {
+  await page.goto("/connect-google?redirect=%2Fdashboard")
+  await expect(page).toHaveURL(/\/sign-in\?/)
+  expect(redirectParam(page.url())).toContain("/connect-google")
+
+  const owner = newOwner()
+  await signUpViaApi(page.context(), owner)
+  // `?error=` means Google bounced us back, so the page waits instead of
+  // redirecting to Google again (which the suite cannot follow).
+  await page.goto("/connect-google?redirect=%2Fdashboard&error=access_denied")
+  await expect(page.getByRole("alert")).toContainText(
+    `Choose the Google account for ${owner.email}`
+  )
+  await expect(
+    page.getByRole("link", { name: "Continue without Google" })
+  ).toHaveAttribute("href", "/dashboard")
+})

@@ -64,6 +64,10 @@ export default defineConfig({
         DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${DB_PORT}/postgres`,
         STORAGE_DRIVER: "local",
         APP_ORIGIN,
+        // Never send real mail from the suite: with the key unset, emails
+        // are printed to the server log (and a developer's .env may hold one).
+        RESEND_API_KEY: "",
+        EMAIL_FROM: "",
       },
     },
   ],

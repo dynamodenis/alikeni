@@ -55,6 +55,35 @@ both use).
 - **Redis** via `secondaryStorage`: moves session reads out of Postgres.
   Only worth it at a much larger scale.
 
+## Google on an existing password account
+
+Better Auth links a Google sign-in onto an existing user with the same
+email (`accountLinking.trustedProviders: ["google"]`), but only once that
+user's **local** email is verified (`requireLocalEmailVerified`, default
+`true`). We keep that default: without it, anyone could register your
+address with a password, never verify it, and inherit your account the
+first time you sign in with Google.
+
+Because sign-up does not require verification, a password account that
+never clicked its confirm link hits `account_not_linked` when it tries
+Google. Better Auth redirects back to `/sign-in?error=account_not_linked`,
+where the page explains this and offers a "Send verification link" action
+(`authClient.sendVerificationEmail`). The link's `callbackURL` is
+`/connect-google`, so opening it verifies the email, signs the person in
+(`autoSignInAfterVerification`) and immediately starts
+`authClient.linkSocial` for Google, which attaches a `google` account row to
+the same user. `/connect-google` skips itself when Google is off or already
+linked, and shows a retry with "Continue without Google" when Google sends
+back `?error=`. In development (no `RESEND_API_KEY`) the link is printed to
+the server log.
+
+If the mail can't be sent, the endpoint answers 503 with code
+`EMAIL_SEND_FAILED` and the page says so next to the button; the provider's
+reason is in the server log. The usual cause in development is Resend's
+test sender (`onboarding@resend.dev`), which only delivers to the address
+that owns the Resend account; sign up with that address, verify a domain,
+or unset `RESEND_API_KEY` to go back to log printing.
+
 ## Configuration
 
 | Variable                                   | Notes                                                                                                                        |
