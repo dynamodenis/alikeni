@@ -199,6 +199,23 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 - [x] `PAYSTACK_CURRENCIES` (default KES): the upgrade page offers only currencies the account accepts; USD needs enabling by Paystack
 - [ ] Try it end to end with Paystack test keys (M-Pesa test number, test card), then live keys on deploy
 
+## Phase 10 — Guest contacts & sending invitations
+
+- [ ] Guests page: optional email and WhatsApp number per guest (migration on `guests`; number normalised to international digits, e.g. `254712345678`, no `+` or leading zero)
+- [ ] "Send on WhatsApp" opens that guest's chat when a number is saved (`https://wa.me/<number>?text=…`); without a number it stays the contact picker (`https://wa.me/?text=…`). The message is sent from the host's own WhatsApp, one click per guest
+- [ ] "Send invitation by email" per guest through Resend: host's name in the message, the guest's personal link (`/i/<slug>?to=<token>`), Reply-To the host
+- [ ] Per-host daily cap on invitation emails: they share the Resend quota with the automatic emails (free tier: 100 a day)
+- [?] Automatic WhatsApp sending (WhatsApp Business API) is left out: messages would come from an Alikeni business number instead of the host, and it needs Meta business verification, a dedicated number, approved message templates and a per-message fee
+
+## Link previews (photo in the WhatsApp / social card)
+
+Found 2026-11-13: links shared on WhatsApp showed no image because `/og/<slug>.png` answered 500 in production. The page's `og:image` tags were correct.
+
+- [x] Render on Workers: `satori` pinned to `0.32.0` (≥ 0.33 bundles HarfBuzz, which Workers cannot run; `docs/DEPLOY.md` said 0.35.0, which still has it), layout binary from `satori/yoga.wasm`, card fonts from the static `@fontsource/*` WOFF files (0.32 does not read WOFF2)
+- [x] Host's photo on the card: first gallery photo read from storage by key, WebP → JPEG through the Cloudflare Images binding (`IMAGES`); the finished card is served as JPEG (~70 KB instead of ~560 KB PNG)
+- [x] Checked on `wrangler dev` (local Workers runtime): 200, 1200×630 JPEG with the photo, second request served from the R2 cache
+- [ ] Deploy, then check a link in WhatsApp and in the Facebook sharing debugger; WhatsApp keeps the old preview for a link it has already seen, so test with a fresh `?v=1`
+
 ## Credits / licensing log
 
 Record any concrete adaptation from permissive sources in `docs/CREDITS.md` (created in Phase 0).

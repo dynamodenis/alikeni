@@ -16,13 +16,15 @@ import { getRequest } from "@tanstack/react-start/server"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm"
-import yogaWasm from "satori/layout.wasm"
+import yogaWasm from "satori/yoga.wasm"
 import * as schema from "@/server/db/schema"
 import type { BucketLike, BucketObjectBody, Db, OgWasm, Runtime } from "./types"
 
 // The generated Env types the bindings as always present; a wrangler.jsonc
 // without them must still fail with a clear message, so treat them as optional.
-const bindings: Partial<Pick<Cloudflare.Env, "HYPERDRIVE" | "BUCKET">> = env
+const bindings: Partial<
+  Pick<Cloudflare.Env, "HYPERDRIVE" | "BUCKET" | "IMAGES">
+> = env
 
 type Entry = { pool: Pool; db: Db; ending: boolean }
 const perRequest = new WeakMap<Request, Entry>()
@@ -139,6 +141,28 @@ export async function initOgWasm(
 }
 
 /**
+ * WebP (what uploads are stored as) → JPEG for the OG card, through the
+ * Cloudflare Images binding. Undefined without the binding or on any error:
+ * the card then renders without the photo.
+ */
+export async function photoToJpeg(
+  bytes: Uint8Array<ArrayBuffer>
+): Promise<Uint8Array<ArrayBuffer> | undefined> {
+  if (!bindings.IMAGES) return undefined
+  try {
+    const source = new Response(bytes).body
+    if (!source) return undefined
+    const output = await bindings.IMAGES.input(source)
+      .transform({ width: 1200, fit: "scale-down" })
+      .output({ format: "image/jpeg", quality: 82 })
+    return new Uint8Array(await output.response().arrayBuffer())
+  } catch (error) {
+    console.warn("[og] photo conversion failed", error)
+    return undefined
+  }
+}
+
+/**
  * Close this request's pool after the response is produced. `pool.end()`
  * waits for checked-out clients; `waitUntil` keeps the isolate alive for it.
  * Loaders run before streaming starts and Alikeni has no deferred loader
@@ -172,5 +196,6 @@ export const runtime = {
   hasDatabase,
   getBucket,
   initOgWasm,
+  photoToJpeg,
   endRequest,
 } satisfies Runtime

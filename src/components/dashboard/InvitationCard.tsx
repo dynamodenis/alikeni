@@ -43,6 +43,7 @@ import {
 } from "@/server/invitations/dashboard.functions"
 import type { listMyInvitationsFn } from "@/server/invitations/invitations.functions"
 import { getTemplateMeta } from "@/templates/registry"
+import { CardPreview } from "./CardPreview"
 import { copyToClipboard } from "./DashboardShell"
 
 export type DashboardRow = Awaited<
@@ -147,6 +148,13 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
               "size-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]",
               archived && "grayscale"
             )}
+          />
+        )}
+        {meta && (
+          <CardPreview
+            templateId={row.templateId}
+            config={row.config}
+            className={cn(archived && "grayscale")}
           />
         )}
         <span

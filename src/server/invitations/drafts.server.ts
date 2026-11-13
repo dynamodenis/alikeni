@@ -92,7 +92,8 @@ export async function getOwnedInvitation(
 /**
  * The user's invitations for the dashboard, most recently edited first.
  * Archived ones are included (the dashboard lists them separately so they
- * can be restored). Only the fields a card shows leave the db.
+ * can be restored). Only the fields a card shows leave the db, plus the
+ * saved draft itself, which the card renders as its miniature preview.
  */
 export async function listOwnedInvitations(
   db: AnyDb,
@@ -121,6 +122,7 @@ export async function listOwnedInvitations(
       title: config.texts?.headline || config.event?.title || "Untitled",
       startsAt: config.datetime?.start ?? null,
       paletteId: config.theme?.paletteId ?? null,
+      config: draftConfig,
       // Free plan: when the public page goes offline (published dates rule).
       freeUntil:
         row.plan === "free" && publishedConfig

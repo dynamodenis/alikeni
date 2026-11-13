@@ -10,7 +10,11 @@ import type {
 export const OG_CACHE_CONTROL =
   "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
 
-/** `og/<invitationId>-<publishedAt epoch ms>.png` */
+/**
+ * `og/<invitationId>-<publishedAt epoch ms>.png`. The name is historical: the
+ * stored card is JPEG where the runtime can compress it (see `OgDeps.compress`),
+ * and its stored content type says which.
+ */
 export function ogCacheKey(invitationId: string, publishedAt: string | Date) {
   return `og/${invitationId}-${new Date(publishedAt).getTime()}.png`
 }
@@ -34,6 +38,15 @@ export async function invalidateOgCard(
 
 export type OgSource = { id: string; publishedAt: string | null }
 
+/** JPEG starts FF D8 FF; everything the renderer makes otherwise is PNG. */
+export function cardMime(bytes: Bytes): "image/jpeg" | "image/png" {
+  return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+    ? "image/jpeg"
+    : "image/png"
+}
+
+const CARD_MIMES = new Set(["image/png", "image/jpeg"])
+
 /**
  * Stored card on a hit; otherwise render, store, return. A failed store still
  * serves the freshly rendered card.
@@ -42,27 +55,35 @@ export async function getOrRenderCard(
   storage: ServerObjects,
   invitation: OgSource,
   render: () => Promise<Bytes>
-): Promise<{ body: ReadableStream<Bytes> | Bytes; hit: boolean }> {
+): Promise<{
+  body: ReadableStream<Bytes> | Bytes
+  mime: string
+  hit: boolean
+}> {
   const key = invitation.publishedAt
     ? ogCacheKey(invitation.id, invitation.publishedAt)
     : null
   if (key) {
     try {
       const stored = await storage.get(key)
-      if (stored) return { body: stored.body, hit: true }
+      if (stored) {
+        const mime = CARD_MIMES.has(stored.mime) ? stored.mime : "image/png"
+        return { body: stored.body, mime, hit: true }
+      }
     } catch (error) {
       console.warn("[og] cache read failed", error)
     }
   }
-  const png = await render()
+  const card = await render()
+  const mime = cardMime(card)
   if (key) {
     try {
-      await storage.put(key, png, "image/png")
+      await storage.put(key, card, mime)
     } catch (error) {
       console.warn("[og] cache write failed", error)
     }
   }
-  return { body: png, hit: false }
+  return { body: card, mime, hit: false }
 }
 
 /**

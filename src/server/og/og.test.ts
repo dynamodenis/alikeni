@@ -139,6 +139,27 @@ describe("GET /og/<slug>.png", () => {
 })
 
 describe("cache helpers", () => {
+  it("stores and serves a compressed card as JPEG", async () => {
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1])
+    const objects = new Map<
+      string,
+      { body: Uint8Array<ArrayBuffer>; mime: string }
+    >()
+    const storage = {
+      put: async (key: string, body: Uint8Array<ArrayBuffer>, mime: string) => {
+        objects.set(key, { body, mime })
+      },
+      get: async (key: string) => objects.get(key) ?? null,
+    }
+    const source = { id: "inv", publishedAt: "2027-01-01T00:00:00.000Z" }
+    const miss = await getOrRenderCard(storage, source, async () => jpeg)
+    expect(miss).toMatchObject({ mime: "image/jpeg", hit: false })
+    const hit = await getOrRenderCard(storage, source, async () => {
+      throw new Error("should be cached")
+    })
+    expect(hit).toMatchObject({ mime: "image/jpeg", hit: true })
+  })
+
   it("serves a fresh render even when storage is down", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const broken = {
@@ -154,7 +175,11 @@ describe("cache helpers", () => {
       { id: "x", publishedAt: new Date().toISOString() },
       async () => FAKE_PNG
     )
-    expect(result).toEqual({ body: FAKE_PNG, hit: false })
+    expect(result).toEqual({
+      body: FAKE_PNG,
+      mime: "image/png",
+      hit: false,
+    })
     warn.mockRestore()
   })
 

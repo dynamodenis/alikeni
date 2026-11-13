@@ -6,6 +6,7 @@ import { facesFor } from "./fonts.server"
 import {
   cardProps,
   fetchPhoto,
+  loadPhoto,
   pickPhotoUrl,
   renderOgCard,
   toHex,
@@ -91,6 +92,53 @@ describe("fetchPhoto", () => {
       })
     expect(
       await fetchPhoto("https://cdn.test/slow.png", hang, 20)
+    ).toBeUndefined()
+  })
+})
+
+describe("loadPhoto", () => {
+  const photo = { assetKey: "useruploads/u/a.webp", url: "https://cdn.test/a" }
+  const never = vi.fn<typeof fetch>(async () => {
+    throw new Error("should not fetch")
+  })
+
+  it("reads from storage and converts WebP to JPEG", async () => {
+    const toJpeg = vi.fn(async () => new Uint8Array([1, 2, 3]))
+    const url = await loadPhoto(photo, {
+      readObject: async (key) =>
+        key === photo.assetKey
+          ? { body: new Uint8Array([9, 9]), mime: "image/webp" }
+          : null,
+      toJpeg,
+      fetchImpl: never,
+    })
+    expect(url).toBe("data:image/jpeg;base64,AQID")
+    expect(toJpeg).toHaveBeenCalledWith(new Uint8Array([9, 9]))
+    expect(never).not.toHaveBeenCalled()
+  })
+
+  it("falls back to the URL when storage misses or throws", async () => {
+    const fetchImpl = async () => pngResponse(new Uint8Array([1, 2, 3]))
+    expect(
+      await loadPhoto(photo, { readObject: async () => null, fetchImpl })
+    ).toBe("data:image/png;base64,AQID")
+    const broken = async () => {
+      throw new Error("storage down")
+    }
+    expect(await loadPhoto(photo, { readObject: broken, fetchImpl })).toBe(
+      "data:image/png;base64,AQID"
+    )
+  })
+
+  it("leaves WebP off when there is no converter or it fails", async () => {
+    const webp = async () =>
+      new Response("x", { headers: { "content-type": "image/webp" } })
+    expect(await loadPhoto(photo, { fetchImpl: webp })).toBeUndefined()
+    expect(
+      await loadPhoto(photo, {
+        fetchImpl: webp,
+        toJpeg: async () => undefined,
+      })
     ).toBeUndefined()
   })
 })

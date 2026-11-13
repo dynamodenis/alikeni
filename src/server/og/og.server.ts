@@ -2,6 +2,7 @@
 import { z } from "zod"
 import { SLUG_PATTERN } from "@/lib/slug"
 import { getPublishedBySlug } from "@/server/invitations/editing.server"
+import { photoToJpeg } from "@/server/platform/runtime"
 import type { Bytes, ServerObjects } from "@/server/storage/types"
 import { OG_CACHE_CONTROL, getOrRenderCard } from "./cache.server"
 import {
@@ -19,6 +20,13 @@ export type OgDeps = {
   db: Db
   storage: ServerObjects
   render?: (config: OgConfig, options?: RenderOptions) => Promise<Bytes>
+  /**
+   * PNG card → JPEG, or undefined to keep the PNG. A card with a photo is
+   * about 550 KB as PNG and WhatsApp drops preview images near 600 KB; as
+   * JPEG it is well under 150 KB. Defaults to the runtime's converter
+   * (Cloudflare Images on Workers, none on Node).
+   */
+  compress?: (png: Bytes) => Promise<Bytes | undefined>
 }
 
 const notFound = () =>
@@ -37,13 +45,22 @@ export async function ogImageResponse(
   if (!invitation) return notFound()
 
   const render = deps.render ?? renderOgCard
+  const compress = deps.compress ?? photoToJpeg
   try {
-    const { body, hit } = await getOrRenderCard(deps.storage, invitation, () =>
-      render(invitation.config)
+    const { body, mime, hit } = await getOrRenderCard(
+      deps.storage,
+      invitation,
+      async () => {
+        const png = await render(invitation.config, {
+          readObject: (key) => deps.storage.get(key),
+          toJpeg: photoToJpeg,
+        })
+        return (await compress(png)) ?? png
+      }
     )
     return new Response(body, {
       headers: {
-        "Content-Type": "image/png",
+        "Content-Type": mime,
         "Cache-Control": OG_CACHE_CONTROL,
         "X-Og-Cache": hit ? "hit" : "miss",
       },

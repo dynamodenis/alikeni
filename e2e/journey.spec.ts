@@ -183,6 +183,11 @@ test.describe.serial("owner and guest journey", () => {
     await expect(
       dashboardStat(page, "Wishes").getByRole("definition")
     ).toHaveText("1")
+    // The card shows the owner's own invitation, not the template's sample.
+    const preview = page.frameLocator(
+      'iframe[title="Preview of your invitation"]'
+    )
+    await expect(preview.getByText(headline).first()).toBeVisible()
   })
 
   test("responses page lists the guest; hiding the wish removes it", async () => {

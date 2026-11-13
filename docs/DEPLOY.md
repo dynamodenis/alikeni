@@ -265,15 +265,21 @@ once a custom domain is attached.
 
 ## Known limitations
 
-- **OG cards (`/og/<slug>.png`) do not render on Workers with satori 0.63.**
-  satori ≥ 0.36 embeds HarfBuzz as base64 and compiles it at the first render
-  (plus small trampoline modules via `new WebAssembly.Module(bytes)`);
-  Workers refuse runtime WASM compilation ("Wasm code generation disallowed
-  by embedder"). The route answers 500 and link previews show no image.
-  Fix: pin `satori` to `0.35.0` (the last standalone build without embedded
-  HarfBuzz; its layout binary is exported as `satori/yoga.wasm`, so the
-  two runtime files import that path instead of `satori/layout.wasm`), or
-  switch the OG renderer to a Workers-ready package. Node is unaffected.
+- **OG cards (`/og/<slug>.png`): `satori` is pinned to `0.32.0`; do not
+  upgrade it.** satori ≥ 0.33 bundles HarfBuzz (emscripten), which reads
+  `self.location.href` (undefined on Workers) and compiles WASM at runtime
+  (refused by Workers), so the route answers 500 and link previews show no
+  image. 0.32.0 is the last build without it. It reads TTF, OTF and WOFF but
+  not WOFF2 or variable fonts, so the card uses the static `@fontsource/*`
+  packages (`src/server/og/fonts.server.ts`). Its layout binary is
+  `satori/yoga.wasm`.
+- **Photo on the OG card needs the Cloudflare Images binding (`IMAGES` in
+  `wrangler.jsonc`).** Uploads are WebP, which the card renderer cannot
+  decode; on Workers the first gallery photo is converted to JPEG and the
+  finished card is compressed to JPEG (about 70 KB; WhatsApp drops preview
+  images near 600 KB). Two transformations per publish, then the card is
+  served from R2. Without the binding, or when a conversion fails, the card
+  is a PNG without the photo. On Node (dev, tests) there is no converter.
 - The Worker bundle needs the paid plan (see above). The biggest pieces are
   resvg's WASM (~0.95 MB gz) and the OG fonts inlined as base64 (~0.8 MB gz);
   serving those fonts from static assets would bring it closer to 3 MB.

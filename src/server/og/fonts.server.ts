@@ -1,6 +1,7 @@
-// Fonts for the OG card, matched to the invitation's font pair. Satori reads
-// WOFF2 (and renders a variable font at its default instance), so the
-// Fontsource packages the invitation pages already use serve here too: Latin
+// Fonts for the OG card, matched to the invitation's font pair. The card is
+// drawn by satori 0.35 (the last build that runs on Cloudflare Workers, see
+// docs/DEPLOY.md), which reads TTF, OTF and WOFF but not WOFF2 or variable
+// fonts, so these are the static Fontsource packages at weight 400, Latin
 // subset only. Each face is a lazy `?inline` import (a base64 data URL in its
 // own chunk), so only the faces a card needs are ever loaded, and no `fs`.
 import type { Font } from "satori/standalone"
@@ -10,50 +11,49 @@ type Loader = () => Promise<{ default: string }>
 
 const FACES = {
   "baloo-2": () =>
-    import("@fontsource-variable/baloo-2/files/baloo-2-latin-wght-normal.woff2?inline"),
+    import("@fontsource/baloo-2/files/baloo-2-latin-400-normal.woff?inline"),
   "bebas-neue": () =>
-    import("@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?inline"),
+    import("@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff?inline"),
   "bricolage-grotesque": () =>
-    import("@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?inline"),
+    import("@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-400-normal.woff?inline"),
   cinzel: () =>
-    import("@fontsource-variable/cinzel/files/cinzel-latin-wght-normal.woff2?inline"),
+    import("@fontsource/cinzel/files/cinzel-latin-400-normal.woff?inline"),
   "cormorant-garamond": () =>
-    import("@fontsource-variable/cormorant-garamond/files/cormorant-garamond-latin-wght-normal.woff2?inline"),
+    import("@fontsource/cormorant-garamond/files/cormorant-garamond-latin-400-normal.woff?inline"),
   "dancing-script": () =>
-    import("@fontsource-variable/dancing-script/files/dancing-script-latin-wght-normal.woff2?inline"),
+    import("@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff?inline"),
   "dm-sans": () =>
-    import("@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?inline"),
+    import("@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff?inline"),
   "eb-garamond": () =>
-    import("@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2?inline"),
+    import("@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff?inline"),
   fraunces: () =>
-    import("@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?inline"),
+    import("@fontsource/fraunces/files/fraunces-latin-400-normal.woff?inline"),
   geist: () =>
-    import("@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?inline"),
+    import("@fontsource/geist/files/geist-latin-400-normal.woff?inline"),
   "great-vibes": () =>
-    import("@fontsource/great-vibes/files/great-vibes-latin-400-normal.woff2?inline"),
+    import("@fontsource/great-vibes/files/great-vibes-latin-400-normal.woff?inline"),
   inter: () =>
-    import("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?inline"),
+    import("@fontsource/inter/files/inter-latin-400-normal.woff?inline"),
   lora: () =>
-    import("@fontsource-variable/lora/files/lora-latin-wght-normal.woff2?inline"),
+    import("@fontsource/lora/files/lora-latin-400-normal.woff?inline"),
   manrope: () =>
-    import("@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?inline"),
+    import("@fontsource/manrope/files/manrope-latin-400-normal.woff?inline"),
   nunito: () =>
-    import("@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2?inline"),
+    import("@fontsource/nunito/files/nunito-latin-400-normal.woff?inline"),
   "playfair-display": () =>
-    import("@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2?inline"),
+    import("@fontsource/playfair-display/files/playfair-display-latin-400-normal.woff?inline"),
   quicksand: () =>
-    import("@fontsource-variable/quicksand/files/quicksand-latin-wght-normal.woff2?inline"),
+    import("@fontsource/quicksand/files/quicksand-latin-400-normal.woff?inline"),
   "space-grotesk": () =>
-    import("@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?inline"),
+    import("@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff?inline"),
 } satisfies Record<string, Loader>
 
 export type FaceId = keyof typeof FACES
 
 /**
- * Display + body face per font pair id (see `FONT_PAIRS`). Satori cannot pick
- * a weight from a variable font, and Montserrat, Raleway and Josefin Sans
- * default to Thin, which vanishes at thumbnail size; those three are swapped
- * for the closest face that defaults to a readable weight.
+ * Display + body face per font pair id (see `FONT_PAIRS`). Montserrat,
+ * Raleway and Josefin Sans are not installed as static faces; those three
+ * use the closest face that is.
  */
 export const OG_FONT_PAIRS: Record<string, { display: FaceId; body: FaceId }> =
   {

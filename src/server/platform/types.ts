@@ -65,6 +65,13 @@ export interface Runtime {
    */
   initOgWasm: (init: (wasm: OgWasm) => Promise<void>) => Promise<void>
   /**
+   * Convert a photo the OG card cannot decode (WebP, AVIF) to JPEG, at most
+   * 1200 px wide. Undefined when the runtime has no converter or it fails.
+   */
+  photoToJpeg: (
+    bytes: Uint8Array<ArrayBuffer>
+  ) => Promise<Uint8Array<ArrayBuffer> | undefined>
+  /**
    * Release per-request resources once the response is produced (global
    * request middleware calls it). Returns a promise the host may wait on.
    */

@@ -53,7 +53,7 @@ async function dataUrlBytes(url: string): Promise<ArrayBuffer> {
 async function loadOgWasm(): Promise<OgWasm> {
   const [{ default: resvgUrl }, { default: yogaUrl }] = await Promise.all([
     import("@resvg/resvg-wasm/index_bg.wasm?url&inline"),
-    import("satori/layout.wasm?url&inline"),
+    import("satori/yoga.wasm?url&inline"),
   ])
   const [resvg, yoga] = await Promise.all([
     dataUrlBytes(resvgUrl),
@@ -68,6 +68,11 @@ export async function initOgWasm(
   await init(await loadOgWasm())
 }
 
+/** Node has no image converter: WebP photos are left off the OG card. */
+export const photoToJpeg = (
+  _bytes: Uint8Array<ArrayBuffer>
+): Promise<undefined> => Promise.resolve(undefined)
+
 /** The process-wide pool outlives requests; nothing to release. */
 export const endRequest = (_request: Request): Promise<void> =>
   Promise.resolve()
@@ -79,5 +84,6 @@ export const runtime = {
   hasDatabase,
   getBucket,
   initOgWasm,
+  photoToJpeg,
   endRequest,
 } satisfies Runtime
