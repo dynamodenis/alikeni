@@ -32,11 +32,14 @@ export function toHex(color: string): string | null {
     .join("")}`
 }
 
-/** First gallery photo, else the first host photo. */
+/**
+ * The first host portrait (the person the invitation is about), else the
+ * first gallery photo.
+ */
 export function pickPhoto(
   config: OgConfig
 ): { assetKey: string; url: string } | undefined {
-  return config.gallery.at(0) ?? config.hosts.find((h) => h.photo)?.photo
+  return config.hosts.find((h) => h.photo)?.photo ?? config.gallery.at(0)
 }
 
 export function pickPhotoUrl(config: OgConfig): string | undefined {

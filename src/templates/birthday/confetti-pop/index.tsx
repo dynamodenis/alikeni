@@ -21,6 +21,7 @@ import { defineTemplate, type TemplateMode } from "../../types"
 import { AgeBadge } from "./AgeBadge"
 import { defaults } from "./defaults"
 import { meta } from "./meta"
+import { Portrait } from "./Portrait"
 import { schema, type ConfettiPopConfig } from "./schema"
 
 /**
@@ -28,7 +29,9 @@ import { schema, type ConfettiPopConfig } from "./schema"
  *
  * Two confetti layers: a seeded SVG field that renders on the server (so the
  * page is festive without JS, WebGL or motion) and, at motion "full", WebGL
- * particles falling over it. The age is a spinning sticker badge; bands
+ * particles falling over it. The celebrant's portrait (when there is one)
+ * leads the hero with the age sticker on its corner; without a portrait the
+ * age is a big spinning sticker badge. Bands
  * alternate between plain and tinted with wave dividers between them.
  */
 function ConfettiPop({
@@ -39,6 +42,8 @@ function ConfettiPop({
   mode: TemplateMode
 }) {
   const { motion, palette } = useInvitation()
+  const celebrant = config.hosts.find((host) => host.photo) ?? config.hosts[0]
+  const portrait = celebrant.photo
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">
@@ -61,8 +66,18 @@ function ConfettiPop({
           variant="classic"
           titleEffect={meta.effects.title}
           titleClassName="font-extrabold tracking-tight"
+          lead={
+            portrait && (
+              <Portrait
+                photo={portrait}
+                name={celebrant.name}
+                age={config.age}
+              />
+            )
+          }
         >
-          <AgeBadge age={config.age} className="mt-6" />
+          {/* With a portrait the age sticker sits on the photo instead. */}
+          {!portrait && <AgeBadge age={config.age} className="mt-6" />}
         </Hero>
       </div>
 

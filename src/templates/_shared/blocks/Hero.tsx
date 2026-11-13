@@ -18,6 +18,8 @@ type HeroProps = {
   kicker?: string
   /** Hide texts.message (when the template places it elsewhere). */
   hideMessage?: boolean
+  /** Shown above the kicker, e.g. the celebrant's portrait. */
+  lead?: ReactNode
   className?: string
   children?: ReactNode
 }
@@ -39,6 +41,7 @@ export function Hero({
   titleClassName,
   kicker,
   hideMessage = false,
+  lead,
   className,
   children,
 }: HeroProps) {
@@ -67,6 +70,7 @@ export function Hero({
             : "mx-auto max-w-4xl items-center"
         )}
       >
+        {lead}
         <Eyebrow className="inv-anim-rise">
           {kicker ?? event.subtitle ?? event.title}
         </Eyebrow>

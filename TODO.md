@@ -212,7 +212,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 Found 2026-11-13: links shared on WhatsApp showed no image because `/og/<slug>.png` answered 500 in production. The page's `og:image` tags were correct.
 
 - [x] Render on Workers: `satori` pinned to `0.32.0` (≥ 0.33 bundles HarfBuzz, which Workers cannot run; `docs/DEPLOY.md` said 0.35.0, which still has it), layout binary from `satori/yoga.wasm`, card fonts from the static `@fontsource/*` WOFF files (0.32 does not read WOFF2)
-- [x] Host's photo on the card: first gallery photo read from storage by key, WebP → JPEG through the Cloudflare Images binding (`IMAGES`); the finished card is served as JPEG (~70 KB instead of ~560 KB PNG)
+- [x] Host's photo on the card: first host portrait (else first gallery photo) read from storage by key, WebP → JPEG through the Cloudflare Images binding (`IMAGES`); the finished card is served as JPEG (~70 KB instead of ~560 KB PNG)
 - [x] Checked on `wrangler dev` (local Workers runtime): 200, 1200×630 JPEG with the photo, second request served from the R2 cache
 - [ ] Deploy, then check a link in WhatsApp and in the Facebook sharing debugger; WhatsApp keeps the old preview for a link it has already seen, so test with a fresh `?v=1`
 

@@ -48,7 +48,7 @@
       "bucket_name": "alikeni",
     },
   ],
-  // Cloudflare Images: converts the first gallery photo (stored as WebP) to
+  // Cloudflare Images: converts the card photo (host portrait or gallery, stored as WebP) to
   // JPEG for the link preview card (/og/<slug>.png). One conversion per
   // publish; the finished card is cached in R2.
   "images": { "binding": "IMAGES" },

@@ -189,17 +189,19 @@ describe("card content", () => {
     })
   })
 
-  it("prefers a gallery photo, then a host photo", () => {
+  it("prefers a host portrait, then a gallery photo", () => {
     expect(pickPhotoUrl(sampleInvitationConfig)).toBe(
       sampleInvitationConfig.gallery[0].url
     )
     const hostPhoto = { assetKey: "h.png", url: "https://cdn.test/h.png" }
-    expect(
-      pickPhotoUrl({
-        ...noPhoto,
-        hosts: [noPhoto.hosts[0], { ...noPhoto.hosts[1], photo: hostPhoto }],
-      })
-    ).toBe(hostPhoto.url)
+    const hosts = [
+      sampleInvitationConfig.hosts[0],
+      { ...sampleInvitationConfig.hosts[1], photo: hostPhoto },
+    ]
+    expect(pickPhotoUrl({ ...sampleInvitationConfig, hosts })).toBe(
+      hostPhoto.url
+    )
+    expect(pickPhotoUrl({ ...noPhoto, hosts })).toBe(hostPhoto.url)
     expect(pickPhotoUrl(noPhoto)).toBeUndefined()
   })
 

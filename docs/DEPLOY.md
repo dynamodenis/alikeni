@@ -275,7 +275,7 @@ once a custom domain is attached.
   `satori/yoga.wasm`.
 - **Photo on the OG card needs the Cloudflare Images binding (`IMAGES` in
   `wrangler.jsonc`).** Uploads are WebP, which the card renderer cannot
-  decode; on Workers the first gallery photo is converted to JPEG and the
+  decode; on Workers the card photo (first host portrait, else first gallery photo) is converted to JPEG and the
   finished card is compressed to JPEG (about 70 KB; WhatsApp drops preview
   images near 600 KB). Two transformations per publish, then the card is
   served from R2. Without the binding, or when a conversion fails, the card
