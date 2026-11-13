@@ -127,23 +127,27 @@ export function PhotoCarousel({
   return (
     <ClientOnly fallback={fallback}>
       <Suspense fallback={fallback}>
-        <Carousel
-          items={photos.map((p, i) => ({
-            id: `${p.assetKey}-${i}`,
-            image: p.url,
-            alt: p.alt ?? "",
-          }))}
-          baseWidth="100%"
-          aspectRatio={4 / 3}
-          effect="tilt"
-          indicator="dots"
-          loop
-          autoplay
-          autoplayDelay={4200}
-          pauseOnHover
-          theme={mode}
-          radius={24}
-        />
+        {/* Full width on phones; capped from tablets up so a 4:3 slide
+            fits inside a laptop viewport instead of filling it. */}
+        <div className="mx-auto w-full md:max-w-xl lg:max-w-2xl">
+          <Carousel
+            items={photos.map((p, i) => ({
+              id: `${p.assetKey}-${i}`,
+              image: p.url,
+              alt: p.alt ?? "",
+            }))}
+            baseWidth="100%"
+            aspectRatio={4 / 3}
+            effect="tilt"
+            indicator="dots"
+            loop
+            autoplay
+            autoplayDelay={4200}
+            pauseOnHover
+            theme={mode}
+            radius={24}
+          />
+        </div>
       </Suspense>
     </ClientOnly>
   )
