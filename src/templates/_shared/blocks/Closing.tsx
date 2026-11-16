@@ -56,9 +56,39 @@ export function Closing({
   )
 }
 
-/** Tiny footer every invitation ends with. */
+/**
+ * Link to the Alikeni home page for guests who want an invitation of their
+ * own. `ref` says where on the invitation it was tapped ("invite-footer",
+ * "invite-rsvp"), so sign-ups that start on an invitation can be counted.
+ */
+export function CreateYoursLink({
+  source,
+  className,
+}: {
+  source: "footer" | "rsvp"
+  className?: string
+}) {
+  const { t } = useInvitation()
+  return (
+    <a
+      href={`/?ref=invite-${source}`}
+      className={cn(
+        "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-inv-line px-5 text-sm text-inv-fg transition-colors hover:border-inv-primary hover:text-inv-primary focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:ring-offset-2 focus-visible:ring-offset-inv-bg focus-visible:outline-none",
+        className
+      )}
+    >
+      {t.closing.createYours}
+      <span aria-hidden="true">→</span>
+    </a>
+  )
+}
+
+/**
+ * Footer every invitation ends with. Guests also get the "create your own"
+ * link; previews are already on the site, so they keep the plain credit.
+ */
 export function Footer({ className }: { className?: string }) {
-  const { config, t } = useInvitation()
+  const { config, mode, t } = useInvitation()
   return (
     <footer
       className={cn(
@@ -77,6 +107,9 @@ export function Footer({ className }: { className?: string }) {
           Alikeni
         </a>
       </p>
+      {mode === "public" && (
+        <CreateYoursLink source="footer" className="mt-2" />
+      )}
     </footer>
   )
 }

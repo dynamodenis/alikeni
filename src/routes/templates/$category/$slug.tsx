@@ -12,16 +12,18 @@ import { DeviceFrame } from "@/components/gallery/DeviceFrame"
 import { DeviceToggle } from "@/components/gallery/DeviceToggle"
 import { PaletteSwitcher } from "@/components/gallery/PaletteSwitcher"
 import { SiteShell } from "@/components/gallery/SiteShell"
+import { TemplateCard } from "@/components/gallery/TemplateCard"
 import { UseTemplateButton } from "@/components/gallery/UseTemplateButton"
+import { OccasionLinks } from "@/components/landing/OccasionLinks"
 import { DEVICE_IDS } from "@/lib/devices"
 import { cn } from "@/lib/utils"
 import { postToWindow, usePreviewMessages } from "@/lib/preview-bridge"
 import { absoluteUrl, breadcrumbJsonLd, seo } from "@/lib/seo"
-import { CATEGORY_LABELS } from "@/templates/catalog"
 import { CATEGORY_PAGES } from "@/templates/category-pages"
 import { getFontPair } from "@/templates/_shared/theme/fonts"
 import { hasPalette } from "@/templates/_shared/theme/palettes"
-import { getTemplateMeta } from "@/templates/registry"
+import { TEMPLATE_METAS, getTemplateMeta } from "@/templates/registry"
+import { TEMPLATE_PAGES, templateOccasion } from "@/templates/template-pages"
 import type { TemplateMeta } from "@/templates/types"
 
 const DetailSearch = z.object({
@@ -38,7 +40,10 @@ export const Route = createFileRoute("/templates/$category/$slug")({
     const { getTemplateMeta: lookup } = await import("@/templates/registry")
     const meta = lookup(`${params.category}/${params.slug}`)
     if (!meta) throw notFound()
+    const { loadTemplateSections } =
+      await import("@/templates/template-sections")
     return {
+      sections: await loadTemplateSections(meta.id),
       id: meta.id,
       name: meta.name,
       category: meta.category,
@@ -49,14 +54,15 @@ export const Route = createFileRoute("/templates/$category/$slug")({
   // Canonical without ?device= / ?palette=: one indexed URL per template.
   head: ({ loaderData: meta }) => {
     if (!meta) return { meta: [{ title: "Template · Alikeni" }] }
-    const label = CATEGORY_LABELS[meta.category]
+    const occasion = templateOccasion(meta)
+    const inSentence = templateOccasion(meta, { sentence: true })
     const path = `/templates/${meta.id}`
     return seo({
-      title: `${meta.name}: ${label} Invitation Template · Alikeni`,
-      description: `${meta.description} Online ${label.toLowerCase()} invitation with RSVP, countdown and map.`,
+      title: `${meta.name}: ${occasion} Invitation Template · Alikeni`,
+      description: `${meta.description} Online ${inSentence} invitation with RSVP and countdown.`,
       path,
       image: absoluteUrl(meta.thumbnail),
-      imageAlt: `${meta.name} ${label.toLowerCase()} invitation template`,
+      imageAlt: `${meta.name} ${inSentence} invitation template`,
       jsonLd: [
         breadcrumbJsonLd([
           { name: "Home", path: "/" },
@@ -87,8 +93,13 @@ const EFFECT_LABELS: Record<string, string> = {
 }
 
 function TemplateDetailPage() {
-  const { id } = Route.useLoaderData()
+  const { id, sections } = Route.useLoaderData()
   const meta = getTemplateMeta(id) as TemplateMeta
+  const page = TEMPLATE_PAGES[id]
+  const siblings = TEMPLATE_METAS.filter(
+    (other) => other.category === meta.category && other.id !== id
+  )
+  const categoryLink = CATEGORY_PAGES[meta.category].linkLabel
   const { device, palette } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const paletteId = palette ?? meta.defaultPaletteId
@@ -162,7 +173,7 @@ function TemplateDetailPage() {
             {CATEGORY_PAGES[meta.category].linkLabel}
           </Link>
 
-          <p className="mt-8 eyebrow">{CATEGORY_LABELS[meta.category]}</p>
+          <p className="mt-8 eyebrow">{templateOccasion(meta)}</p>
           <h1 className="mt-3 heading-2">{meta.name}</h1>
           <p className="mt-5 lead">{meta.description}</p>
 
@@ -271,6 +282,79 @@ function TemplateDetailPage() {
           </p>
         </section>
       </div>
+
+      <section
+        aria-labelledby="about-heading"
+        className="border-t border-gold/10 px-4 py-16 sm:px-6"
+      >
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
+          <div>
+            <h2 id="about-heading" className="heading-3">
+              About the {meta.name} template
+            </h2>
+            {page && <p className="mt-5 lead">{page.about}</p>}
+            <p className="mt-5 text-sm leading-relaxed text-sand">
+              Everything in the sample is yours to change: the words, colour
+              palette, fonts, photos and music. Sections can be switched off or
+              reordered, and the invitation is shared as one link.
+            </p>
+          </div>
+          {sections.length > 0 && (
+            <div>
+              <h3 className="label">What&apos;s inside</h3>
+              <ol className="mt-5 grid gap-x-6 gap-y-2.5 text-sm text-cream sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {sections.map((section, i) => (
+                  <li key={section} className="flex items-baseline gap-3">
+                    <span className="w-5 shrink-0 text-right nums text-xs text-gold/70">
+                      {i + 1}
+                    </span>
+                    {section}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {siblings.length > 0 && (
+        <section
+          aria-labelledby="related-heading"
+          className="border-t border-gold/10 px-4 py-16 sm:px-6"
+        >
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <h2 id="related-heading" className="heading-3">
+                More {categoryLink.toLowerCase()}
+              </h2>
+              <Link
+                to="/templates/$category"
+                params={{ category: meta.category }}
+                className="link"
+              >
+                See all {categoryLink.toLowerCase()}
+              </Link>
+            </div>
+            <ul className="mt-10 grid grid-cols-2 gap-x-5 gap-y-12 sm:gap-x-8 md:grid-cols-3 lg:grid-cols-4">
+              {siblings.map((other) => (
+                <li key={other.id}>
+                  <TemplateCard meta={other} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <section
+        aria-labelledby="occasions-heading"
+        className="border-t border-gold/10 px-4 py-16 sm:px-6"
+      >
+        <h2 id="occasions-heading" className="text-center heading-3">
+          Invitations for other occasions
+        </h2>
+        <OccasionLinks exclude={meta.category} className="mt-8" />
+      </section>
     </SiteShell>
   )
 }

@@ -79,6 +79,7 @@ export const en = {
     note: "A note for us",
     send: "Send RSVP",
     sent: "Thank you, we have your response.",
+    hostPrompt: "Planning an event of your own?",
     replyBy: (date: string) => `Please reply by ${date}`,
     previewNote: "Preview: responses are not recorded.",
     previewToast: "RSVPs are disabled while previewing.",
@@ -133,6 +134,7 @@ export const en = {
   closing: {
     signOff: "With love",
     madeWith: "Made with",
+    createYours: "Create your own invitation, free",
   },
   share: {
     label: "Share this invitation",

@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { CATEGORY_LABELS, templateParams } from "@/templates/catalog"
+import { templateParams } from "@/templates/catalog"
+import { templateOccasion } from "@/templates/template-pages"
 import { getPalette } from "@/templates/_shared/theme/palettes"
 import type { TemplateMeta } from "@/templates/types"
 import { PaletteDots } from "./PaletteDots"
@@ -33,7 +34,7 @@ export function TemplateCard({
           >
             <img
               src={meta.thumbnail}
-              alt={`${meta.name}, ${CATEGORY_LABELS[meta.category].toLowerCase()} invitation template`}
+              alt={`${meta.name}, ${templateOccasion(meta, { sentence: true })} invitation template`}
               width={390}
               height={844}
               loading={priority ? "eager" : "lazy"}
@@ -61,7 +62,7 @@ export function TemplateCard({
             >
               {meta.name}
             </h3>
-            <p className="mt-1 label">{CATEGORY_LABELS[meta.category]}</p>
+            <p className="mt-1 label">{templateOccasion(meta)}</p>
           </div>
           <PaletteDots palette={palette} className="mt-1.5 shrink-0" />
         </div>

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { formatLongDate } from "@/lib/format-date"
 import { useTurnstile } from "@/components/turnstile/useTurnstile"
 import { useInvitation, type RsvpInput } from "../context"
+import { CreateYoursLink } from "./Closing"
 import { Section, type BlockProps } from "./Section"
 import { InvButton, inputClass } from "./ui"
 
@@ -114,9 +115,15 @@ export function RsvpForm({
       className={className}
     >
       {status === "sent" ? (
-        <p className="text-center font-inv-display text-2xl text-inv-primary">
-          {t.rsvp.sent}
-        </p>
+        <div className="flex flex-col items-center gap-8 text-center">
+          <p className="font-inv-display text-2xl text-inv-primary">
+            {t.rsvp.sent}
+          </p>
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-inv-muted">{t.rsvp.hostPrompt}</p>
+            <CreateYoursLink source="rsvp" />
+          </div>
+        </div>
       ) : (
         <form
           onSubmit={handleSubmit}

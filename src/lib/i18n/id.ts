@@ -80,6 +80,7 @@ export const id: Messages = {
     note: "Pesan untuk kami",
     send: "Kirim konfirmasi",
     sent: "Terima kasih, konfirmasi Anda telah kami terima.",
+    hostPrompt: "Sedang merencanakan acara Anda sendiri?",
     replyBy: (date: string) => `Mohon konfirmasi sebelum ${date}`,
     previewNote: "Pratinjau: konfirmasi tidak disimpan.",
     previewToast: "Konfirmasi kehadiran dinonaktifkan selama pratinjau.",
@@ -134,6 +135,7 @@ export const id: Messages = {
   closing: {
     signOff: "Kami yang berbahagia",
     madeWith: "Dibuat dengan",
+    createYours: "Buat undangan Anda sendiri, gratis",
   },
   share: {
     label: "Bagikan undangan ini",
