@@ -33,7 +33,12 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      testMatch: ["journey.spec.ts", "auth.spec.ts", "album.spec.ts"],
+      testMatch: [
+        "journey.spec.ts",
+        "auth.spec.ts",
+        "album.spec.ts",
+        "stale.spec.ts",
+      ],
       use: { viewport: { width: 1440, height: 900 } },
     },
     {
