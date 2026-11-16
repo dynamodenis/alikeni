@@ -181,7 +181,7 @@ function Dock({ source, startAt, loop }: Props) {
           >
             <Music2 className="size-3 shrink-0" aria-hidden="true" />
             <span className="truncate">{source.title}</span>
-            <span className="shrink-0 max-sm:hidden">· SoundCloud</span>
+            <span className="shrink-0">· SoundCloud</span>
             <ChevronUp className="size-3 shrink-0" aria-hidden="true" />
           </button>
         </div>

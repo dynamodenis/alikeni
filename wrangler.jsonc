@@ -60,9 +60,6 @@
     // Where replies to automatic emails go (EMAIL_FROM itself has no inbox).
     "EMAIL_REPLY_TO": "info@alikeni.com",
     "GEOCODE_PROVIDER": "nominatim",
-    // TEMPORARY, for testing: the event album works on free invitations.
-    // Remove this line once the album is priced, so Premium gates it again.
-    "ALBUM_FREE_PREVIEW": "true",
     // Currencies the Paystack account can charge (KES, USD).
     "PAYSTACK_CURRENCIES": "KES",
   },
