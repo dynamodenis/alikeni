@@ -30,6 +30,7 @@ import {
   sniffMedia,
   type GuestUploadState,
 } from "@/lib/album"
+import { serverEnv } from "@/env.server"
 import * as schema from "@/server/db/schema"
 import { getPublishedBySlug } from "@/server/invitations/editing.server"
 import { sha256Hex } from "@/server/public/fingerprint.server"
@@ -40,6 +41,16 @@ import type { InvitationConfigBase } from "@/templates/_shared/schema"
 
 type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>
 const { albums, albumBatches, albumItems, invitations: inv } = schema
+
+/**
+ * Which invitations may have an album. Premium only, unless
+ * ALBUM_FREE_PREVIEW opens it to free invitations for testing. An object so
+ * tests can flip it.
+ */
+export const albumAccess = { freePreview: serverEnv.ALBUM_FREE_PREVIEW }
+
+export const albumAvailable = (plan: "free" | "premium") =>
+  plan === "premium" || albumAccess.freePreview
 
 /** A refusal whose message is safe to show the person verbatim. */
 export class AlbumError extends Error {
@@ -178,7 +189,7 @@ export async function updateAlbumSettings(
 ): Promise<AlbumSettings | null> {
   const invitation = await ownedInvitation(db, input)
   if (!invitation) return null
-  if (input.enabled && invitation.plan !== "premium") {
+  if (input.enabled && !albumAvailable(invitation.plan)) {
     throw new AlbumError(NOT_PREMIUM)
   }
   const changes: Partial<typeof albums.$inferInsert> = {}
@@ -401,6 +412,8 @@ export async function getOwnerAlbum(
       slug: invitation.slug,
       status: invitation.status,
       plan: invitation.plan,
+      /** False: the album needs Premium (the page shows the upgrade). */
+      albumAvailable: albumAvailable(invitation.plan),
       title:
         (config as Partial<InvitationConfigBase>).event?.title || "Untitled",
     },
@@ -502,7 +515,7 @@ export async function deleteItems(
 /** A published Premium invitation whose album is switched on, or null. */
 async function publicAlbum(db: AnyDb, slug: string, now: Date) {
   const invitation = await getPublishedBySlug(db, slug, now)
-  if (!invitation || invitation.plan !== "premium") return null
+  if (!invitation || !albumAvailable(invitation.plan)) return null
   const row = await albumRow(db, invitation.id)
   if (!row.enabled) return null
   return { invitation, row }
@@ -513,7 +526,7 @@ export async function hasPublicAlbum(
   db: AnyDb,
   invitation: { id: string; plan: "free" | "premium" }
 ): Promise<boolean> {
-  if (invitation.plan !== "premium") return false
+  if (!albumAvailable(invitation.plan)) return false
   return (await albumRow(db, invitation.id)).enabled
 }
 
@@ -619,7 +632,7 @@ export async function ownerUploadScope(
 ): Promise<UploadScope | null> {
   const invitation = await ownedInvitation(db, input)
   if (!invitation) return null
-  if (invitation.plan !== "premium") throw new AlbumError(NOT_PREMIUM)
+  if (!albumAvailable(invitation.plan)) throw new AlbumError(NOT_PREMIUM)
   return { invitationId: invitation.id, byOwner: true }
 }
 

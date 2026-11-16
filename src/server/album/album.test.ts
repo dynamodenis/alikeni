@@ -13,6 +13,7 @@ import { MemoryRateLimiter } from "@/server/rate-limit"
 import type { ServerStorage } from "@/server/storage/types"
 import {
   ALBUM_UNAVAILABLE,
+  albumAccess,
   AlbumError,
   NOT_PREMIUM,
   PIN_REQUIRED,
@@ -199,6 +200,31 @@ describe("album settings", () => {
     ).toBe(true)
     // Downgraded later: the album disappears for guests.
     await setPlan("free")
+    expect(await getPublicAlbum(db, SLUG, EVENT_DAY)).toBeNull()
+  })
+
+  it("works on free invitations while the free preview is switched on", async () => {
+    await db.delete(schema.albums)
+    await setPlan("free")
+    albumAccess.freePreview = true
+    try {
+      await updateAlbumSettings(db, {
+        ...owner,
+        id: invitationId,
+        enabled: true,
+      })
+      expect((await getPublicAlbum(db, SLUG, EVENT_DAY))?.slug).toBe(SLUG)
+      const store = memoryStorage()
+      const scope = await ownerUploadScope(db, { ...owner, id: invitationId })
+      expect((await upload(store, scope!, 1)).ids).toHaveLength(1)
+      const album = await getOwnerAlbum(db, store.storage, {
+        ...owner,
+        id: invitationId,
+      })
+      expect(album?.invitation.albumAvailable).toBe(true)
+    } finally {
+      albumAccess.freePreview = false
+    }
     expect(await getPublicAlbum(db, SLUG, EVENT_DAY)).toBeNull()
   })
 

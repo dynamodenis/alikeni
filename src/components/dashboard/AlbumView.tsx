@@ -49,7 +49,7 @@ export function AlbumView({ data }: { data: Data }) {
   const router = useRouter()
   const [settings, setSettings] = useState(data.settings)
   const live = invitation.status === "published" && !!invitation.slug
-  const premium = invitation.plan === "premium"
+  const premium = invitation.albumAvailable
 
   return (
     <div className="flex flex-col gap-8">

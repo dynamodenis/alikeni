@@ -15,16 +15,19 @@ import { Group } from "../fields"
  * Photos themselves are managed on the dashboard album page.
  */
 export function AlbumTab() {
-  const { plan, invitationId } = useEditor()
+  const { invitationId } = useEditor()
   const load = useServerFn(getOwnerAlbumFn)
   const [settings, setSettings] = useState<AlbumSettings>()
+  const [available, setAvailable] = useState(true)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     load({ data: { id: invitationId } }).then(
       (album) => {
-        if (!cancelled && album) setSettings(album.settings)
+        if (cancelled || !album) return
+        setAvailable(album.invitation.albumAvailable)
+        setSettings(album.settings)
       },
       () => {
         if (!cancelled) setFailed(true)
@@ -40,7 +43,7 @@ export function AlbumTab() {
       title="Event album"
       description="A shared album for the photos and videos of the day. Guests open it from a link at the end of your invitation."
     >
-      {plan === "free" ? (
+      {!available ? (
         <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
           The album is part of Premium.{" "}
           <Link

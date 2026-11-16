@@ -125,6 +125,14 @@ const serverEnvSchema = z
         }
         return [...new Set(list.filter(isCurrency))]
       }),
+    /**
+     * "true": the event album works on free invitations too. For testing
+     * the album before it is priced; leave unset once Premium should gate it.
+     */
+    ALBUM_FREE_PREVIEW: z
+      .enum(["true", "false", "1", "0"])
+      .optional()
+      .transform((value) => value === "true" || value === "1"),
     ALLOW_DEV_USER: z
       .enum(["true", "false", "1", "0"])
       .optional()
