@@ -33,6 +33,22 @@ describe("server env", () => {
   })
 })
 
+describe("album free preview", () => {
+  it("is off unless switched on, and forgives quotes and case", () => {
+    const flag = (value?: string) =>
+      parseServerEnv(value === undefined ? {} : { ALBUM_FREE_PREVIEW: value })
+        .ALBUM_FREE_PREVIEW
+    expect(flag()).toBe(false)
+    expect(flag("false")).toBe(false)
+    expect(flag("yes")).toBe(false)
+    expect(flag("true")).toBe(true)
+    expect(flag("1")).toBe(true)
+    // Some .env loaders hand over the quotes as written.
+    expect(flag('"true"')).toBe(true)
+    expect(flag(" TRUE ")).toBe(true)
+  })
+})
+
 describe("auth env", () => {
   const production = {
     NODE_ENV: "production",

@@ -277,20 +277,17 @@ function AlbumBody({
     }
   }
 
+  const longDay = (day: string) =>
+    formatLongDate(`${day}T12:00:00Z`, "UTC", album.locale)
   const uploadNote =
+    album.uploads === "open" ? t.until(longDay(album.uploadUntil)) : null
+  // Why there is no upload box, said where the box would be.
+  const uploadsShut =
     album.uploads === "before"
-      ? t.notYet
+      ? t.notYet(longDay(album.uploadFrom))
       : album.uploads === "closed"
         ? t.closed
-        : album.uploads === "open"
-          ? t.until(
-              formatLongDate(
-                `${album.uploadUntil}T12:00:00Z`,
-                "UTC",
-                album.locale
-              )
-            )
-          : null
+        : null
 
   return (
     <>
@@ -303,6 +300,24 @@ function AlbumBody({
             if (!result.needsApproval) void loadOrLock("reload")
           }}
         />
+      )}
+
+      {uploadsShut && (
+        <div
+          role="status"
+          className="flex flex-col gap-2 rounded-2xl border border-border bg-card px-5 py-4 text-sm"
+        >
+          <p className="font-medium">{uploadsShut}</p>
+          <p className="text-muted-foreground">
+            {t.hostHint}{" "}
+            <Link
+              to="/dashboard"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {t.hostLink}
+            </Link>
+          </p>
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">

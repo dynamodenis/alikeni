@@ -176,7 +176,11 @@ export const id: Messages = {
     failed: (n: number) => `${n} berkas gagal diunggah`,
     again: "Tambah lagi",
     uploadFailed: "Unggahan tidak dapat dimulai",
-    notYet: "Tamu dapat menambahkan foto mulai hari acara.",
+    notYet: (date: string) =>
+      `Tamu dapat menambahkan foto dan video di sini mulai ${date}, hari acara.`,
+    hostHint:
+      "Anda tuan rumahnya? Anda dapat menambahkan foto kapan saja dari dasbor.",
+    hostLink: "Buka dasbor saya",
     closed: "Unggahan untuk album ini sudah ditutup.",
     until: (date: string) => `Tamu dapat menambahkan foto hingga ${date}.`,
     download: "Unduh",

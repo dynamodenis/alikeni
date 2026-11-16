@@ -130,9 +130,18 @@ const serverEnvSchema = z
      * the album before it is priced; leave unset once Premium should gate it.
      */
     ALBUM_FREE_PREVIEW: z
-      .enum(["true", "false", "1", "0"])
+      .string()
       .optional()
-      .transform((value) => value === "true" || value === "1"),
+      // Forgiving on purpose: `"true"` with its quotes, `TRUE` and stray
+      // spaces all mean on (some .env loaders keep the quotes).
+      .transform((value) =>
+        ["true", "1"].includes(
+          (value ?? "")
+            .trim()
+            .replace(/^["']|["']$/g, "")
+            .toLowerCase()
+        )
+      ),
     ALLOW_DEV_USER: z
       .enum(["true", "false", "1", "0"])
       .optional()

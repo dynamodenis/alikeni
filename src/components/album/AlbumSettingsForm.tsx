@@ -87,6 +87,15 @@ export function AlbumSettingsForm({
 
   return (
     <div className="flex flex-col gap-3">
+      {!settings.enabled && (
+        <p
+          role="status"
+          className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm"
+        >
+          The album is off, so guests do not see it yet. Switch on “Album on” to
+          add the album link to your invitation.
+        </p>
+      )}
       <Row
         label="Album on"
         help="Guests get a link to the album at the end of your invitation."

@@ -180,7 +180,11 @@ export const en = {
         : `${n} files could not be uploaded`,
     again: "Add more",
     uploadFailed: "The upload could not start",
-    notYet: "Guests can add photos from the day of the event.",
+    notYet: (date: string) =>
+      `Guests can add photos and videos here from ${date}, the day of the event.`,
+    hostHint:
+      "Hosting this event? You can add photos at any time from your dashboard.",
+    hostLink: "Open my dashboard",
     closed: "Uploads are closed for this album.",
     until: (date: string) => `Guests can add photos until ${date}.`,
     download: "Download",

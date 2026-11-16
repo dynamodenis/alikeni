@@ -560,6 +560,7 @@ export async function getPublicAlbum(
     pinRequired: !!row.pinHash,
     downloads: row.downloads,
     uploads: uploadStateOf(row, config, now),
+    uploadFrom: guestUploadDays(config).from,
     uploadUntil: guestUploadDays(config).until,
     count: row.pinHash ? null : await approvedCount(db, invitation.id),
   }
