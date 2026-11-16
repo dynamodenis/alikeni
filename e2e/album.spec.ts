@@ -264,8 +264,15 @@ test("the host deletes photos in bulk", async () => {
   ).click()
   await tiles(page).nth(0).click()
   await tiles(page).nth(1).click()
-  page.once("dialog", (dialog) => void dialog.accept())
-  await page.getByRole("button", { name: "Delete 2" }).click()
+  await page.getByRole("button", { name: "Delete 2", exact: true }).click()
+  // Our own popup, not the browser's.
+  const popup = page.getByRole("alertdialog", {
+    name: "Delete 2 files from the album?",
+  })
+  await popup.getByRole("button", { name: "Cancel" }).click()
+  await expect(popup).toBeHidden()
+  await page.getByRole("button", { name: "Delete 2", exact: true }).click()
+  await popup.getByRole("button", { name: "Delete 2 files" }).click()
   await expect(page.getByText("2 deleted")).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText("25", { exact: true })).toBeVisible()
 })

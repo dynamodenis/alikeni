@@ -20,6 +20,7 @@ import { AlbumUploader } from "@/components/album/AlbumUploader"
 import { AlbumViewer } from "@/components/album/AlbumViewer"
 import { useAlbumItems } from "@/components/album/useAlbumItems"
 import { Button } from "@/components/ui/button"
+import { useConfirm } from "@/components/ui/confirm"
 import { formatBytes } from "@/lib/album"
 import { downloadAll, downloadSome } from "@/lib/album-download"
 import { en } from "@/lib/i18n/en"
@@ -216,13 +217,17 @@ function PendingBatch({
 }) {
   const decide = useServerFn(decideAlbumBatchFn)
   const [busy, setBusy] = useState<"approve" | "reject">()
+  const [confirm, confirmDialog] = useConfirm()
 
   const run = async (approve: boolean) => {
     if (
       !approve &&
-      !window.confirm(
-        `Reject and delete ${batch.count} files from ${batch.uploaderName}?`
-      )
+      !(await confirm({
+        title: `Reject ${batch.count} files from ${batch.uploaderName}?`,
+        body: "They are deleted and never appear in the album. This cannot be undone.",
+        action: "Reject and delete",
+        destructive: true,
+      }))
     ) {
       return
     }
@@ -306,6 +311,7 @@ function PendingBatch({
           Reject and delete
         </Button>
       </div>
+      {confirmDialog}
     </li>
   )
 }
@@ -327,6 +333,7 @@ function Items({ data }: { data: Data }) {
   const [selected, setSelected] = useState<ReadonlySet<string> | null>(null)
   const [busy, setBusy] = useState(false)
   const [zipping, setZipping] = useState<{ done: number; total: number }>()
+  const [confirm, confirmDialog] = useConfirm()
 
   const toggle = (id: string) =>
     setSelected((current) => {
@@ -338,9 +345,15 @@ function Items({ data }: { data: Data }) {
   const destroy = async (ids: Array<string>) => {
     if (
       ids.length === 0 ||
-      !window.confirm(
-        `Delete ${ids.length === 1 ? "this file" : `${ids.length} files`} from the album? This cannot be undone.`
-      )
+      !(await confirm({
+        title:
+          ids.length === 1
+            ? "Delete this file from the album?"
+            : `Delete ${ids.length} files from the album?`,
+        body: "This cannot be undone.",
+        action: ids.length === 1 ? "Delete" : `Delete ${ids.length} files`,
+        destructive: true,
+      }))
     ) {
       return
     }
@@ -538,6 +551,7 @@ function Items({ data }: { data: Data }) {
           </button>
         )}
       />
+      {confirmDialog}
     </section>
   )
 }
