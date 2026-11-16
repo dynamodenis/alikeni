@@ -188,6 +188,13 @@ function PublicInvitation({ page }: { page: LivePage }) {
       <ShareBar
         title={config.seo.title ?? config.event.title}
         url={`${page.origin}/i/${slug}`}
+        // The music button floats in the bottom-left corner; on a phone the
+        // share buttons need room to sit above it at the end of the page.
+        className={
+          config.music.enabled && config.music.source
+            ? "pb-20 sm:pb-6"
+            : undefined
+        }
         colors={{
           primary: palette.primary,
           background: palette.background,

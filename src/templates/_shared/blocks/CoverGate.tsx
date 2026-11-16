@@ -50,7 +50,11 @@ const REVEAL_MS: Record<CoverReveal, Record<EffectiveMotion, number>> = {
  * The "You are invited" screen.
  *
  * - Server / no-JS: an ordinary first screen (`data-state="inline"`), so the
- *   page is readable and the button simply sits above the content.
+ *   page is readable and the button simply sits above the content. On the
+ *   public page it is already laid over the page in the server's HTML (a
+ *   `<noscript>` rule puts it back in the flow), so nothing moves when the
+ *   page hydrates: sliding a full screen of content up would be a layout
+ *   shift of the whole viewport.
  * - Public mode after hydration: a modal gate (`role="dialog"`) that locks
  *   scrolling and takes focus. The tap is the user gesture browsers need for
  *   audio, so it also flips `opened` in context (MusicPlayer listens). The
@@ -88,6 +92,8 @@ export function CoverGate({
   const titleId = useId()
   const gated = hydrated && mode === "public" && !opened
   const overlay = !gone && (gated || (opening && mode === "public"))
+  // Where the cover sits: over the page from the server's first HTML on.
+  const pinned = mode === "public" && (!opened || opening)
 
   useEffect(() => {
     if (!overlay) return
@@ -198,7 +204,7 @@ export function CoverGate({
       aria-labelledby={titleId}
       className={cn(
         "relative isolate z-50 flex min-h-svh flex-col overflow-hidden bg-inv-bg text-inv-fg",
-        overlay && "fixed inset-0",
+        pinned && "fixed inset-0",
         opening && "pointer-events-none",
         !envelope &&
           "transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.7,0,0.3,1)] motion-reduce:transition-none",
@@ -207,6 +213,11 @@ export function CoverGate({
         className
       )}
     >
+      {pinned && !hydrated && (
+        <noscript>
+          <style>{`[data-block="cover"]{position:relative!important}`}</style>
+        </noscript>
+      )}
       {envelope ? (
         <div className="relative isolate flex flex-1 flex-col">
           {decorLayer}

@@ -20,6 +20,10 @@ export type CspOptions = {
 
 const TURNSTILE = "https://challenges.cloudflare.com"
 const SOUNDCLOUD_WIDGET = "https://w.soundcloud.com"
+// Cloudflare Web Analytics: the beacon script Cloudflare adds to each page,
+// and where it reports to.
+const CF_ANALYTICS_SCRIPT = "https://static.cloudflareinsights.com"
+const CF_ANALYTICS_REPORT = "https://cloudflareinsights.com"
 const GOOGLE_MAPS_JS = [
   "https://maps.googleapis.com",
   "https://maps.gstatic.com",
@@ -35,6 +39,7 @@ export function contentSecurityPolicy(options: CspOptions = {}): string {
       "'unsafe-inline'",
       TURNSTILE,
       SOUNDCLOUD_WIDGET,
+      CF_ANALYTICS_SCRIPT,
       ...GOOGLE_MAPS_JS,
     ],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -44,6 +49,7 @@ export function contentSecurityPolicy(options: CspOptions = {}): string {
     "connect-src": [
       "'self'",
       TURNSTILE,
+      CF_ANALYTICS_REPORT,
       // Browser uploads with the `r2` driver go straight to R2.
       "https://*.r2.cloudflarestorage.com",
       ...GOOGLE_MAPS_JS,

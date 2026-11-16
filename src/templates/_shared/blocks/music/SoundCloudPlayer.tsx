@@ -14,7 +14,10 @@ const START_GRACE_MS = 1500
 
 /**
  * SoundCloud's own compact player, docked and visible (their terms require
- * visible credit; it never plays while hidden). The cover tap asks it to
+ * visible credit; it never plays while hidden). On the public page the
+ * widget (over 1 MB of script, plus SoundCloud's cookie) is not loaded until
+ * the guest first touches the page, so it costs nothing while the cover is
+ * up; a play asked for meanwhile runs as soon as it is ready. The cover tap asks it to
  * play; iOS Safari will not pass that tap into the cross-origin iframe, so
  * after a short grace period the dock asks the guest to tap ▶ themselves.
  */
@@ -28,11 +31,32 @@ function Dock({ source, startAt, loop }: Props) {
   const [needsTap, setNeedsTap] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [src] = useState(() => widgetSrc(source.trackId, palette.primary))
+  const [armed, setArmed] = useState(mode !== "public")
+
+  useEffect(() => {
+    if (armed) return
+    const arm = () => setArmed(true)
+    const events = ["pointerdown", "keydown", "touchstart"] as const
+    for (const event of events) {
+      window.addEventListener(event, arm, { once: true, passive: true })
+    }
+    return () => {
+      for (const event of events) window.removeEventListener(event, arm)
+    }
+  }, [armed])
+
+  const startGrace = () => {
+    window.clearTimeout(graceTimer.current)
+    graceTimer.current = window.setTimeout(
+      () => setNeedsTap(true),
+      START_GRACE_MS
+    )
+  }
 
   useEffect(() => {
     let cancelled = false
     const iframe = frame.current
-    if (!iframe) return
+    if (!armed || !iframe) return
     loadWidgetApi()
       .then((SC) => {
         if (cancelled) return
@@ -42,7 +66,9 @@ function Dock({ source, startAt, loop }: Props) {
           widget.current = w
           if (pendingStart.current) {
             pendingStart.current = false
+            if (startAt > 0) w.seekTo(startAt * 1000)
             w.play()
+            startGrace()
           }
         })
         w.bind(E.PLAY, () => {
@@ -65,24 +91,24 @@ function Dock({ source, startAt, loop }: Props) {
       window.clearTimeout(graceTimer.current)
       widget.current = null
     }
-  }, [loop, startAt])
+  }, [armed, loop, startAt])
 
   useEffect(
     () =>
       registerMusic({
-        prime: () => {},
+        prime: () => setArmed(true),
         start: () => {
+          setArmed(true)
           setCollapsed(false)
           if (widget.current) {
             if (startAt > 0) widget.current.seekTo(startAt * 1000)
             widget.current.play()
+            startGrace()
           } else {
+            // Still loading: READY plays it, and only then starts the wait
+            // before asking for a tap.
             pendingStart.current = true
           }
-          graceTimer.current = window.setTimeout(
-            () => setNeedsTap(true),
-            START_GRACE_MS
-          )
         },
       }),
     [registerMusic, startAt]
@@ -107,11 +133,15 @@ function Dock({ source, startAt, loop }: Props) {
         <button
           type="button"
           onClick={() => setCollapsed(false)}
-          className="flex items-center gap-2 rounded-full border border-inv-line bg-inv-bg/95 px-3 py-2 text-xs text-inv-fg shadow-lg backdrop-blur hover:border-inv-primary focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:outline-none"
+          // On a phone only the round icon: the pill with the title would
+          // sit on top of whatever is at the end of the page.
+          className="flex items-center gap-2 rounded-full border border-inv-line bg-inv-bg/95 p-2.5 text-xs text-inv-fg shadow-lg backdrop-blur hover:border-inv-primary focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:outline-none sm:px-3 sm:py-2"
         >
           <Music2 className="size-4 text-inv-primary" aria-hidden="true" />
-          <span className="max-w-48 truncate">{source.title}</span>
-          <span className="text-inv-muted">· SoundCloud</span>
+          <span className="max-w-48 truncate max-sm:sr-only">
+            {source.title}
+          </span>
+          <span className="text-inv-muted max-sm:sr-only">· SoundCloud</span>
         </button>
       )}
       <div
@@ -145,7 +175,7 @@ function Dock({ source, startAt, loop }: Props) {
         <iframe
           ref={frame}
           title={t.music.widgetTitle(source.title, source.artist)}
-          src={src}
+          src={armed ? src : undefined}
           allow="autoplay"
           className="block h-[166px] w-full border-0"
         />

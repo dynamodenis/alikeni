@@ -48,6 +48,32 @@ test("?to= puts the guest's name on the cover and in the RSVP form", async ({
   await context.close()
 })
 
+test("nothing moves on the page while it loads and hydrates", async ({
+  browser,
+}) => {
+  const context = await newGuestContext(browser)
+  const page = await context.newPage()
+  // The cover is laid over the page from the first HTML: content sliding up
+  // under it at hydration would be a layout shift of the whole screen.
+  await page.addInitScript(() => {
+    const w = window as unknown as { __cls: number }
+    w.__cls = 0
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        w.__cls += (entry as unknown as { value: number }).value
+      }
+    }).observe({ type: "layout-shift", buffered: true })
+  })
+  await page.goto(`/i/${invitation.slug}`)
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 30_000 })
+  await page.waitForTimeout(1_000)
+  const shift = await page.evaluate(
+    () => (window as unknown as { __cls: number }).__cls
+  )
+  expect(shift).toBeLessThan(0.1)
+  await context.close()
+})
+
 test("a filled honeypot looks accepted but stores nothing", async ({
   browser,
 }) => {
