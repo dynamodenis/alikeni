@@ -173,6 +173,32 @@ export function eventReminderEmail(input: {
   })
 }
 
+/* ---------- album: a guest batch waits for the host ---------- */
+
+export function albumBatchEmail(input: {
+  to: string
+  title: string
+  name: string
+  count: number
+  url: string
+}): Email {
+  const { to, title, name, count, url } = input
+  return message({
+    to,
+    subject: `${name} sent ${count} photos for ${title}`,
+    heading: "Photos waiting for your approval",
+    body: [
+      `${name} uploaded ${count} photos and videos to the album of ${title}.`,
+      "Large uploads from guests stay hidden until you approve them. Have a look, then approve or reject the batch.",
+      "Batches left unanswered are deleted after 14 days.",
+    ],
+    action: "Review the upload",
+    url,
+    footer:
+      "You received this because a guest uploaded to the album of an invitation you published on Alikeni.",
+  })
+}
+
 /* ---------- contact form → our inbox ---------- */
 
 /** A message from the site's contact form. Replying answers the visitor. */

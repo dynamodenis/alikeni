@@ -10,6 +10,7 @@ import {
   findPublishedBySlug,
   getPublishedBySlug,
 } from "@/server/invitations/editing.server"
+import { hasPublicAlbum } from "@/server/album/album.server"
 import { DEVICE_ID_PATTERN } from "@/lib/guest-device"
 import type { GuestRateLimit } from "@/lib/guest-limit"
 import {
@@ -411,11 +412,12 @@ export async function loadPublicPage(
       locale: invitation.config.locale,
     }
   }
-  const [wishes, guestName] = await Promise.all([
+  const [wishes, guestName, album] = await Promise.all([
     invitation.config.features.wishes
       ? listWishes(db, invitation.id)
       : Promise.resolve([]),
     resolveGuestName(db, invitation.id, input.to),
+    hasPublicAlbum(db, invitation),
   ])
   return {
     ended: false as const,
@@ -424,5 +426,7 @@ export async function loadPublicPage(
     config: invitation.config,
     wishes,
     guestName,
+    /** The invitation links to `/i/<slug>/album` when true. */
+    album,
   }
 }

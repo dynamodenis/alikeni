@@ -37,7 +37,7 @@ export interface BucketLike {
   ) => Promise<BucketObjectBody | null>
   put: (
     key: string,
-    value: ArrayBuffer | Uint8Array<ArrayBuffer>,
+    value: ArrayBuffer | Uint8Array<ArrayBuffer> | ReadableStream<Uint8Array>,
     options?: { httpMetadata?: { contentType?: string } }
   ) => Promise<unknown>
   delete: (key: string) => Promise<void>

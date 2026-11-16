@@ -40,6 +40,12 @@ export const mediaKind = pgEnum("media_kind", ["image", "audio"])
 export const invitationPlan = pgEnum("invitation_plan", ["free", "premium"])
 export const orderStatus = pgEnum("order_status", ["pending", "paid", "failed"])
 export const rsvpAttending = pgEnum("rsvp_attending", ["yes", "no", "maybe"])
+export const albumKind = pgEnum("album_kind", ["image", "video"])
+/** Pending: a large guest batch waiting for the host. */
+export const albumBatchStatus = pgEnum("album_batch_status", [
+  "pending",
+  "approved",
+])
 export const templateCategory = pgEnum("template_category", TEMPLATE_CATEGORIES)
 
 /* ---------- auth (Better Auth; usePlural maps user → users etc.) ---------- */
@@ -240,6 +246,85 @@ export const wishes = pgTable(
   (t) => [index("wishes_invitation_idx").on(t.invitationId, t.createdAt)]
 )
 
+/* ---------- event album ---------- */
+
+/**
+ * Album settings for one invitation (rules in `src/lib/album.ts`). Kept out
+ * of the invitation config because they apply at once, without a publish,
+ * and because the PIN must never reach a guest's browser.
+ */
+export const albums = pgTable("albums", {
+  invitationId: uuid("invitation_id")
+    .primaryKey()
+    .references(() => invitations.id, { onDelete: "cascade" }),
+  enabled: boolean("enabled").notNull().default(false),
+  /** Anyone with the link may upload during the event window. */
+  guestUploads: boolean("guest_uploads").notNull().default(true),
+  downloads: boolean("downloads").notNull().default(true),
+  /** Both null: no PIN. The salt changes with the PIN, ending old access. */
+  pinSalt: text("pin_salt"),
+  pinHash: text("pin_hash"),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+})
+
+/** One upload session: the files a person chose together. */
+export const albumBatches = pgTable(
+  "album_batches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    invitationId: uuid("invitation_id")
+      .notNull()
+      .references(() => invitations.id, { onDelete: "cascade" }),
+    uploaderName: text("uploader_name").notNull(),
+    byOwner: boolean("by_owner").notNull().default(false),
+    /** Files announced at the start; no more than this are accepted. */
+    declaredCount: integer("declared_count").notNull(),
+    /** Upload URLs handed out so far (capped, so a batch cannot be farmed). */
+    preparedCount: integer("prepared_count").notNull().default(0),
+    status: albumBatchStatus("status").notNull(),
+    /** Set when the uploader's browser finished sending the files. */
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    ipHash: text("ip_hash"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("album_batches_invitation_idx").on(t.invitationId, t.createdAt),
+    index("album_batches_pending_idx")
+      .on(t.createdAt)
+      .where(sql`${t.status} = 'pending'`),
+    check("album_batches_count_positive", sql`${t.declaredCount} > 0`),
+  ]
+)
+
+export const albumItems = pgTable(
+  "album_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    invitationId: uuid("invitation_id")
+      .notNull()
+      .references(() => invitations.id, { onDelete: "cascade" }),
+    batchId: uuid("batch_id")
+      .notNull()
+      .references(() => albumBatches.id, { onDelete: "cascade" }),
+    kind: albumKind("kind").notNull(),
+    key: text("key").notNull().unique(),
+    /** Small preview for the grid; null when the browser could not make one. */
+    thumbKey: text("thumb_key"),
+    mime: text("mime").notNull(),
+    bytes: integer("bytes").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    durationSec: real("duration_sec"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("album_items_invitation_idx").on(t.invitationId, t.createdAt),
+    index("album_items_batch_idx").on(t.batchId),
+    check("album_items_bytes_positive", sql`${t.bytes} > 0`),
+  ]
+)
+
 /* ---------- analytics ---------- */
 
 export const pageViews = pgTable(
@@ -376,3 +461,6 @@ export type MediaAsset = typeof mediaAssets.$inferSelect
 export type Rsvp = typeof rsvps.$inferSelect
 export type Wish = typeof wishes.$inferSelect
 export type Guest = typeof guests.$inferSelect
+export type Album = typeof albums.$inferSelect
+export type AlbumBatch = typeof albumBatches.$inferSelect
+export type AlbumItem = typeof albumItems.$inferSelect

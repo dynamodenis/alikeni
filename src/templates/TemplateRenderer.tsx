@@ -14,6 +14,7 @@ export type TemplateViewProps = {
   mode: TemplateMode
   slug?: string
   guestName?: string
+  album?: boolean
   wishes?: ReadonlyArray<WishItem>
   actions?: InvitationActions
 }
@@ -28,6 +29,7 @@ export function TemplateView({
   mode,
   slug,
   guestName,
+  album,
   wishes,
   actions,
 }: TemplateViewProps & { module: TemplateModule }) {
@@ -42,6 +44,7 @@ export function TemplateView({
       mode={mode}
       slug={slug}
       guestName={guestName}
+      album={album}
       wishes={wishes}
       actions={actions}
       ornament={module.meta.ornament}

@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Eye,
   Heart,
+  Images,
   Link2,
   LoaderCircle,
   MessageSquareText,
@@ -243,6 +244,14 @@ export function InvitationCard({ row }: { row: DashboardRow }) {
                   params={{ invitationId: row.id }}
                 >
                   <Users aria-hidden="true" /> Guests
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/dashboard/$invitationId/album"
+                  params={{ invitationId: row.id }}
+                >
+                  <Images aria-hidden="true" /> Album
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

@@ -135,6 +135,69 @@ export const en = {
     signOff: "With love",
     madeWith: "Made with",
     createYours: "Create your own invitation, free",
+    album: "Photos & videos from the event",
+  },
+  album: {
+    eyebrow: "Album",
+    back: "Back to the invitation",
+    count: (n: number) =>
+      n === 1 ? "1 photo or video" : `${n} photos and videos`,
+    empty: "No photos yet.",
+    emptyOpen: "Be the first to add one.",
+    loadMore: "Show more",
+    loadFailed: "Could not load the album. Please try again.",
+    retry: "Try again",
+    pinTitle: "This album is private",
+    pinBody: "Enter the PIN the host shared with you.",
+    pinLabel: "PIN",
+    pinSubmit: "Open album",
+    add: "Add photos & videos",
+    choose: "Choose photos or videos",
+    folder: "Choose a folder",
+    zip: "Upload a .zip file",
+    limits:
+      "Photos: JPEG, PNG, WebP or AVIF, up to 25 MB each. Videos: MP4, MOV or WebM, up to 95 MB each. Up to 500 files at a time.",
+    reading: (n: number) => `Reading files… ${n} found`,
+    name: "Your name",
+    ready: (n: number) => (n === 1 ? "1 file ready" : `${n} files ready`),
+    more: (n: number) => `+${n} more`,
+    skipped: (n: number) =>
+      n === 1 ? "1 file left out" : `${n} files left out`,
+    nothing: "None of those files are photos or videos we can accept.",
+    approval: (n: number) =>
+      `Uploads of more than ${n} files appear after the host approves them.`,
+    send: (n: number) => (n === 1 ? "Upload 1 file" : `Upload ${n} files`),
+    cancel: "Cancel",
+    uploading: (done: number, total: number) => `Uploading ${done} of ${total}`,
+    keepOpen: "Keep this page open until it finishes.",
+    done: (n: number) =>
+      n === 1 ? "1 file added to the album" : `${n} files added to the album`,
+    sentForApproval: (n: number) =>
+      `${n} files sent. They appear once the host approves them.`,
+    failed: (n: number) =>
+      n === 1
+        ? "1 file could not be uploaded"
+        : `${n} files could not be uploaded`,
+    again: "Add more",
+    uploadFailed: "The upload could not start",
+    notYet: "Guests can add photos from the day of the event.",
+    closed: "Uploads are closed for this album.",
+    until: (date: string) => `Guests can add photos until ${date}.`,
+    download: "Download",
+    downloadAll: "Download all",
+    preparing: (done: number, total: number) => `Preparing ${done} of ${total}`,
+    missed: (n: number) =>
+      n === 1
+        ? "1 file could not be downloaded"
+        : `${n} files could not be downloaded`,
+    share: "Share",
+    linkCopied: "Link copied",
+    video: "Video",
+    by: (name: string) => `Added by ${name}`,
+    open: (n: number, total: number) => `Open ${n} of ${total}`,
+    previous: "Previous",
+    next: "Next",
+    close: "Close",
   },
   share: {
     label: "Share this invitation",

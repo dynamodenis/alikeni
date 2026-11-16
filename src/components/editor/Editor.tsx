@@ -35,6 +35,7 @@ import {
   type EditorConfig,
 } from "./EditorContext"
 import { EditorPreview } from "./EditorPreview"
+import { AlbumTab } from "./tabs/AlbumTab"
 import { BasicsTab } from "./tabs/BasicsTab"
 import { DesignTab } from "./tabs/DesignTab"
 import { EventVenueTab } from "./tabs/EventVenueTab"
@@ -72,6 +73,7 @@ type TabId =
   | "gallery"
   | "story"
   | "gifts"
+  | "album"
   | "sharing"
 
 /**
@@ -105,6 +107,7 @@ const TABS: Array<{ id: TabId; label: string; prefixes: Array<string> }> = [
   { id: "story", label: "Story", prefixes: ["story"] },
   { id: "music", label: "Music", prefixes: ["music"] },
   { id: "gifts", label: "Gifts", prefixes: ["gifts"] },
+  { id: "album", label: "Album", prefixes: [] },
   {
     id: "sections",
     label: "Sections",
@@ -124,6 +127,7 @@ const PANELS: Record<Exclude<TabId, "sharing">, ComponentType> = {
   gallery: GalleryTab,
   story: StoryTab,
   gifts: GiftsTab,
+  album: AlbumTab,
 }
 
 /** Dev-only reminder that uploads are going to .storage/, not R2. */

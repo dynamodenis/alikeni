@@ -4,10 +4,12 @@
 // single-use in-memory token; everyone else gets 404.
 import { createFileRoute } from "@tanstack/react-router"
 import { serverEnv } from "@/env.server"
+import { purgeStaleBatches } from "@/server/album/album.server"
 import { getDb } from "@/server/db/client.server"
 import { runNotifications } from "@/server/email/notifications.server"
 import { sendEmail } from "@/server/email/send.server"
 import { takeCronToken } from "@/server/platform/cron-token.server"
+import { getStorage } from "@/server/storage/index.server"
 
 const CRON_TOKEN_HEADER = "x-alikeni-cron"
 
@@ -21,9 +23,20 @@ export const Route = createFileRoute("/api/cron/notifications")({
         const result = await runNotifications(getDb(), sendEmail, {
           origin: serverEnv.APP_ORIGIN,
         })
-        return Response.json(result, {
-          headers: { "Cache-Control": "no-store" },
+        // Album housekeeping rides along; it must never fail the emails.
+        const albumBatchesPurged = await purgeStaleBatches(
+          getDb(),
+          getStorage()
+        ).catch((error: unknown) => {
+          console.error("[cron] album purge failed", error)
+          return 0
         })
+        return Response.json(
+          { ...result, albumBatchesPurged },
+          {
+            headers: { "Cache-Control": "no-store" },
+          }
+        )
       },
     },
   },

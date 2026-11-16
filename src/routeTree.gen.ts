@@ -35,10 +35,12 @@ import { Route as ApiPaymentsPaystackRouteImport } from './routes/api/payments/p
 import { Route as ApiStorageUploadRouteImport } from './routes/api/storage/upload'
 import { Route as DevTemplatesIndexRouteImport } from './routes/dev/templates/index'
 import { Route as DevTemplatesSplatRouteImport } from './routes/dev/templates/$'
+import { Route as ISlugAlbumRouteImport } from './routes/i/$slug_.album'
 import { Route as MediaLibrarySplatRouteImport } from './routes/media/library/$'
 import { Route as PreviewCategorySlugRouteImport } from './routes/preview/$category/$slug'
 import { Route as TemplatesCategoryIndexRouteImport } from './routes/templates/$category/index'
 import { Route as TemplatesCategorySlugRouteImport } from './routes/templates/$category/$slug'
+import { Route as AuthedDashboardInvitationIdAlbumRouteImport } from './routes/_authed/dashboard/$invitationId/album'
 import { Route as AuthedDashboardInvitationIdGuestsRouteImport } from './routes/_authed/dashboard/$invitationId/guests'
 import { Route as AuthedDashboardInvitationIdResponsesRouteImport } from './routes/_authed/dashboard/$invitationId/responses'
 import { Route as AuthedDashboardInvitationIdUpgradeRouteImport } from './routes/_authed/dashboard/$invitationId/upgrade'
@@ -175,6 +177,11 @@ const DevTemplatesSplatRoute = DevTemplatesSplatRouteImport.update({
   path: '/templates/$',
   getParentRoute: () => DevRouteRoute,
 } as any)
+const ISlugAlbumRoute = ISlugAlbumRouteImport.update({
+  id: '/i/$slug_/album',
+  path: '/i/$slug/album',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaLibrarySplatRoute = MediaLibrarySplatRouteImport.update({
   id: '/media/library/$',
   path: '/media/library/$',
@@ -195,6 +202,12 @@ const TemplatesCategorySlugRoute = TemplatesCategorySlugRouteImport.update({
   path: '/templates/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedDashboardInvitationIdAlbumRoute =
+  AuthedDashboardInvitationIdAlbumRouteImport.update({
+    id: '/dashboard/$invitationId/album',
+    path: '/dashboard/$invitationId/album',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedDashboardInvitationIdGuestsRoute =
   AuthedDashboardInvitationIdGuestsRouteImport.update({
     id: '/dashboard/$invitationId/guests',
@@ -243,12 +256,14 @@ export interface FileRoutesByFullPath {
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
+  '/i/$slug/album': typeof ISlugAlbumRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
   '/templates/$category/': typeof TemplatesCategoryIndexRoute
+  '/dashboard/$invitationId/album': typeof AuthedDashboardInvitationIdAlbumRoute
   '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -278,12 +293,14 @@ export interface FileRoutesByTo {
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
+  '/i/$slug/album': typeof ISlugAlbumRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/dev/templates': typeof DevTemplatesIndexRoute
   '/templates/$category': typeof TemplatesCategoryIndexRoute
+  '/dashboard/$invitationId/album': typeof AuthedDashboardInvitationIdAlbumRoute
   '/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -315,12 +332,14 @@ export interface FileRoutesById {
   '/api/payments/paystack': typeof ApiPaymentsPaystackRoute
   '/api/storage/upload': typeof ApiStorageUploadRoute
   '/dev/templates/$': typeof DevTemplatesSplatRoute
+  '/i/$slug_/album': typeof ISlugAlbumRoute
   '/media/library/$': typeof MediaLibrarySplatRoute
   '/preview/$category/$slug': typeof PreviewCategorySlugRoute
   '/templates/$category/$slug': typeof TemplatesCategorySlugRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/dev/templates/': typeof DevTemplatesIndexRoute
   '/templates/$category/': typeof TemplatesCategoryIndexRoute
+  '/_authed/dashboard/$invitationId/album': typeof AuthedDashboardInvitationIdAlbumRoute
   '/_authed/dashboard/$invitationId/guests': typeof AuthedDashboardInvitationIdGuestsRoute
   '/_authed/dashboard/$invitationId/responses': typeof AuthedDashboardInvitationIdResponsesRoute
   '/_authed/dashboard/$invitationId/upgrade': typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -352,12 +371,14 @@ export interface FileRouteTypes {
     | '/api/payments/paystack'
     | '/api/storage/upload'
     | '/dev/templates/$'
+    | '/i/$slug/album'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
     | '/dashboard/'
     | '/dev/templates/'
     | '/templates/$category/'
+    | '/dashboard/$invitationId/album'
     | '/dashboard/$invitationId/guests'
     | '/dashboard/$invitationId/responses'
     | '/dashboard/$invitationId/upgrade'
@@ -387,12 +408,14 @@ export interface FileRouteTypes {
     | '/api/payments/paystack'
     | '/api/storage/upload'
     | '/dev/templates/$'
+    | '/i/$slug/album'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
     | '/dashboard'
     | '/dev/templates'
     | '/templates/$category'
+    | '/dashboard/$invitationId/album'
     | '/dashboard/$invitationId/guests'
     | '/dashboard/$invitationId/responses'
     | '/dashboard/$invitationId/upgrade'
@@ -423,12 +446,14 @@ export interface FileRouteTypes {
     | '/api/payments/paystack'
     | '/api/storage/upload'
     | '/dev/templates/$'
+    | '/i/$slug_/album'
     | '/media/library/$'
     | '/preview/$category/$slug'
     | '/templates/$category/$slug'
     | '/_authed/dashboard/'
     | '/dev/templates/'
     | '/templates/$category/'
+    | '/_authed/dashboard/$invitationId/album'
     | '/_authed/dashboard/$invitationId/guests'
     | '/_authed/dashboard/$invitationId/responses'
     | '/_authed/dashboard/$invitationId/upgrade'
@@ -455,6 +480,7 @@ export interface RootRouteChildren {
   ApiExportFileRoute: typeof ApiExportFileRoute
   ApiPaymentsPaystackRoute: typeof ApiPaymentsPaystackRoute
   ApiStorageUploadRoute: typeof ApiStorageUploadRoute
+  ISlugAlbumRoute: typeof ISlugAlbumRoute
   MediaLibrarySplatRoute: typeof MediaLibrarySplatRoute
   PreviewCategorySlugRoute: typeof PreviewCategorySlugRoute
   TemplatesCategorySlugRoute: typeof TemplatesCategorySlugRoute
@@ -646,6 +672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevTemplatesSplatRouteImport
       parentRoute: typeof DevRouteRoute
     }
+    '/i/$slug_/album': {
+      id: '/i/$slug_/album'
+      path: '/i/$slug/album'
+      fullPath: '/i/$slug/album'
+      preLoaderRoute: typeof ISlugAlbumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media/library/$': {
       id: '/media/library/$'
       path: '/media/library/$'
@@ -673,6 +706,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/templates/$category/$slug'
       preLoaderRoute: typeof TemplatesCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/dashboard/$invitationId/album': {
+      id: '/_authed/dashboard/$invitationId/album'
+      path: '/dashboard/$invitationId/album'
+      fullPath: '/dashboard/$invitationId/album'
+      preLoaderRoute: typeof AuthedDashboardInvitationIdAlbumRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/dashboard/$invitationId/guests': {
       id: '/_authed/dashboard/$invitationId/guests'
@@ -727,6 +767,7 @@ interface AuthedRouteChildren {
   AuthedConnectGoogleRoute: typeof AuthedConnectGoogleRoute
   AuthedEditorInvitationIdRoute: typeof AuthedEditorInvitationIdRoute
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
+  AuthedDashboardInvitationIdAlbumRoute: typeof AuthedDashboardInvitationIdAlbumRoute
   AuthedDashboardInvitationIdGuestsRoute: typeof AuthedDashboardInvitationIdGuestsRoute
   AuthedDashboardInvitationIdResponsesRoute: typeof AuthedDashboardInvitationIdResponsesRoute
   AuthedDashboardInvitationIdUpgradeRoute: typeof AuthedDashboardInvitationIdUpgradeRoute
@@ -736,6 +777,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedConnectGoogleRoute: AuthedConnectGoogleRoute,
   AuthedEditorInvitationIdRoute: AuthedEditorInvitationIdRoute,
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
+  AuthedDashboardInvitationIdAlbumRoute: AuthedDashboardInvitationIdAlbumRoute,
   AuthedDashboardInvitationIdGuestsRoute:
     AuthedDashboardInvitationIdGuestsRoute,
   AuthedDashboardInvitationIdResponsesRoute:
@@ -767,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiExportFileRoute: ApiExportFileRoute,
   ApiPaymentsPaystackRoute: ApiPaymentsPaystackRoute,
   ApiStorageUploadRoute: ApiStorageUploadRoute,
+  ISlugAlbumRoute: ISlugAlbumRoute,
   MediaLibrarySplatRoute: MediaLibrarySplatRoute,
   PreviewCategorySlugRoute: PreviewCategorySlugRoute,
   TemplatesCategorySlugRoute: TemplatesCategorySlugRoute,

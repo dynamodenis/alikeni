@@ -52,6 +52,10 @@ export function createBindingDriver(
       await bucket.put(key, bytes, { httpMetadata: { contentType } })
     },
 
+    async putStream(key, body, contentType) {
+      await bucket.put(key, body, { httpMetadata: { contentType } })
+    },
+
     async get(key) {
       const object = await bucket.get(key)
       if (!object) return null

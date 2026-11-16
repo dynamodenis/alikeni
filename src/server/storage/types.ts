@@ -56,6 +56,16 @@ export interface RouteServedStorage {
     upload: { key: string; mime: string; bytes: number; exp: number },
     sig: string
   ) => boolean
+  /**
+   * Write a request body without holding it in memory (album videos). The
+   * stream must carry exactly `bytes` bytes.
+   */
+  putStream?: (
+    key: string,
+    body: ReadableStream<Uint8Array>,
+    contentType: string,
+    bytes: number
+  ) => Promise<void>
   /** Bytes `start..end` (inclusive) of an object, or null when missing. */
   readRange: (
     key: string,

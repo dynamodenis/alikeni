@@ -88,13 +88,42 @@ When all five are set, `getStorage()` switches to R2 automatically.
 
 ## Object layout
 
-| Prefix                              | What                                  | Written by       |
-| ----------------------------------- | ------------------------------------- | ---------------- |
-| `useruploads/<ownerId>/<uuid>.webp` | Photos (resized client-side ≤ 800 KB) | editor uploads   |
-| `useruploads/<ownerId>/<uuid>.mp3`  | Host music (≤ 10 MB)                  | editor uploads   |
-| `library/<track>.mp3`               | Curated music library                 | `pnpm music:add` |
+| Prefix                                   | What                                  | Written by       |
+| ---------------------------------------- | ------------------------------------- | ---------------- |
+| `useruploads/<ownerId>/<uuid>.webp`      | Photos (resized client-side ≤ 800 KB) | editor uploads   |
+| `useruploads/<ownerId>/<uuid>.mp3`       | Host music (≤ 10 MB)                  | editor uploads   |
+| `library/<track>.mp3`                    | Curated music library                 | `pnpm music:add` |
+| `album/<invitationId>/<uuid>.<ext>`      | Event album originals (see below)     | album uploads    |
+| `album/<invitationId>/<uuid>.thumb.webp` | Album grid preview (≤ 400 KB)         | album uploads    |
 
 Keys are owner-scoped: `confirmUpload` refuses keys outside the caller's
 prefix, re-checks the real size and type with a HEAD request, and deletes
 anything that breaks the rules. Presigned URLs expire after 10 minutes and
 bind the Content-Type.
+
+## Event album
+
+`src/lib/album.ts` holds the rules, `src/server/album` the logic. A Premium
+invitation can switch on an album at `/i/<slug>/album`: the host uploads at
+any time, anyone with the link (plus the PIN, when set) from the first event
+day until seven days after the last.
+
+- **Originals are kept as uploaded**: photos ≤ 25 MB (JPEG, PNG, WebP,
+  AVIF), videos ≤ 95 MB (MP4, MOV, WebM). The video limit is below
+  Cloudflare's 100 MB request body limit because each file travels in one
+  signed PUT; larger videos would need multipart uploads.
+- **The upload route streams album files** to R2 (`putStream`) instead of
+  buffering them, so a video does not sit in the Worker's memory.
+- **Zip and folder uploads are opened in the browser** (`fflate`); the server
+  only ever receives individual photos and videos.
+- **What arrived is checked on confirm**: size, declared type and the file's
+  first bytes (`sniffMedia`). A mismatch deletes the object.
+- **Bulk approval**: a guest batch of more than 20 files is stored but hidden
+  until the host approves it; rejected and unanswered (14 days, cron) batches
+  are deleted from storage.
+- **Limits per album**: 10 GB and 5,000 files.
+- **PIN**: only a salted hash is stored. Media URLs are unguessable but not
+  signed, so someone who was given a direct file link can open it without
+  the PIN; the PIN protects the listing.
+- With `R2_PUBLIC_URL` on another origin, "Download" and "Download all" need
+  the bucket's CORS rule to allow `GET` from the site (see above).

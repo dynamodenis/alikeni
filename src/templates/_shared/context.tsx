@@ -65,6 +65,8 @@ export type InvitationContextValue = {
   slug?: string
   /** "Dear {guestName}" on the cover (sanitized by the caller). */
   guestName?: string
+  /** The invitation has an event album (`/i/<slug>/album`). */
+  album: boolean
   wishes: ReadonlyArray<WishItem>
   actions: InvitationActions
   /** True once the guest tapped through the cover. */
@@ -108,6 +110,7 @@ export type InvitationProviderProps = {
   mode: TemplateMode
   slug?: string
   guestName?: string
+  album?: boolean
   wishes?: ReadonlyArray<WishItem>
   actions?: InvitationActions
   /** The template's default ornament (meta.ornament). */
@@ -120,6 +123,7 @@ export function InvitationProvider({
   mode,
   slug,
   guestName,
+  album = false,
   wishes = NO_WISHES,
   actions = NO_ACTIONS,
   ornament: defaultOrnament,
@@ -159,6 +163,7 @@ export function InvitationProvider({
       ornament,
       slug,
       guestName,
+      album,
       wishes,
       actions,
       opened,
@@ -176,6 +181,7 @@ export function InvitationProvider({
       ornament,
       slug,
       guestName,
+      album,
       wishes,
       actions,
       opened,

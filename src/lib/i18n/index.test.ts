@@ -35,12 +35,19 @@ describe("i18n", () => {
 
   it("translates Indonesian strings rather than copying English", () => {
     const id = getMessages("id")
-    // Brand names and "RSVP" may stay; ordinary copy must differ.
+    // Brand names, "RSVP" and words Indonesian shares with English (album,
+    // PIN, video) may stay; ordinary copy must differ.
     const same = leaves(en).filter((key) => {
       const a = leafAt(en, key)
       return typeof a === "string" && a !== "" && a === leafAt(id, key)
     })
-    expect(same.sort()).toEqual(["calendar.ics", "rsvp.eyebrow"])
+    expect(same.sort()).toEqual([
+      "album.eyebrow",
+      "album.pinLabel",
+      "album.video",
+      "calendar.ics",
+      "rsvp.eyebrow",
+    ])
   })
 
   it("interpolates and pluralises", () => {

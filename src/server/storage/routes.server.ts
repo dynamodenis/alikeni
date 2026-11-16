@@ -2,6 +2,7 @@
 // for the drivers that route uploads and reads through this app (`local` in
 // development, `binding` on Workers). Kept out of the route files so they
 // can be tested against any driver.
+import { checkAlbumFile, checkAlbumThumb, isAlbumKey } from "@/lib/album"
 import { ObjectKey, checkUpload, type MediaKind } from "@/lib/upload-policy"
 import type { ServerStorage } from "./types"
 
@@ -39,6 +40,9 @@ export async function handleSignedUpload(
   if (declared > bytes) {
     return new Response("Larger than signed", { status: 413 })
   }
+  if (isAlbumKey(key)) {
+    return putAlbumObject(request, storage, { key, mime, bytes, declared })
+  }
   const kind: MediaKind = key.split("/")[2] === "audio" ? "audio" : "image"
   const body = new Uint8Array(await request.arrayBuffer())
   const verdict = checkUpload(kind, mime, body.byteLength)
@@ -46,6 +50,34 @@ export async function handleSignedUpload(
     return new Response(verdict.ok ? "Larger than signed" : verdict.reason, {
       status: 413,
     })
+  }
+  await storage.put(key, body, mime)
+  return new Response(null, { status: 200 })
+}
+
+/**
+ * Album files (`album/<invitationId>/…`, rules in `src/lib/album.ts`). They
+ * can be large, so the body is streamed to storage when the driver can and
+ * the browser said how long it is; what really arrived is checked again when
+ * the upload is confirmed.
+ */
+async function putAlbumObject(
+  request: Request,
+  storage: ServerStorage,
+  upload: { key: string; mime: string; bytes: number; declared: number }
+): Promise<Response> {
+  const { key, mime, bytes, declared } = upload
+  const allowed = key.includes(".thumb.")
+    ? checkAlbumThumb(mime, bytes)
+    : checkAlbumFile(mime, bytes).ok
+  if (!allowed) return new Response("Not allowed in an album", { status: 413 })
+  if (storage.putStream && request.body && declared > 0) {
+    await storage.putStream(key, request.body, mime, declared)
+    return new Response(null, { status: 200 })
+  }
+  const body = new Uint8Array(await request.arrayBuffer())
+  if (body.byteLength === 0 || body.byteLength > bytes) {
+    return new Response("Larger than signed", { status: 413 })
   }
   await storage.put(key, body, mime)
   return new Response(null, { status: 200 })

@@ -181,6 +181,7 @@ function PublicInvitation({ page }: { page: LivePage }) {
         mode="public"
         slug={slug}
         guestName={page.guestName}
+        album={page.album}
         wishes={page.wishes}
         actions={actions}
       />

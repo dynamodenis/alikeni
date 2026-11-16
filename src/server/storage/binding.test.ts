@@ -59,16 +59,20 @@ class FakeBucket implements BucketLike {
     return Promise.resolve(result)
   }
 
-  put(
+  async put(
     key: string,
-    value: ArrayBuffer | Uint8Array<ArrayBuffer>,
+    value: ArrayBuffer | Uint8Array<ArrayBuffer> | ReadableStream<Uint8Array>,
     options?: { httpMetadata?: { contentType?: string } }
   ) {
+    const bytes =
+      value instanceof ReadableStream
+        ? new Uint8Array(await new Response(value).arrayBuffer())
+        : new Uint8Array(value).slice()
     this.objects.set(key, {
-      bytes: new Uint8Array(value).slice(),
+      bytes,
       contentType: options?.httpMetadata?.contentType,
     })
-    return Promise.resolve(null)
+    return null
   }
 
   delete(key: string) {
@@ -114,6 +118,78 @@ async function signedPut(
     storage
   )
 }
+
+describe("album uploads through the upload route", () => {
+  const ALBUM_KEY = "album/0b1c2d3e-0000-4000-8000-000000000001/item.mp4"
+
+  async function albumPut(
+    storage: ReturnType<typeof driver>["storage"],
+    key: string,
+    mime: string,
+    body: Uint8Array<ArrayBuffer>,
+    withLength = true
+  ) {
+    const target = await storage.createUploadTarget({
+      key,
+      mime,
+      bytes: body.byteLength,
+    })
+    return handleSignedUpload(
+      new Request(target.url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": mime,
+          ...(withLength ? { "Content-Length": String(body.byteLength) } : {}),
+        },
+        body,
+      }),
+      storage
+    )
+  }
+
+  it("streams a video the editor's rules would refuse", async () => {
+    const { bucket, storage } = driver()
+    const body = new Uint8Array(64).fill(7)
+    const response = await albumPut(storage, ALBUM_KEY, "video/mp4", body)
+    expect(response.status).toBe(200)
+    const stored = bucket.objects.get(ALBUM_KEY)
+    expect(stored?.contentType).toBe("video/mp4")
+    expect(stored?.bytes.byteLength).toBe(64)
+  })
+
+  it("buffers when the browser sent no length", async () => {
+    const { bucket, storage } = driver()
+    const body = new Uint8Array(16).fill(1)
+    const response = await albumPut(
+      storage,
+      ALBUM_KEY,
+      "image/jpeg",
+      body,
+      false
+    )
+    expect(response.status).toBe(200)
+    expect(bucket.objects.get(ALBUM_KEY)?.bytes.byteLength).toBe(16)
+  })
+
+  it("refuses types an album does not take, and oversized previews", async () => {
+    const { bucket, storage } = driver()
+    const zip = await albumPut(
+      storage,
+      ALBUM_KEY,
+      "application/zip",
+      new Uint8Array(8)
+    )
+    expect(zip.status).toBe(413)
+    const thumb = await albumPut(
+      storage,
+      "album/0b1c2d3e-0000-4000-8000-000000000001/item.thumb.jpg",
+      "image/png",
+      new Uint8Array(8)
+    )
+    expect(thumb.status).toBe(413)
+    expect(bucket.objects.size).toBe(0)
+  })
+})
 
 describe("binding driver", () => {
   it("signs a PUT to our upload route that expires within 10 minutes", async () => {

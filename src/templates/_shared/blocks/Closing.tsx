@@ -88,7 +88,7 @@ export function CreateYoursLink({
  * link; previews are already on the site, so they keep the plain credit.
  */
 export function Footer({ className }: { className?: string }) {
-  const { config, mode, t } = useInvitation()
+  const { config, mode, slug, album, t } = useInvitation()
   return (
     <footer
       className={cn(
@@ -96,6 +96,15 @@ export function Footer({ className }: { className?: string }) {
         className
       )}
     >
+      {mode === "public" && album && slug && (
+        <a
+          href={`/i/${slug}/album`}
+          className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-inv-primary px-6 text-sm font-medium text-inv-bg transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:ring-offset-2 focus-visible:ring-offset-inv-bg focus-visible:outline-none"
+        >
+          {t.closing.album}
+          <span aria-hidden="true">→</span>
+        </a>
+      )}
       {config.texts.footerNote && <p>{config.texts.footerNote}</p>}
       <MusicCredit />
       <p>
