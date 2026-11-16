@@ -185,10 +185,15 @@ export const en = {
     hostHint:
       "Hosting this event? You can add photos at any time from your dashboard.",
     hostLink: "Open my dashboard",
+    preview: (name: string) => `Preview ${name}`,
     closed: "Uploads are closed for this album.",
     until: (date: string) => `Guests can add photos until ${date}.`,
     download: "Download",
     downloadAll: "Download all",
+    downloadSome: (n: number) => (n === 0 ? "Download" : `Download ${n}`),
+    select: "Select",
+    selectAll: "Select all",
+    selectHint: "Tap the photos and videos you want.",
     preparing: (done: number, total: number) => `Preparing ${done} of ${total}`,
     missed: (n: number) =>
       n === 1

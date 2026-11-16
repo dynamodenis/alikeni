@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useHydrated } from "@/hooks/use-hydrated"
-import { downloadAll } from "@/lib/album-download"
+import { downloadAll, downloadSome } from "@/lib/album-download"
 import { formatLongDate } from "@/lib/format-date"
 import { INTL_LOCALE, getMessages } from "@/lib/i18n"
 import {
@@ -227,6 +227,8 @@ function AlbumBody({
   const [count, setCount] = useState<number | null>(album.count)
   const [open, setOpen] = useState<number | null>(null)
   const [zipping, setZipping] = useState<{ done: number; total: number }>()
+  /** null: tiles open the viewer. A set: tiles are being picked. */
+  const [selected, setSelected] = useState<ReadonlySet<string> | null>(null)
 
   const fetchPage = useCallback(
     async (offset: number) => {
@@ -270,6 +272,39 @@ function AlbumBody({
         setZipping({ done, total })
       )
       if (missed > 0) toast.error(t.missed(missed))
+    } catch {
+      toast.error(t.loadFailed)
+    } finally {
+      setZipping(undefined)
+    }
+  }
+
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+
+  const selectAll = async () => {
+    try {
+      const all = await loadAll()
+      setSelected(new Set(all.map((item) => item.id)))
+    } catch {
+      toast.error(t.loadFailed)
+    }
+  }
+
+  const saveSelected = async () => {
+    const chosen = items.filter((item) => selected?.has(item.id))
+    if (chosen.length === 0) return
+    setZipping({ done: 0, total: chosen.length })
+    try {
+      const missed = await downloadSome(chosen, album.title, (done, total) =>
+        setZipping({ done, total })
+      )
+      if (missed > 0) toast.error(t.missed(missed))
+      setSelected(null)
     } catch {
       toast.error(t.loadFailed)
     } finally {
@@ -322,28 +357,89 @@ function AlbumBody({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          {count !== null && count > 0 && <>{t.count(count)} · </>}
-          {uploadNote}
+          {selected ? (
+            t.selectHint
+          ) : (
+            <>
+              {count !== null && count > 0 && <>{t.count(count)} · </>}
+              {uploadNote}
+            </>
+          )}
         </p>
         {album.downloads && items.length > 0 && (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!!zipping}
-            onClick={() => void saveAll()}
-          >
-            {zipping ? (
-              <LoaderCircle className="animate-spin" aria-hidden="true" />
+          <div className="flex flex-wrap gap-2">
+            {selected ? (
+              <>
+                <Button
+                  type="button"
+                  disabled={!!zipping || selected.size === 0}
+                  onClick={() => void saveSelected()}
+                >
+                  {zipping ? (
+                    <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download aria-hidden="true" />
+                  )}
+                  {zipping
+                    ? t.preparing(zipping.done, zipping.total)
+                    : t.downloadSome(selected.size)}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!!zipping || loading}
+                  onClick={() => void selectAll()}
+                >
+                  {t.selectAll}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={!!zipping}
+                  onClick={() => setSelected(null)}
+                >
+                  {t.cancel}
+                </Button>
+              </>
             ) : (
-              <Download aria-hidden="true" />
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!!zipping}
+                  onClick={() => void saveAll()}
+                >
+                  {zipping ? (
+                    <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download aria-hidden="true" />
+                  )}
+                  {zipping
+                    ? t.preparing(zipping.done, zipping.total)
+                    : t.downloadAll}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!!zipping}
+                  onClick={() => setSelected(new Set())}
+                >
+                  {t.select}
+                </Button>
+              </>
             )}
-            {zipping ? t.preparing(zipping.done, zipping.total) : t.downloadAll}
-          </Button>
+          </div>
         )}
       </div>
 
       {items.length > 0 ? (
-        <AlbumGrid items={items} t={t} onOpen={setOpen} />
+        <AlbumGrid
+          items={items}
+          t={t}
+          onOpen={setOpen}
+          selected={selected ?? undefined}
+          onToggle={toggle}
+        />
       ) : loading ? (
         <p className="flex justify-center py-16 text-muted-foreground">
           <LoaderCircle className="size-6 animate-spin" aria-hidden="true" />

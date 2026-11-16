@@ -112,6 +112,19 @@ async function buildZip(
   return { blob: new Blob(chunks, { type: "application/zip" }), missed }
 }
 
+/** A chosen few: one file as it is, several as a zip. */
+export async function downloadSome(
+  items: ReadonlyArray<Downloadable>,
+  albumName: string,
+  onProgress?: (done: number, total: number) => void
+): Promise<number> {
+  if (items.length === 1) {
+    await downloadOne(items[0])
+    return 0
+  }
+  return downloadAll(items, albumName, onProgress)
+}
+
 /**
  * Download every item as one or more zip files named after the album.
  * Returns how many files could not be fetched.

@@ -181,10 +181,15 @@ export const id: Messages = {
     hostHint:
       "Anda tuan rumahnya? Anda dapat menambahkan foto kapan saja dari dasbor.",
     hostLink: "Buka dasbor saya",
+    preview: (name: string) => `Pratinjau ${name}`,
     closed: "Unggahan untuk album ini sudah ditutup.",
     until: (date: string) => `Tamu dapat menambahkan foto hingga ${date}.`,
     download: "Unduh",
     downloadAll: "Unduh semua",
+    downloadSome: (n: number) => (n === 0 ? "Unduh" : `Unduh ${n}`),
+    select: "Pilih",
+    selectAll: "Pilih semua",
+    selectHint: "Ketuk foto dan video yang Anda inginkan.",
     preparing: (done: number, total: number) =>
       `Menyiapkan ${done} dari ${total}`,
     missed: (n: number) => `${n} berkas gagal diunduh`,

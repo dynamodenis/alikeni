@@ -46,6 +46,32 @@ const png = (index: number) => ({
   buffer: makePng(120 + index, 90, [40 + index * 7, 120, 200]),
 })
 
+/** A one-second WebM, recorded in the page from a canvas (no fixture file). */
+async function recordWebm(page: Page): Promise<Buffer> {
+  const bytes = await page.evaluate(async () => {
+    const canvas = document.createElement("canvas")
+    canvas.width = 160
+    canvas.height = 120
+    const context = canvas.getContext("2d")!
+    const recorder = new MediaRecorder(canvas.captureStream(15), {
+      mimeType: "video/webm",
+    })
+    const chunks: Array<Blob> = []
+    recorder.ondataavailable = (event) => chunks.push(event.data)
+    const stopped = new Promise((resolve) => (recorder.onstop = resolve))
+    recorder.start()
+    for (let frame = 0; frame < 15; frame++) {
+      context.fillStyle = `hsl(${frame * 24} 70% 50%)`
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      await new Promise((resolve) => setTimeout(resolve, 70))
+    }
+    recorder.stop()
+    await stopped
+    return Array.from(new Uint8Array(await new Blob(chunks).arrayBuffer()))
+  })
+  return Buffer.from(bytes)
+}
+
 /** The uploader's three hidden inputs: files, folder, zip. */
 const fileInput = (page: Page) => page.locator('input[type="file"]').nth(0)
 const zipInput = (page: Page) => page.locator('input[type="file"]').nth(2)
@@ -72,6 +98,22 @@ test("the host switches the album on and uploads photos and a zip", async () => 
   await page.goto(`/dashboard/${invitationId}/album`)
   await (await hydrated(page.getByRole("switch", { name: "Album on" }))).click()
   await expect(page.getByRole("switch", { name: "Album on" })).toBeChecked()
+
+  // A video shows a frame in the review step and plays when opened.
+  await fileInput(page).setInputFiles({
+    name: "clip.webm",
+    mimeType: "video/webm",
+    buffer: await recordWebm(page),
+  })
+  await expect(page.getByText("1 file ready")).toBeVisible()
+  await page.getByRole("button", { name: "Preview clip.webm" }).click()
+  const player = page.getByRole("dialog").locator("video")
+  await expect(player).toHaveAttribute("controls", "")
+  await expect
+    .poll(() => player.evaluate((video: HTMLVideoElement) => video.videoWidth))
+    .toBeGreaterThan(0)
+  await page.getByRole("button", { name: "Close" }).click()
+  await page.getByRole("button", { name: "Cancel" }).click()
 
   await fileInput(page).setInputFiles([png(1), png(2)])
   await expect(page.getByText("2 files ready")).toBeVisible()
@@ -193,15 +235,39 @@ test("a large guest upload waits for the host's approval", async ({
   await context.close()
 })
 
-test("the host deletes a photo", async () => {
+test("a guest picks two photos and downloads them as a zip", async ({
+  browser,
+}) => {
+  const context = await newGuestContext(browser)
+  const page = await context.newPage()
+  await page.goto(`/i/${published.slug}/album`)
+  await (
+    await hydrated(page.getByRole("button", { name: "Select", exact: true }))
+  ).click()
+  await tiles(page).nth(0).click()
+  await tiles(page).nth(1).click()
+  const download = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Download 2" }).click()
+  expect((await download).suggestedFilename()).toMatch(/\.zip$/)
+  // Back to browsing: a tile opens the viewer again.
+  await expect(
+    page.getByRole("button", { name: "Select", exact: true })
+  ).toBeVisible()
+  await context.close()
+})
+
+test("the host deletes photos in bulk", async () => {
   const { page, invitationId } = published
   await page.goto(`/dashboard/${invitationId}/album`)
-  await (await hydrated(page.getByRole("button", { name: "Select" }))).click()
-  await tiles(page).first().click()
+  await (
+    await hydrated(page.getByRole("button", { name: "Select", exact: true }))
+  ).click()
+  await tiles(page).nth(0).click()
+  await tiles(page).nth(1).click()
   page.once("dialog", (dialog) => void dialog.accept())
-  await page.getByRole("button", { name: "Delete 1" }).click()
-  await expect(page.getByText("1 deleted")).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByText("26", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: "Delete 2" }).click()
+  await expect(page.getByText("2 deleted")).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText("25", { exact: true })).toBeVisible()
 })
 
 test("a PIN locks the album until it is entered", async ({ browser }) => {
@@ -225,11 +291,11 @@ test("a PIN locks the album until it is entered", async ({ browser }) => {
 
   await page.getByLabel("PIN").fill("4821")
   await page.getByRole("button", { name: "Open album" }).click()
-  await expect(page.getByText("26 photos and videos")).toBeVisible()
+  await expect(page.getByText("25 photos and videos")).toBeVisible()
 
   // The browser remembers; a changed PIN locks it again.
   await page.reload()
-  await expect(page.getByText("26 photos and videos")).toBeVisible()
+  await expect(page.getByText("25 photos and videos")).toBeVisible()
   await owner.getByPlaceholder("New PIN").fill("9090")
   await owner.getByRole("button", { name: "Change PIN" }).click()
   await expect(owner.getByText("PIN saved")).toBeVisible()

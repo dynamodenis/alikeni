@@ -21,7 +21,7 @@ import { AlbumViewer } from "@/components/album/AlbumViewer"
 import { useAlbumItems } from "@/components/album/useAlbumItems"
 import { Button } from "@/components/ui/button"
 import { formatBytes } from "@/lib/album"
-import { downloadAll } from "@/lib/album-download"
+import { downloadAll, downloadSome } from "@/lib/album-download"
 import { en } from "@/lib/i18n/en"
 import {
   decideAlbumBatchFn,
@@ -363,6 +363,33 @@ function Items({ data }: { data: Data }) {
     }
   }
 
+  const selectAll = async () => {
+    try {
+      const all = await loadAll()
+      setSelected(new Set(all.map((item) => item.id)))
+    } catch {
+      toast.error("Could not load the whole album")
+    }
+  }
+
+  const saveSelected = async () => {
+    const chosen = items.filter((item) => selected?.has(item.id))
+    if (chosen.length === 0) return
+    setZipping({ done: 0, total: chosen.length })
+    try {
+      const missed = await downloadSome(
+        chosen,
+        invitation.title,
+        (done, total) => setZipping({ done, total })
+      )
+      if (missed > 0) toast.error(t.missed(missed))
+    } catch {
+      toast.error("Could not prepare the download")
+    } finally {
+      setZipping(undefined)
+    }
+  }
+
   const saveAll = async () => {
     setZipping({ done: 0, total: items.length })
     try {
@@ -390,8 +417,23 @@ function Items({ data }: { data: Data }) {
               <>
                 <Button
                   type="button"
+                  variant="outline"
+                  disabled={busy || !!zipping || selected.size === 0}
+                  onClick={() => void saveSelected()}
+                >
+                  {zipping ? (
+                    <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download aria-hidden="true" />
+                  )}
+                  {zipping
+                    ? t.preparing(zipping.done, zipping.total)
+                    : t.downloadSome(selected.size)}
+                </Button>
+                <Button
+                  type="button"
                   variant="destructive"
-                  disabled={busy || selected.size === 0}
+                  disabled={busy || !!zipping || selected.size === 0}
                   onClick={() => void destroy([...selected])}
                 >
                   {busy ? (
@@ -403,8 +445,16 @@ function Items({ data }: { data: Data }) {
                 </Button>
                 <Button
                   type="button"
+                  variant="outline"
+                  disabled={busy || !!zipping || loading}
+                  onClick={() => void selectAll()}
+                >
+                  {t.selectAll}
+                </Button>
+                <Button
+                  type="button"
                   variant="ghost"
-                  disabled={busy}
+                  disabled={busy || !!zipping}
                   onClick={() => setSelected(null)}
                 >
                   Cancel

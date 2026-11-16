@@ -6,8 +6,11 @@ import {
   FolderOpen,
   ImagePlus,
   LoaderCircle,
+  Play,
   Video,
+  X,
 } from "lucide-react"
+import { Dialog as DialogPrimitive } from "radix-ui"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -303,6 +306,7 @@ function Review({
   onSend: () => void
 }) {
   const shown = files.slice(0, PREVIEWS)
+  const [open, setOpen] = useState<AlbumFile>()
   const bytes = files.reduce((sum, item) => sum + item.file.size, 0)
 
   if (files.length === 0) {
@@ -341,14 +345,36 @@ function Review({
             key={`${item.file.name}-${index}`}
             className="relative aspect-square overflow-hidden rounded-md bg-muted"
           >
-            {item.kind === "image" ? (
-              <LocalImage file={item.file} />
-            ) : (
-              <span className="grid h-full w-full place-items-center text-muted-foreground">
-                <Video className="size-5" aria-hidden="true" />
-                <span className="sr-only">{item.file.name}</span>
-              </span>
-            )}
+            <button
+              type="button"
+              aria-label={t.preview(item.file.name)}
+              onClick={() => setOpen(item)}
+              className="group relative block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+            >
+              {item.kind === "image" ? (
+                <LocalImage file={item.file} />
+              ) : (
+                <>
+                  {/* Behind the frame: what shows when the browser cannot
+                      decode this video (it still uploads). */}
+                  <span className="absolute inset-0 grid place-items-center text-muted-foreground">
+                    <Video className="size-5" aria-hidden="true" />
+                  </span>
+                  <LocalVideo
+                    file={item.file}
+                    className="relative h-full w-full object-cover"
+                  />
+                  <span className="absolute inset-0 grid place-items-center">
+                    <span className="grid size-8 place-items-center rounded-full bg-black/60 text-white transition-transform group-hover:scale-110">
+                      <Play
+                        className="size-4 fill-current"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </span>
+                </>
+              )}
+            </button>
           </li>
         ))}
         {files.length > shown.length && (
@@ -357,6 +383,7 @@ function Review({
           </li>
         )}
       </ul>
+      <LocalPreview item={open} onClose={() => setOpen(undefined)} t={t} />
       {skipped.length > 0 && (
         <FileNotes summary={t.skipped(skipped.length)} items={skipped} />
       )}
@@ -392,26 +419,120 @@ function Review({
 }
 
 /**
- * A photo straight from the device. The object URL is made when the image
- * mounts and released when it leaves, so nothing outlives the preview.
+ * A photo or video straight from the device. The object URL is made when
+ * the element mounts and released when it leaves, so nothing outlives the
+ * preview. `fragment` is added to the URL (`#t=…` picks the video frame).
  */
-function LocalImage({ file }: { file: File }) {
-  const attach = useCallback(
-    (image: HTMLImageElement | null) => {
-      if (!image) return
+function useLocalFile(file: File, fragment = "") {
+  return useCallback(
+    (element: HTMLImageElement | HTMLVideoElement | null) => {
+      if (!element) return
       const url = URL.createObjectURL(file)
-      image.src = url
+      element.src = `${url}${fragment}`
       return () => URL.revokeObjectURL(url)
     },
-    [file]
+    [file, fragment]
   )
+}
+
+function LocalImage({
+  file,
+  className = "h-full w-full object-cover",
+}: {
+  file: File
+  className?: string
+}) {
+  const attach = useLocalFile(file)
   return (
-    <img
+    <img ref={attach} alt={file.name} decoding="async" className={className} />
+  )
+}
+
+/** Without `controls`: a still frame from just after the start. */
+function LocalVideo({
+  file,
+  controls = false,
+  className,
+}: {
+  file: File
+  controls?: boolean
+  className?: string
+}) {
+  const attach = useLocalFile(file, controls ? "" : "#t=0.1")
+  return (
+    // People's own clips: there are no captions to offer.
+    // eslint-disable-next-line jsx-a11y/media-has-caption
+    <video
       ref={attach}
-      alt={file.name}
-      decoding="async"
-      className="h-full w-full object-cover"
+      controls={controls}
+      autoPlay={controls}
+      muted={!controls}
+      playsInline
+      preload="metadata"
+      tabIndex={controls ? undefined : -1}
+      className={className}
     />
+  )
+}
+
+/** One chosen file, large: the photo, or the video with a player. */
+function LocalPreview({
+  item,
+  onClose,
+  t,
+}: {
+  item: AlbumFile | undefined
+  onClose: () => void
+  t: Messages["album"]
+}) {
+  return (
+    <DialogPrimitive.Root
+      open={!!item}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/95" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          className="fixed inset-0 z-50 flex flex-col outline-none"
+        >
+          {item && (
+            <>
+              <div className="flex items-center justify-between gap-3 p-3 text-white">
+                <DialogPrimitive.Title className="min-w-0 truncate text-sm text-white/80">
+                  {item.file.name}
+                  <span className="ml-2 text-white/50">
+                    {formatBytes(item.file.size)}
+                  </span>
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Close
+                  aria-label={t.close}
+                  className="grid size-11 shrink-0 place-items-center rounded-full bg-white/10 text-white transition-colors outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <X className="size-5" aria-hidden="true" />
+                </DialogPrimitive.Close>
+              </div>
+              <div className="flex min-h-0 flex-1 items-center justify-center px-2 pb-4">
+                {item.kind === "video" ? (
+                  <LocalVideo
+                    file={item.file}
+                    controls
+                    className="max-h-full max-w-full rounded-md"
+                  />
+                ) : (
+                  <LocalImage
+                    file={item.file}
+                    className="max-h-full max-w-full rounded-md object-contain"
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
 
