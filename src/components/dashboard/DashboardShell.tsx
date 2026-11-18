@@ -24,7 +24,7 @@ export function DashboardShell({
     <div className="theme-alikeni min-h-svh bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Logo />
+          <Logo href="/dashboard" />
           <div className="flex items-center gap-4">
             <Link
               to="/templates"

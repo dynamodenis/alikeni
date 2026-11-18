@@ -394,7 +394,7 @@ function EditorLoaded({
       <div className="theme-alikeni flex h-svh flex-col bg-background text-foreground">
         <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-4">
-            <Logo />
+            <Logo href="/dashboard" />
             <span
               aria-hidden="true"
               className="hidden h-6 w-px bg-border sm:block"
