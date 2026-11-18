@@ -61,6 +61,6 @@
     "EMAIL_REPLY_TO": "info@alikeni.com",
     "GEOCODE_PROVIDER": "nominatim",
     // Currencies the Paystack account can charge (KES, USD).
-    "PAYSTACK_CURRENCIES": "KES",
+    "PAYSTACK_CURRENCIES": "KES,USD",
   },
 }
