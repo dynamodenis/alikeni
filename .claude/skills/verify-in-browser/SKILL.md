@@ -74,6 +74,12 @@ while requesting the page (skill `deploy-and-env`).
 
 Add a line when something goes wrong here. Newest first.
 
+- 2026-11-18: A flicker report could not be judged from a screenshot.
+  Record frames with CDP `Page.startScreencast` around the click and compare
+  frame sizes: a dip marks the flash. It showed the dashboard card previews
+  going white, because `/preview` said "ready" before the template chunk
+  had loaded and the pushed config made React show the loading skeleton.
+  The preview now announces itself from inside the Suspense boundary.
 - 2026-11-18: A check "passed" because the title typed in an earlier run
   had been autosaved. Use a fresh value each run.
 - 2026-11-18: `pkill -f` on a pattern that also matched the running shell

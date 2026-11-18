@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { z } from "zod"
 import { deepMerge } from "@/lib/deep-merge"
 import { DEVICE_IDS } from "@/lib/devices"
@@ -57,13 +57,28 @@ function PreviewPage() {
     motionLevel?: MotionLevel
   }>({})
 
+  // Ready only when the template (not its loading skeleton) has rendered:
+  // a config pushed before that would replace the server-rendered page with
+  // the skeleton until the template chunk arrives.
+  const mounted = useRef(false)
+  const announce = useCallback(() => {
+    mounted.current = true
+    if (window.parent !== window) {
+      postToWindow(window.parent, { type: "alikeni:ready", templateId: id })
+    }
+  }, [id])
+
   usePreviewMessages(
     () => (window.parent === window ? null : window.parent),
     (message) => {
       // Either page may hydrate first, so readiness is a handshake: the
-      // preview announces itself on mount and answers every ping.
+      // preview announces itself once the template is on screen and answers
+      // every ping from then on. A ping that comes earlier gets no answer;
+      // the announcement follows.
       if (message.type === "alikeni:ping") {
-        postToWindow(window.parent, { type: "alikeni:ready", templateId: id })
+        if (mounted.current) {
+          postToWindow(window.parent, { type: "alikeni:ready", templateId: id })
+        }
         return
       }
       if (message.type === "alikeni:config") {
@@ -103,18 +118,12 @@ function PreviewPage() {
         search.device ? `mx-auto ${DEVICE_MAX[search.device]}` : undefined
       }
     >
-      <ReadySignal templateId={id} />
-      <TemplateRenderer templateId={id} config={config} mode="preview" />
+      <TemplateRenderer
+        templateId={id}
+        config={config}
+        mode="preview"
+        onMounted={announce}
+      />
     </div>
   )
-}
-
-/** Tells a hosting page (if any) that the preview can now take messages. */
-function ReadySignal({ templateId }: { templateId: string }) {
-  useEffect(() => {
-    if (window.parent !== window) {
-      postToWindow(window.parent, { type: "alikeni:ready", templateId })
-    }
-  }, [templateId])
-  return null
 }

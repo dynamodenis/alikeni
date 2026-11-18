@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo } from "react"
+import { Suspense, lazy, useEffect, useMemo, useRef } from "react"
 import type { ComponentType, LazyExoticComponent } from "react"
 import { InvitationProvider } from "./_shared/context"
 import type { InvitationActions, WishItem } from "./_shared/context"
@@ -76,7 +76,26 @@ for (const id of TEMPLATE_IDS) {
   })
 }
 
-export type TemplateRendererProps = TemplateViewProps & { templateId: string }
+export type TemplateRendererProps = TemplateViewProps & {
+  templateId: string
+  /**
+   * Called once the template itself is on screen and hydrated (not the
+   * loading skeleton). The preview waits for this before accepting a pushed
+   * config: an update that arrives while the template chunk is still loading
+   * makes React drop the server-rendered page and show the skeleton.
+   */
+  onMounted?: () => void
+}
+
+/** Sits inside the Suspense boundary, so its effect runs with the template. */
+function Mounted({ onMounted }: { onMounted: () => void }) {
+  const notify = useRef(onMounted)
+  useEffect(() => {
+    notify.current = onMounted
+  })
+  useEffect(() => notify.current(), [])
+  return null
+}
 
 /**
  * Lazy-loads the template chunk for `templateId` and renders it. Shows the
@@ -84,6 +103,7 @@ export type TemplateRendererProps = TemplateViewProps & { templateId: string }
  */
 export function TemplateRenderer({
   templateId,
+  onMounted,
   ...props
 }: TemplateRendererProps) {
   const View = views[templateId]
@@ -100,6 +120,7 @@ export function TemplateRenderer({
   return (
     <Suspense fallback={<TemplateRendererSkeleton />}>
       <View {...props} />
+      {onMounted && <Mounted onMounted={onMounted} />}
     </Suspense>
   )
 }
