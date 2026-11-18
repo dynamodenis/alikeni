@@ -20,7 +20,8 @@ export const FREE_RSVP_LIMIT = 50
  * Paystack charges). KES is for M-Pesa and Kenyan cards, USD for everyone
  * else. Placeholder prices: change them here.
  */
-export const PREMIUM_PRICE = { KES: 150_000, USD: 1_200 } as const
+// TEMPORARY live-test prices (KES 200 / $3). Restore: { KES: 150_000, USD: 1_200 }
+export const PREMIUM_PRICE = { KES: 20_000, USD: 300 } as const
 export type Currency = keyof typeof PREMIUM_PRICE
 export const CURRENCIES = Object.keys(PREMIUM_PRICE) as Array<Currency>
 
