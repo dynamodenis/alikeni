@@ -5,7 +5,8 @@ import { isEditLocked } from "@/lib/edit-lock"
 import { z } from "zod"
 import { hasTemplate } from "@/templates/loaders"
 import { getDb } from "@/server/db/client.server"
-import { storageInfo } from "@/server/storage/index.server"
+import { withMediaUrls } from "@/lib/media-urls"
+import { getStorage, storageInfo } from "@/server/storage/index.server"
 import {
   UnauthorizedError,
   requireUserId,
@@ -51,6 +52,14 @@ export const createDraftFn = createServerFn({ method: "POST" })
   })
 
 /** The current user's invitations (archived included) with card stats. */
+/**
+ * Media is addressed by key: the saved `url` of every photo and audio file
+ * is replaced by the one built from its key and today's public address
+ * (`src/lib/media-urls.ts`), on everything this file sends to the browser.
+ */
+const currentMedia = <T>(value: T): T =>
+  withMediaUrls(value, getStorage().publicUrl)
+
 export const listMyInvitationsFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const db = getDb()
@@ -60,7 +69,7 @@ export const listMyInvitationsFn = createServerFn({ method: "GET" }).handler(
       db,
       rows.map((row) => row.id)
     )
-    return rows.map((row) => ({
+    return currentMedia(rows).map((row) => ({
       ...row,
       updatedAt: row.updatedAt.toISOString(),
       stats: stats.get(row.id) ?? EMPTY_STATS,
@@ -78,7 +87,7 @@ export const getDraftFn = createServerFn({ method: "GET" })
     if (!row) return null
     const { publishedConfig, editUnlockedUntil, ...draft } = row
     return {
-      ...draft,
+      ...currentMedia(draft),
       /** The event has ended: only photos and the closing words can change. */
       locked: isEditLocked({ publishedConfig, editUnlockedUntil }),
       updatedAt: row.updatedAt.toISOString(),
@@ -140,4 +149,6 @@ export const publishFn = createServerFn({ method: "POST" })
 /** Public: a published invitation by slug (null when missing or archived). */
 export const getPublishedFn = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string().trim().toLowerCase().max(80) }))
-  .handler(async ({ data }) => getPublishedBySlug(getDb(), data.slug))
+  .handler(async ({ data }) =>
+    currentMedia(await getPublishedBySlug(getDb(), data.slug))
+  )

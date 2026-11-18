@@ -4,6 +4,8 @@ import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { z } from "zod"
 import { serverEnv } from "@/env.server"
+import { withMediaUrls } from "@/lib/media-urls"
+import { getStorage } from "@/server/storage/index.server"
 import { getDb } from "@/server/db/client.server"
 import { getRateLimiter } from "@/server/rate-limit/limiter.server"
 import { fingerprint } from "./fingerprint.server"
@@ -70,7 +72,12 @@ export const getPublicPageFn = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const page = await loadPublicPage(getDb(), data)
     if (!page) return null
-    return { ...page, origin: serverEnv.APP_ORIGIN }
+    // Media is addressed by key: build each file's address from its key and
+    // today's public address, whatever was saved (src/lib/media-urls.ts).
+    return {
+      ...withMediaUrls(page, getStorage().publicUrl),
+      origin: serverEnv.APP_ORIGIN,
+    }
   })
 
 /**

@@ -69,6 +69,13 @@ template headings. Do not add to its allow-list to get a design through.
   `src/components/editor/copy.ts`, never hard-coded wedding terms in a tab.
 - A new section id must be added to `SectionId`, `isSectionEnabled`,
   `SECTION_LABELS` (editor) and `template-sections.ts`.
+- **Media is addressed by key.** A photo or audio reference is saved as
+  `{ assetKey, url }`; the key is the truth and the saved `url` is only a
+  record. Anything that sends invitation data to the browser passes it
+  through `withMediaUrls` (`src/lib/media-urls.ts`), which rebuilds each
+  `url` from the key and `R2_PUBLIC_URL`. Never build a media address by
+  hand, and never treat a saved `url` as current on the server: read the
+  file by key.
 
 ### 3. Templates are compositions
 
@@ -143,13 +150,31 @@ to revive a free page or reusing a paid invitation.
   `src/components/brand/pending.tsx` (`DashboardPending`, `SitePending`);
   only pages with no shell fall back to the full-page loader.
 
-### 10. Accessibility and motion
+### 10. Free-plan limits
+
+Production runs on free plans: Workers (100,000 requests a day, 10 ms CPU
+per request), Hyperdrive (100,000 queries a day) and Resend (100 emails a
+day). Going over fails requests or stops email; nothing is billed. So:
+
+- Do not add a server call that runs on every page view, hover or
+  navigation. Session checks for navigation go through
+  `navigationSession()` (`src/lib/session.ts`), never `getSessionFn`
+  directly; marketing pages ask for the session only when `hasAccountHint()`.
+- A public page that is the same for every visitor must stay cacheable
+  (`src/server/platform/edge-cache.ts`): nothing visitor-specific in the
+  HTML of `/i/<slug>`, no cookies set on it.
+- Scheduled emails go through `runNotifications`, which enforces
+  `EMAIL_DAILY_BUDGET` and the hourly gap per invitation. A new kind of
+  scheduled email must count against the same budget.
+- Count the queries a new loader or job makes; batch them.
+
+### 11. Accessibility and motion
 
 Respect `prefers-reduced-motion` and `theme.motionLevel`. Every `<img>` has
 `alt`; decorative SVG is `aria-hidden`. Palettes pass the AA checks in
 `palettes.test.ts`. Select by role and label in tests; do not add test ids.
 
-### 11. Code quality
+### 12. Code quality
 
 TypeScript strict, no `any` in app code, ESLint and Prettier clean, tests
 next to the code. `src/components/ui` (shadcn) and
@@ -157,7 +182,7 @@ next to the code. `src/components/ui` (shadcn) and
 ReactBits is fetched from the `@react-bits` registry, never hand-written,
 and its source is never redistributed.
 
-### 12. Ask before irreversible choices
+### 13. Ask before irreversible choices
 
 Providers (database, auth, storage, payments, hosting), destructive
 migrations, deleting user data, and anything that sends email or charges

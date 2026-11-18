@@ -74,6 +74,12 @@ while requesting the page (skill `deploy-and-env`).
 
 Add a line when something goes wrong here. Newest first.
 
+- 2026-11-18: `pkill -f "<pattern>"` killed the shell running it twice,
+  because the pattern is in the shell's own command line. Stop servers by
+  port: `ss -ltnp | grep ":<port> "`, take the pid, `kill` it.
+- 2026-11-18: To test Worker-only code (edge cache, cron): `pnpm db:local
+--port 55435`, `pnpm build:worker`, `pnpm exec wrangler dev --port 8787`,
+  then `curl -D -` and look for `CF-Cache-Status: HIT`.
 - 2026-11-18: The editor logo was a plain `<a href>`, so going to the
   dashboard reloaded the whole app and flashed. In-app links are router
   `Link`s. To prove no reload happened, set a value on `window` before the

@@ -16,6 +16,18 @@ export type Email = {
 
 export type EmailSender = (email: Email) => Promise<void>
 
+/**
+ * The provider's sending allowance is used up (Resend free plan: 100 a day,
+ * 3,000 a month). Retrying before it resets cannot work, so batch jobs stop
+ * at the first one instead of failing every remaining send.
+ */
+export class EmailQuotaError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "EmailQuotaError"
+  }
+}
+
 const DEV_FROM = "Alikeni <onboarding@resend.dev>"
 
 export function createEmailSender(env: ServerEnv): EmailSender {
@@ -35,7 +47,12 @@ export function createEmailSender(env: ServerEnv): EmailSender {
       replyTo: replyTo ?? env.EMAIL_REPLY_TO,
       ...message,
     })
-    if (error) throw new Error(`Email to ${email.to} failed: ${error.message}`)
+    if (!error) return
+    const reason = `Email to ${email.to} failed: ${error.message}`
+    // Resend: daily_quota_exceeded, monthly_quota_exceeded.
+    throw /quota/i.test(error.name)
+      ? new EmailQuotaError(reason)
+      : new Error(reason)
   }
 }
 

@@ -22,6 +22,7 @@ export const Route = createFileRoute("/api/cron/notifications")({
         }
         const result = await runNotifications(getDb(), sendEmail, {
           origin: serverEnv.APP_ORIGIN,
+          dailyBudget: serverEnv.EMAIL_DAILY_BUDGET,
         })
         // Album housekeeping rides along; it must never fail the emails.
         const albumBatchesPurged = await purgeStaleBatches(

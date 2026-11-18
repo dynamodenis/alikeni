@@ -77,6 +77,13 @@ const serverEnvSchema = z
     /** Reply-To on every outgoing email: an inbox a person reads. Optional. */
     EMAIL_REPLY_TO: z.email().optional(),
     /**
+     * Scheduled emails (RSVP updates, event reminders) allowed per UTC day.
+     * Keep it below the email provider's daily allowance so sign-up and
+     * password emails always have room: 80 suits Resend's free 100 a day.
+     * Raise it when the plan is upgraded.
+     */
+    EMAIL_DAILY_BUDGET: z.coerce.number().int().min(0).default(80),
+    /**
      * When nobody is signed in, act as a fixed dev user instead of refusing.
      * Off unless set to "true"; for local demos and scripts, never a real
      * deployment.

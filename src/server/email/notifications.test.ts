@@ -20,7 +20,7 @@ import {
   sendEventReminders,
   sendRsvpDigests,
 } from "./notifications.server"
-import type { Email } from "./send.server"
+import { EmailQuotaError, type Email } from "./send.server"
 import { DIGEST_LISTED } from "./templates.server"
 
 const client = new PGlite()
@@ -312,6 +312,87 @@ describe("runNotifications", () => {
     })
     // The third reminder goes out on the next run.
     expect((await sendEventReminders(db, send, options)).sent).toBe(1)
+  })
+})
+
+describe("staying inside the email allowance", () => {
+  const early = (i: number) => ({
+    createdAt: new Date(NOW.getTime() - 48 * HOUR),
+    contact: `guest${i}@example.com`,
+    // Already announced, so only reminders are pending.
+    ownerNotifiedAt: new Date(NOW.getTime() - 47 * HOUR),
+  })
+
+  it("tells an owner about one invitation at most once an hour", async () => {
+    await addRsvp()
+    expect((await sendRsvpDigests(db, send, options)).sent).toBe(1)
+
+    // More replies in the next minutes wait…
+    const later = { ...options, now: new Date(NOW.getTime() + 20 * 60_000) }
+    await addRsvp({ guestName: "Otieno", createdAt: later.now })
+    await addRsvp({ guestName: "Achieng", createdAt: later.now })
+    expect((await sendRsvpDigests(db, send, later)).sent).toBe(0)
+
+    // …and arrive together once the hour has passed.
+    const hourOn = { ...options, now: new Date(NOW.getTime() + 61 * 60_000) }
+    expect((await sendRsvpDigests(db, send, hourOn)).sent).toBe(1)
+    expect(sent).toHaveLength(2)
+    expect(sent[1].text).toContain("Otieno")
+    expect(sent[1].text).toContain("Achieng")
+  })
+
+  it("stops for the day at the budget, reminders first", async () => {
+    await eventIn(20)
+    for (let i = 0; i < 3; i++) await addRsvp(early(i))
+    await addRsvp({ guestName: "New reply" }) // one RSVP update pending
+
+    const first = await runNotifications(db, send, {
+      ...options,
+      dailyBudget: 2,
+    })
+    expect(first.reminders.sent).toBe(2)
+    expect(first.rsvpUpdates.sent).toBe(0)
+    expect(sent.every((email) => email.to.startsWith("guest"))).toBe(true)
+
+    // Later the same day: the budget is spent, nothing goes out.
+    const sameDay = { ...options, now: new Date(NOW.getTime() + 2 * HOUR) }
+    const second = await runNotifications(db, send, {
+      ...sameDay,
+      dailyBudget: 2,
+    })
+    expect(second.reminders.sent + second.rsvpUpdates.sent).toBe(0)
+
+    // The next UTC day it carries on.
+    const nextDay = {
+      ...options,
+      now: new Date("2026-12-02T00:05:00Z"),
+    }
+    const third = await runNotifications(db, send, {
+      ...nextDay,
+      dailyBudget: 2,
+    })
+    expect(third.reminders.sent + third.rsvpUpdates.sent).toBe(2)
+  })
+
+  it("stops trying once the provider says the allowance is used up", async () => {
+    await eventIn(20)
+    for (let i = 0; i < 4; i++) await addRsvp(early(i))
+    await addRsvp({ guestName: "New reply" })
+    let attempts = 0
+    const refused = async () => {
+      attempts += 1
+      throw new EmailQuotaError("daily quota")
+    }
+    const result = await runNotifications(db, refused, options)
+    expect(attempts).toBe(1)
+    expect(result.reminders).toEqual({
+      sent: 0,
+      failed: 1,
+      quotaReached: true,
+    })
+    expect(result.rsvpUpdates).toEqual({ sent: 0, failed: 0 })
+    // Nothing was marked: it all goes out when sending works again.
+    expect((await sendEventReminders(db, send, options)).sent).toBe(4)
   })
 })
 

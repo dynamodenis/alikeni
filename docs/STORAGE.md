@@ -46,6 +46,16 @@ driver, with the bucket instead of the disk:
    with its content type.
 3. `confirmUploadFn` `head`s the object as before.
 
+Media is addressed by key. An invitation saves each photo and audio file as
+`{ assetKey, url }`, but the saved `url` is only a record of where the file
+was served from at upload time. Whenever invitation data is sent to the
+browser (public page, editor, dashboard), `withMediaUrls`
+(`src/lib/media-urls.ts`) rebuilds every `url` from its key and the current
+public address. Changing `R2_PUBLIC_URL`, or moving the files to another
+bucket under the same keys, therefore moves every existing invitation with
+no data migration. Sample photos in template defaults (`samples/…` keys)
+are not in the bucket and are left as they are.
+
 Reads: `publicUrl(key)` is `R2_PUBLIC_URL/<key>` when set (recommended:
 enable public access on the bucket), otherwise `/api/storage/file/<key>`,
 which streams from the binding with HTTP Range support. Setup:

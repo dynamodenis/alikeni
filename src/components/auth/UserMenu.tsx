@@ -1,3 +1,4 @@
+import { forgetNavigationSession } from "@/lib/session"
 import { Link, useRouteContext, useRouter } from "@tanstack/react-router"
 import { LayoutGrid, LogOut } from "lucide-react"
 import {
@@ -19,6 +20,7 @@ export function UserMenu() {
 
   const signOut = async () => {
     await authClient.signOut()
+    forgetNavigationSession({ signedOut: true })
     await router.invalidate()
     await router.navigate({ to: "/" })
   }

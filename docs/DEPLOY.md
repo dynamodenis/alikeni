@@ -221,7 +221,18 @@ inside the same isolate with a single-use in-memory token (the route answers
 
 At most 40 emails of each kind per run, about two per second (Resend's
 default rate limit); the rest go out on the next run, and a failed send is
-retried then. Watch the runs with `pnpm exec wrangler tail` (`[cron]` lines).
+retried then. To stay inside a small sending plan:
+
+- An owner hears about one invitation at most once an hour
+  (`DIGEST_MIN_GAP_MS`): the first response at once, later ones together.
+- `EMAIL_DAILY_BUDGET` (default 80, in `wrangler.jsonc`) caps scheduled
+  emails per UTC day, leaving room under Resend's free 100 a day for sign-up
+  and password emails. Reminders are sent before RSVP updates. Raise it
+  when the Resend plan is upgraded.
+- When Resend answers that the quota is used up, the run stops at once
+  instead of failing every remaining send.
+
+Watch the runs with `pnpm exec wrangler tail` (`[cron]` lines).
 Locally: `pnpm exec wrangler dev --test-scheduled`, then open
 `/cdn-cgi/handler/scheduled`. The Node server (`pnpm start`) has no cron.
 
@@ -238,13 +249,15 @@ revalidate; shared caches may keep the page for 60 s and serve it stale for
 10 more minutes while refetching, so **a republish shows within about a
 minute** wherever the header is honoured.
 
-On Cloudflare itself, note that a Worker runs _in front of_ the CDN cache:
-its responses are not stored automatically, whatever their `Cache-Control`.
-Edge caching of `/i/<slug>` needs either a Cache Rule on a **custom domain**
-or a small Cache API (`caches.default`) wrapper in the Worker; neither is
-built yet, so today every view renders (fast: one indexed query plus the
-wishes list). Instant purge on publish would additionally need the Cloudflare
-cache purge API (zone id + API token); also not implemented.
+On Cloudflare a Worker runs _in front of_ the CDN cache, so nothing is
+stored unless the Worker does it. `src/worker.ts` keeps `/i/<slug>` in the
+zone cache (`caches.default`) for as long as `s-maxage` says, 60 s today
+(`src/server/platform/edge-cache.ts`): a cache hit renders nothing and makes
+no database query, which is what keeps a busy invitation inside the Workers
+CPU and Hyperdrive limits. Consequences: a republish, a new wish and a free
+page going offline show within a minute; the cache is per Cloudflare
+location and does not exist on the `workers.dev` address. Nothing is purged
+on publish (that needs the cache purge API: zone id + API token).
 
 Page views are therefore not counted while rendering: after hydration the
 page POSTs a small beacon (`recordViewFn`). Bots are skipped on the server by

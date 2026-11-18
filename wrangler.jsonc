@@ -55,11 +55,19 @@
   "vars": {
     "NODE_ENV": "production",
     "STORAGE_DRIVER": "binding",
+    // Uploaded photos and audio are read straight from R2 at this address
+    // (custom domain on the bucket), not through the Worker: no Worker
+    // request, no CPU time. The bucket needs a CORS rule allowing GET from
+    // APP_ORIGIN for the album's Download buttons (docs/STORAGE.md).
+    "R2_PUBLIC_URL": "https://media.alikeni.com",
     // The deployed origin (no trailing slash).
     "APP_ORIGIN": "https://alikeni.com",
     // Where replies to automatic emails go (EMAIL_FROM itself has no inbox).
     "EMAIL_REPLY_TO": "info@alikeni.com",
     "GEOCODE_PROVIDER": "nominatim",
+    // Scheduled emails per day (RSVP updates + reminders). Below Resend's
+    // free 100 a day, so sign-up and password emails always have room.
+    "EMAIL_DAILY_BUDGET": "80",
     // Currencies the Paystack account can charge (KES, USD).
     "PAYSTACK_CURRENCIES": "KES,USD",
   },

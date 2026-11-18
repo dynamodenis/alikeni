@@ -1,7 +1,8 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
+import { useEffect } from "react"
 import { AuthedPending } from "@/components/brand/pending"
 import { NOINDEX } from "@/lib/seo"
-import { getSessionFn } from "@/server/auth/auth.functions"
+import { navigationSession, rememberAccount } from "@/lib/session"
 
 /**
  * Pages that need an account (dashboard, editor). Signed-out visitors go to
@@ -10,7 +11,7 @@ import { getSessionFn } from "@/server/auth/auth.functions"
  */
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ location }) => {
-    const { user } = await getSessionFn()
+    const { user } = await navigationSession()
     if (!user) {
       throw redirect({ to: "/sign-in", search: { redirect: location.href } })
     }
@@ -18,5 +19,10 @@ export const Route = createFileRoute("/_authed")({
   },
   head: () => ({ meta: [NOINDEX] }),
   pendingComponent: AuthedPending,
-  component: Outlet,
+  component: AuthedLayout,
 })
+
+function AuthedLayout() {
+  useEffect(rememberAccount, [])
+  return <Outlet />
+}

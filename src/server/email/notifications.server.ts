@@ -9,12 +9,22 @@
 // Pure functions over a Drizzle db and an `EmailSender` (tested on PGlite).
 // A row is marked only after its email was accepted, so a failed send is
 // retried on the next run.
-import { and, asc, eq, gt, inArray, isNotNull, isNull, sql } from "drizzle-orm"
+import {
+  and,
+  asc,
+  eq,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+  max,
+  sql,
+} from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { z } from "zod"
 import { formatLongDate, formatTime } from "@/lib/format-date"
 import * as schema from "@/server/db/schema"
-import type { EmailSender } from "./send.server"
+import { EmailQuotaError, type EmailSender } from "./send.server"
 import {
   eventReminderEmail,
   rsvpDigestEmail,
@@ -31,6 +41,13 @@ const HOUR = 3_600_000
 export const DIGEST_MAX_AGE_MS = 7 * 24 * HOUR
 /** Reminders go out once the event is this close. */
 export const REMINDER_WINDOW_MS = 24 * HOUR
+/**
+ * An owner hears about one invitation at most this often. The first response
+ * is announced at once; the ones that follow wait and arrive together.
+ * Without it a busy invitation sends an email every run (96 a day), which
+ * alone would use up a small sending plan.
+ */
+export const DIGEST_MIN_GAP_MS = HOUR
 
 export type NotifyOptions = {
   /** APP_ORIGIN, for links. */
@@ -40,9 +57,20 @@ export type NotifyOptions = {
   maxEmails?: number
   /** Wait between two sends, to stay under the provider's rate limit. */
   pauseMs?: number
+  /**
+   * Scheduled emails allowed per UTC day, both kinds together
+   * (`EMAIL_DAILY_BUDGET`). Kept below the provider's daily allowance so
+   * sign-up and password emails still go out. Unset: no daily limit.
+   */
+  dailyBudget?: number
 }
 
-export type NotifyResult = { sent: number; failed: number }
+export type NotifyResult = {
+  sent: number
+  failed: number
+  /** The provider refused: its allowance is used up. Nothing more was tried. */
+  quotaReached?: boolean
+}
 
 const DEFAULT_MAX_EMAILS = 40
 /** Resend allows 2 requests per second by default. */
@@ -98,11 +126,30 @@ export async function sendRsvpDigests(
     .orderBy(asc(rsvps.createdAt))
     .limit(2000)
 
+  // Invitations whose owner was emailed within the gap wait for a later run.
+  const pendingIds = [...new Set(rows.map((row) => row.invitationId))]
+  const recent =
+    pendingIds.length === 0
+      ? []
+      : await db
+          .select({ invitationId: rsvps.invitationId })
+          .from(rsvps)
+          .where(inArray(rsvps.invitationId, pendingIds))
+          .groupBy(rsvps.invitationId)
+          .having(
+            gt(
+              max(rsvps.ownerNotifiedAt),
+              new Date(now.getTime() - DIGEST_MIN_GAP_MS)
+            )
+          )
+  const waiting = new Set(recent.map((row) => row.invitationId))
+
   const byInvitation = new Map<
     string,
     { to: string; title: string; ids: Array<string>; lines: Array<RsvpLine> }
   >()
   for (const row of rows) {
+    if (waiting.has(row.invitationId)) continue
     let group = byInvitation.get(row.invitationId)
     if (!group) {
       group = { to: row.to, title: row.title, ids: [], lines: [] }
@@ -134,6 +181,10 @@ export async function sendRsvpDigests(
     } catch (error) {
       failure("RSVP update", error)
       result.failed += 1
+      if (error instanceof EmailQuotaError) {
+        result.quotaReached = true
+        break
+      }
     }
   }
   return result
@@ -237,17 +288,63 @@ export async function sendEventReminders(
     } catch (error) {
       failure("event reminder", error)
       result.failed += 1
+      if (error instanceof EmailQuotaError) {
+        result.quotaReached = true
+        break
+      }
     }
   }
   return result
 }
 
-/** Both jobs; one failing does not stop the other. */
+/* ---------- daily budget ---------- */
+
+/**
+ * Scheduled emails already sent this UTC day, counted from the rows they
+ * stamped: one per invitation and run for RSVP updates, one per invitation
+ * and address for reminders.
+ */
+export async function scheduledEmailsToday(
+  db: AnyDb,
+  now = new Date()
+): Promise<number> {
+  const dayStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  )
+  const [row] = await db
+    .select({
+      digests: sql<number>`count(distinct (${rsvps.invitationId}, ${rsvps.ownerNotifiedAt})) filter (where ${rsvps.ownerNotifiedAt} >= ${dayStart.toISOString()}::timestamptz and ${rsvps.ownerNotifiedAt} <> ${rsvps.createdAt})`,
+      reminders: sql<number>`count(distinct (${rsvps.invitationId}, lower(btrim(${rsvps.contact})))) filter (where ${rsvps.reminderSentAt} >= ${dayStart.toISOString()}::timestamptz and ${rsvps.contact} like '%@%')`,
+    })
+    .from(rsvps)
+    .where(
+      sql`${rsvps.ownerNotifiedAt} >= ${dayStart.toISOString()}::timestamptz or ${rsvps.reminderSentAt} >= ${dayStart.toISOString()}::timestamptz`
+    )
+  return Number(row.digests) + Number(row.reminders)
+}
+
+/**
+ * Both jobs; one failing does not stop the other. Reminders go first: they
+ * are tied to the event's time, while an RSVP update can wait an hour. Both
+ * share the daily budget, and nothing more is tried once the provider says
+ * its allowance is used up.
+ */
 export async function runNotifications(
   db: AnyDb,
   send: EmailSender,
   options: NotifyOptions
 ) {
+  const perKind = options.maxEmails ?? DEFAULT_MAX_EMAILS
+  let left = Number.POSITIVE_INFINITY
+  if (options.dailyBudget !== undefined) {
+    left = Math.max(
+      0,
+      options.dailyBudget - (await scheduledEmailsToday(db, options.now))
+    )
+    if (left === 0)
+      console.warn("[notifications] daily email budget used up; waiting")
+  }
+  const none: NotifyResult = { sent: 0, failed: 0 }
   const run = async (
     kind: string,
     job: () => Promise<NotifyResult>
@@ -259,12 +356,24 @@ export async function runNotifications(
       return { sent: 0, failed: 0 }
     }
   }
-  return {
-    rsvpUpdates: await run("RSVP updates", () =>
-      sendRsvpDigests(db, send, options)
-    ),
-    reminders: await run("event reminders", () =>
-      sendEventReminders(db, send, options)
-    ),
-  }
+  const reminders =
+    left > 0
+      ? await run("event reminders", () =>
+          sendEventReminders(db, send, {
+            ...options,
+            maxEmails: Math.min(perKind, left),
+          })
+        )
+      : none
+  left -= reminders.sent
+  const rsvpUpdates =
+    left > 0 && !reminders.quotaReached
+      ? await run("RSVP updates", () =>
+          sendRsvpDigests(db, send, {
+            ...options,
+            maxEmails: Math.min(perKind, left),
+          })
+        )
+      : none
+  return { rsvpUpdates, reminders }
 }

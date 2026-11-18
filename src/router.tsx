@@ -18,7 +18,10 @@ export function getRouter() {
 
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 0,
+    // Hovering a link loads its page in advance. Keep that result for half a
+    // minute, so the click that follows (or a second hover) reuses it
+    // instead of asking the server again.
+    defaultPreloadStaleTime: 30_000,
     defaultErrorComponent: RouteError,
     // Routes with a header and footer set their own (components/brand/pending).
     defaultPendingComponent: FullPageLoader,

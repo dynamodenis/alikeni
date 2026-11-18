@@ -1,3 +1,4 @@
+import { forgetNavigationSession } from "@/lib/session"
 import { NOINDEX } from "@/lib/seo"
 import {
   Link,
@@ -56,6 +57,7 @@ function SignUp() {
       setError(authErrorMessage(failure))
       return
     }
+    forgetNavigationSession()
     await router.invalidate()
     await router.navigate({ href: next })
   }
