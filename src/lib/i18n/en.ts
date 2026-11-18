@@ -111,6 +111,15 @@ export const en = {
     qrAlt: "Payment QR code",
     qrCaption: "Scan to send a gift",
   },
+  admission: {
+    eyebrow: "Admission",
+    title: "Tickets",
+    cta: "Get tickets",
+  },
+  sponsors: {
+    eyebrow: "With thanks to",
+    title: "Sponsors & partners",
+  },
   calendar: {
     heading: "Add to calendar",
     google: "Google Calendar",

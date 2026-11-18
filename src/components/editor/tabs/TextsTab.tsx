@@ -1,8 +1,11 @@
 import { MAX_DRESS_CODE_PHOTOS } from "@/templates/_shared/schema"
+import { useEditor } from "../EditorContext"
+import { editorCopy } from "../copy"
 import { DateTimeField, Group, TextField } from "../fields"
 import { ImageListField } from "../media"
 
 export function TextsTab() {
+  const copy = editorCopy(useEditor().module.meta.category)
   return (
     <>
       <Group title="Cover">
@@ -37,6 +40,7 @@ export function TextsTab() {
           label="Dress code"
           optional
           maxLength={200}
+          placeholder={copy.dressCodePlaceholder}
         />
         <ImageListField
           path={["texts", "dressCodePhotos"]}

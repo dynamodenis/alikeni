@@ -21,6 +21,8 @@ export const SECTION_LABELS: Record<SectionId, string> = {
   rsvp: "RSVP",
   wishes: "Wishes",
   gifts: "Gifts",
+  admission: "Tickets",
+  sponsors: "Sponsors",
   calendar: "Add to calendar",
   closing: "Closing & footer",
 }

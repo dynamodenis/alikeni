@@ -1,6 +1,8 @@
 import { Fragment } from "react"
 import type { ReactNode } from "react"
 import type { Features, InvitationConfigBase, SectionId } from "../schema"
+import { Admission } from "./Admission"
+import { Sponsors } from "./Sponsors"
 
 /** Sections that only render when their feature flag is on. */
 export const FEATURE_FOR: Partial<Record<SectionId, keyof Features>> = {
@@ -16,13 +18,19 @@ export const FEATURE_FOR: Partial<Record<SectionId, keyof Features>> = {
 
 export function isSectionEnabled(
   id: SectionId,
-  config: Pick<InvitationConfigBase, "features" | "gallery" | "story" | "gifts">
+  config: Pick<
+    InvitationConfigBase,
+    "features" | "gallery" | "story" | "gifts" | "admission" | "sponsors"
+  >
 ): boolean {
   const flag = FEATURE_FOR[id]
   if (flag && !config.features[flag]) return false
   if (id === "gallery" && config.gallery.length === 0) return false
   if (id === "story" && config.story.length === 0) return false
   if (id === "gifts" && !config.gifts.enabled) return false
+  if (id === "admission")
+    return config.admission.tiers.length > 0 || !!config.admission.url
+  if (id === "sponsors") return config.sponsors.items.length > 0
   return true
 }
 
@@ -31,6 +39,8 @@ export type SectionMap = Partial<Record<SectionId, ReactNode>>
 /**
  * Renders a template's section map in the invitation's `sectionsOrder`,
  * skipping disabled features and empty content. Templates stay declarative.
+ * Tickets and sponsors have a shared default, so every template shows them
+ * without listing them; a template can still pass its own.
  */
 export function Sections({
   config,
@@ -39,12 +49,17 @@ export function Sections({
   config: InvitationConfigBase
   sections: SectionMap
 }) {
+  const all: SectionMap = {
+    admission: <Admission tone="tint" />,
+    sponsors: <Sponsors />,
+    ...sections,
+  }
   return (
     <>
       {config.sectionsOrder
-        .filter((id) => isSectionEnabled(id, config) && sections[id])
+        .filter((id) => isSectionEnabled(id, config) && all[id])
         .map((id) => (
-          <Fragment key={id}>{sections[id]}</Fragment>
+          <Fragment key={id}>{all[id]}</Fragment>
         ))}
     </>
   )

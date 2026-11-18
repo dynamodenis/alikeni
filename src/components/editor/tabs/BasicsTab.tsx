@@ -1,5 +1,6 @@
 import { EventType } from "@/templates/_shared/schema"
 import { useEditor } from "../EditorContext"
+import { editorCopy } from "../copy"
 import {
   DateTimeField,
   Group,
@@ -25,6 +26,7 @@ const EVENT_LABELS: Record<EventType, string> = {
 
 export function BasicsTab() {
   const { module } = useEditor()
+  const copy = editorCopy(module.meta.category)
   const zones = timeZones().map((z) => ({
     value: z,
     label: z.replaceAll("_", " "),
@@ -43,14 +45,14 @@ export function BasicsTab() {
         <TextField
           path={["event", "title"]}
           label="Event title"
-          placeholder="The Wedding of Amara & Kofi"
+          placeholder={copy.titlePlaceholder}
           maxLength={120}
         />
         <TextField
           path={["event", "subtitle"]}
           label="Subtitle"
           optional
-          placeholder="Together with their families"
+          placeholder={copy.subtitlePlaceholder}
           maxLength={200}
         />
         <SelectField

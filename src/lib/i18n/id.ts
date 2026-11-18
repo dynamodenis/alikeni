@@ -112,6 +112,15 @@ export const id: Messages = {
     qrAlt: "Kode QR pembayaran",
     qrCaption: "Pindai untuk mengirim hadiah",
   },
+  admission: {
+    eyebrow: "Tiket masuk",
+    title: "Tiket",
+    cta: "Dapatkan tiket",
+  },
+  sponsors: {
+    eyebrow: "Terima kasih kepada",
+    title: "Sponsor & mitra",
+  },
   calendar: {
     heading: "Tambahkan ke kalender",
     google: "Google Kalender",

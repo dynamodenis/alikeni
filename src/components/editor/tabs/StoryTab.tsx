@@ -1,14 +1,14 @@
 import type { StoryItem } from "@/templates/_shared/schema"
+import { useEditor } from "../EditorContext"
 import { ListEditor } from "../ListEditor"
+import { editorCopy } from "../copy"
 import { Group, TextField, ToggleField } from "../fields"
 import { ImageField } from "../media"
 
 export function StoryTab() {
+  const copy = editorCopy(useEditor().module.meta.category)
   return (
-    <Group
-      title="Story"
-      description="Milestones in order: how you met, the proposal, the thesis."
-    >
+    <Group title="Story" description={copy.storyDescription}>
       <ToggleField path={["features", "story"]} label="Show story" />
       <ListEditor<StoryItem>
         path={["story"]}
@@ -29,7 +29,12 @@ export function StoryTab() {
               maxLength={60}
               placeholder="2021"
             />
-            <TextField path={[...p, "title"]} label="Title" maxLength={120} />
+            <TextField
+              path={[...p, "title"]}
+              label="Title"
+              maxLength={120}
+              placeholder={copy.storyTitlePlaceholder}
+            />
             <TextField
               path={[...p, "body"]}
               label="What happened"

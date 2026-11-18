@@ -30,6 +30,8 @@ const SECTION_LABELS: Record<Exclude<SectionId, "hosts">, string> = {
   rsvp: "RSVP form",
   wishes: "Guest wishes",
   gifts: "Gifts (Premium)",
+  admission: "Tickets and prices",
+  sponsors: "Sponsors and partners",
   calendar: "Add to calendar",
   closing: "Closing message",
 }

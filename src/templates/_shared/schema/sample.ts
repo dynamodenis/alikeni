@@ -87,6 +87,8 @@ export const sampleInvitationConfig: InvitationConfigBase = {
       body: "A rainy afternoon, one umbrella and a long walk home.",
     },
   ],
+  admission: { tiers: [] },
+  sponsors: { items: [] },
   gifts: {
     enabled: true,
     accounts: [],

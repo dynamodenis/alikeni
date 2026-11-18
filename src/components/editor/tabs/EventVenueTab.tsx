@@ -10,6 +10,7 @@ import { geocodeFn, parseMapsLinkFn } from "@/server/geo/geo.functions"
 import type { SubEvent } from "@/templates/_shared/schema"
 import { useEditor } from "../EditorContext"
 import { ListEditor } from "../ListEditor"
+import { editorCopy } from "../copy"
 import { DateTimeField, Group, NumberField, TextField } from "../fields"
 
 type Candidate = {
@@ -168,6 +169,7 @@ function LocationTools() {
 }
 
 export function EventVenueTab() {
+  const copy = editorCopy(useEditor().module.meta.category)
   return (
     <>
       <Group title="Venue">
@@ -194,7 +196,7 @@ export function EventVenueTab() {
           multiline
           rows={2}
           maxLength={500}
-          placeholder="Parking is available at the main gate."
+          placeholder={copy.venueNotesPlaceholder}
         />
       </Group>
       <Group
@@ -203,10 +205,7 @@ export function EventVenueTab() {
       >
         <LocationTools />
       </Group>
-      <Group
-        title="Programme"
-        description="Ceremony, reception, cake… Leave empty to show just the main event."
-      >
+      <Group title="Programme" description={copy.programmeDescription}>
         <ListEditor<SubEvent>
           path={["event", "subEvents"]}
           max={10}

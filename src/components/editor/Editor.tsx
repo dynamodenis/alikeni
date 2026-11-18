@@ -47,6 +47,7 @@ import { SectionsTab } from "./tabs/SectionsTab"
 import { SharingTab, type PublishState } from "./tabs/SharingTab"
 import { StoryTab } from "./tabs/StoryTab"
 import { TextsTab } from "./tabs/TextsTab"
+import { TicketsTab } from "./tabs/TicketsTab"
 import { useAutosave, type SaveState } from "./useAutosave"
 import { useUploader } from "./useUploader"
 
@@ -73,6 +74,7 @@ type TabId =
   | "gallery"
   | "story"
   | "gifts"
+  | "tickets"
   | "album"
   | "sharing"
 
@@ -107,6 +109,11 @@ const TABS: Array<{ id: TabId; label: string; prefixes: Array<string> }> = [
   { id: "story", label: "Story", prefixes: ["story"] },
   { id: "music", label: "Music", prefixes: ["music"] },
   { id: "gifts", label: "Gifts", prefixes: ["gifts"] },
+  {
+    id: "tickets",
+    label: "Tickets & Sponsors",
+    prefixes: ["admission", "sponsors"],
+  },
   { id: "album", label: "Album", prefixes: [] },
   {
     id: "sections",
@@ -127,6 +134,7 @@ const PANELS: Record<Exclude<TabId, "sharing">, ComponentType> = {
   gallery: GalleryTab,
   story: StoryTab,
   gifts: GiftsTab,
+  tickets: TicketsTab,
   album: AlbumTab,
 }
 

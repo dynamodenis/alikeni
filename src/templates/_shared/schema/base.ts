@@ -75,6 +75,8 @@ export const Host = z.object({
   role: HostRole,
   photo: MediaRef.optional(),
   parentsLine: optionalText(200),
+  /** What this person presents or does at the event: a talk title, a toast. */
+  topic: optionalText(200),
 })
 
 export const EventType = z.enum([
@@ -283,6 +285,46 @@ export const Gifts = z.object({
     .default([]),
 })
 
+/**
+ * Tickets or entry fees. Prices are free text ("KES 2,500", "Free") so any
+ * currency and wording works; nothing is charged through the invitation.
+ */
+export const Admission = z.object({
+  /** Section heading; the locale's default ("Tickets") when empty. */
+  title: optionalText(80),
+  tiers: z
+    .array(
+      z.object({
+        label: text(80),
+        price: text(40),
+        note: optionalText(200),
+      })
+    )
+    .max(8)
+    .default([]),
+  note: optionalText(300),
+  /** Where guests buy or book. */
+  url: HttpUrl.optional(),
+})
+
+export const MAX_SPONSORS = 24
+
+export const Sponsor = z.object({
+  name: text(120),
+  logo: MediaRef.optional(),
+  url: HttpUrl.optional(),
+})
+
+/** Sponsors, partners or vendors, shown as a row of logos (or names). */
+export const Sponsors = z.object({
+  /** Section heading; the locale's default ("Sponsors & partners") when empty. */
+  title: optionalText(80),
+  items: z
+    .array(Sponsor)
+    .max(MAX_SPONSORS, { message: `At most ${MAX_SPONSORS} sponsors` })
+    .default([]),
+})
+
 export const SectionId = z.enum([
   "hero",
   "hosts",
@@ -294,6 +336,8 @@ export const SectionId = z.enum([
   "rsvp",
   "wishes",
   "gifts",
+  "admission",
+  "sponsors",
   "calendar",
   "closing",
 ])
@@ -346,6 +390,9 @@ export const InvitationConfigBase = z.object({
     ewallets: [],
     registryLinks: [],
   }),
+  /** Optional: configs saved before these existed parse to empty. */
+  admission: Admission.default({ tiers: [] }),
+  sponsors: Sponsors.default({ items: [] }),
   features: Features.default({
     countdown: true,
     rsvp: true,
@@ -387,4 +434,7 @@ export type Music = z.infer<typeof Music>
 export type Texts = z.infer<typeof Texts>
 export type StoryItem = z.infer<typeof StoryItem>
 export type Gifts = z.infer<typeof Gifts>
+export type Admission = z.infer<typeof Admission>
+export type Sponsor = z.infer<typeof Sponsor>
+export type Sponsors = z.infer<typeof Sponsors>
 export type Features = z.infer<typeof Features>

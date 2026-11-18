@@ -123,6 +123,11 @@ function HostCard({
         {host.parentsLine && (
           <p className="text-sm text-inv-muted italic">{host.parentsLine}</p>
         )}
+        {host.topic && (
+          <p className="mt-1 text-base leading-snug text-balance">
+            {host.topic}
+          </p>
+        )}
       </div>
     </div>
   )

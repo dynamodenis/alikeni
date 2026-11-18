@@ -1,34 +1,27 @@
-import { HostRole, type Host } from "@/templates/_shared/schema"
+import type { Host } from "@/templates/_shared/schema"
+import { useEditor } from "../EditorContext"
 import { ListEditor } from "../ListEditor"
+import { editorCopy, roleOptions } from "../copy"
 import { Group, SelectField, TextField } from "../fields"
 import { ImageField } from "../media"
 
-const ROLE_LABELS: Record<Host["role"], string> = {
-  bride: "Bride",
-  groom: "Groom",
-  host: "Host",
-  graduate: "Graduate",
-  celebrant: "Celebrant",
-  baby: "Baby",
-  company: "Company",
-  other: "Other",
-}
+const capitalise = (word: string) =>
+  word.charAt(0).toUpperCase() + word.slice(1)
 
 export function PeopleTab() {
+  const { module, config } = useEditor()
+  const copy = editorCopy(module.meta.category)
   return (
-    <Group
-      title="Who is celebrating"
-      description="The couple, the birthday star, the graduate, or the hosting company."
-    >
+    <Group title={copy.peopleTitle} description={copy.peopleDescription}>
       <ListEditor<Host>
         path={["hosts"]}
         min={1}
         max={8}
-        addLabel="Add person"
-        itemLabel={(h, i) => h.name || `Person ${i + 1}`}
-        create={() => ({ name: "New person", role: "host" })}
+        addLabel={`Add ${copy.person}`}
+        itemLabel={(h, i) => h.name || `${capitalise(copy.person)} ${i + 1}`}
+        create={() => ({ name: `New ${copy.person}`, role: copy.newRole })}
       >
-        {(_, p) => (
+        {(index, p) => (
           <>
             <TextField
               path={[...p, "name"]}
@@ -40,23 +33,30 @@ export function PeopleTab() {
               label="Short name"
               optional
               maxLength={40}
-              help="Used in headlines, e.g. “Amara”."
+              help={copy.shortNameHelp}
             />
             <SelectField
               path={[...p, "role"]}
               label="Role"
-              options={HostRole.options.map((v) => ({
-                value: v,
-                label: ROLE_LABELS[v],
-              }))}
+              options={roleOptions(copy, config.hosts[index]?.role)}
             />
             <TextField
               path={[...p, "parentsLine"]}
-              label="Family line"
+              label={copy.lineLabel}
               optional
               maxLength={200}
-              placeholder="Daughter of Mr. & Mrs. Kamau"
+              placeholder={copy.linePlaceholder}
             />
+            {copy.topicLabel && (
+              <TextField
+                path={[...p, "topic"]}
+                label={copy.topicLabel}
+                optional
+                maxLength={200}
+                placeholder={copy.topicPlaceholder}
+                className="sm:col-span-2"
+              />
+            )}
             <ImageField
               path={[...p, "photo"]}
               purpose="portrait"
