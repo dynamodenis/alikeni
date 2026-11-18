@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { useInvitation } from "../context"
 import { Section, type SectionTone } from "./Section"
-import { hostNames } from "./hosts"
+import { hostNames, signatories } from "./hosts"
 import { MusicCredit } from "./MusicPlayer"
 
 export type ClosingVariant = "signature" | "banner"
@@ -18,7 +18,11 @@ type ClosingProps = {
   children?: ReactNode
 }
 
-/** Closing words signed by the hosts in foil, followed by the footer. */
+/**
+ * Closing words signed in foil by whoever is inviting (see `signatories`),
+ * followed by the footer. Corporate events get a formal sign-off, not
+ * "With love".
+ */
 export function Closing({
   variant = "signature",
   tone,
@@ -28,7 +32,14 @@ export function Closing({
   children,
 }: ClosingProps) {
   const { config, t } = useInvitation()
-  const { texts, hosts } = config
+  const { texts, hosts, event } = config
+  const formal = event.type === "corporate"
+  const signers = signatories(hosts)
+  // A corporate event that lists only speakers is signed by the event itself.
+  const signature =
+    formal && signers.every((h) => h.role === "other")
+      ? event.title
+      : hostNames(signers)
   return (
     <Section
       id="closing"
@@ -46,10 +57,10 @@ export function Closing({
         {texts.closing}
       </p>
       <p className="mt-10 text-[0.7rem] tracking-[0.3em] text-inv-muted uppercase">
-        {t.closing.signOff}
+        {formal ? t.closing.signOffFormal : t.closing.signOff}
       </p>
       <p className="inv-foil mt-3 font-inv-display text-5xl leading-tight sm:text-6xl">
-        {hostNames(hosts)}
+        {signature}
       </p>
       {children}
     </Section>

@@ -174,7 +174,11 @@ sheet lays every thumbnail of a category side by side for the batch review
 5. `/dev/templates/<id>` at motion full and none, mobile and desktop: no
    console errors, no hydration warnings, headline readable over the decor.
 6. `pnpm thumbs --only <id>`; the thumbnail shows the cover, not a blank.
-7. `pnpm typecheck && pnpm lint && pnpm test` green.
+7. No event-specific value is typed into the design: dates, years, ages,
+   counts, names and places come from `config` (`AGENTS.md` rule 1;
+   `baked-values.test.ts` checks digits and number words). Change the date,
+   names and venue in the editor and confirm every place follows.
+8. `pnpm typecheck && pnpm lint && pnpm test` green.
 
 ## 7. Batch procedure (Phase 7)
 

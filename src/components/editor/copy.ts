@@ -163,7 +163,7 @@ const BY_CATEGORY: Record<TemplateCategory, Partial<EditorCopy>> = {
     roleLabels: {
       company: "Company / organiser (shown as “Hosted by”)",
       host: "Host (shown as “Your Host”)",
-      other: "Speaker or guest (no label)",
+      other: "Speaker or guest (not in the closing signature)",
     },
     shortNameHelp: "Used in headlines, e.g. “Wambui” or the company name.",
     lineLabel: "Job title and company",

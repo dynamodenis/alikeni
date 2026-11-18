@@ -144,6 +144,7 @@ export const id: Messages = {
   },
   closing: {
     signOff: "Kami yang berbahagia",
+    signOffFormal: "Kami menantikan kehadiran Anda",
     madeWith: "Dibuat dengan",
     createYours: "Buat undangan Anda sendiri, gratis",
     album: "Foto & video dari acara",

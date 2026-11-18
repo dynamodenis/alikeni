@@ -143,6 +143,7 @@ export const en = {
   },
   closing: {
     signOff: "With love",
+    signOffFormal: "We look forward to welcoming you",
     madeWith: "Made with",
     createYours: "Create your own invitation, free",
     album: "Photos & videos from the event",
