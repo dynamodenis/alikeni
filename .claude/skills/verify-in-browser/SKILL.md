@@ -74,6 +74,11 @@ while requesting the page (skill `deploy-and-env`).
 
 Add a line when something goes wrong here. Newest first.
 
+- 2026-11-18: The editor logo was a plain `<a href>`, so going to the
+  dashboard reloaded the whole app and flashed. In-app links are router
+  `Link`s. To prove no reload happened, set a value on `window` before the
+  click and read it back after, and count main-frame navigation requests.
+  The editor's `useBlocker` saves pending edits before any in-app leave.
 - 2026-11-18: A flicker report could not be judged from a screenshot.
   Record frames with CDP `Page.startScreencast` around the click and compare
   frame sizes: a dip marks the flash. It showed the dashboard card previews

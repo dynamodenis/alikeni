@@ -31,9 +31,13 @@ export function useAutosave(opts: {
   const latest = useRef(opts.config)
   const savedRef = useRef(opts.config)
   const inFlight = useRef(false)
+  /** The save in progress, so `settle` can wait for it. */
+  const running = useRef<Promise<void> | null>(null)
+  const valid = useRef(opts.valid)
 
   useEffect(() => {
     latest.current = opts.config
+    valid.current = opts.valid
   })
 
   // A conflict blocks until resolved; an ordinary error only for the config that failed.
@@ -52,39 +56,60 @@ export function useAutosave(opts: {
           : "invalid")
 
   const flush = useCallback(
-    async (force = false) => {
-      if (inFlight.current) return
+    (force = false): Promise<void> => {
+      if (inFlight.current) return running.current ?? Promise.resolve()
       const snapshot = latest.current
-      if (!force && snapshot === savedRef.current) return
+      if (!force && snapshot === savedRef.current) return Promise.resolve()
       inFlight.current = true
       setSaving(true)
-      try {
-        const result = await save({
-          data: {
-            id: opts.id,
+      const run = async () => {
+        try {
+          const result = await save({
+            data: {
+              id: opts.id,
+              config: snapshot,
+              baseUpdatedAt: base.current,
+              force,
+            },
+          })
+          base.current = result.updatedAt
+          savedRef.current = snapshot
+          setSavedConfig(snapshot)
+          setLastSavedAt(result.updatedAt)
+          setFailure(null)
+        } catch (error) {
+          const message = error instanceof Error ? error.message : ""
+          setFailure({
+            kind: message.startsWith("conflict:") ? "conflict" : "error",
             config: snapshot,
-            baseUpdatedAt: base.current,
-            force,
-          },
-        })
-        base.current = result.updatedAt
-        savedRef.current = snapshot
-        setSavedConfig(snapshot)
-        setLastSavedAt(result.updatedAt)
-        setFailure(null)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : ""
-        setFailure({
-          kind: message.startsWith("conflict:") ? "conflict" : "error",
-          config: snapshot,
-        })
-      } finally {
-        inFlight.current = false
-        setSaving(false)
+          })
+        } finally {
+          inFlight.current = false
+          running.current = null
+          setSaving(false)
+        }
       }
+      running.current = run()
+      return running.current
     },
     [save, opts.id]
   )
+
+  /**
+   * Save whatever is still pending, for leaving the editor inside the app
+   * (no page reload, so `beforeunload` does not fire). Resolves true when
+   * everything is saved, false when it cannot be (invalid fields, a
+   * conflict, the network).
+   */
+  const settle = useCallback(async () => {
+    // A save in progress may predate the last edit: go round again after it.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (latest.current === savedRef.current) return true
+      if (!valid.current) return false
+      await flush()
+    }
+    return latest.current === savedRef.current
+  }, [flush])
 
   // Save once edits pause (also picks up edits made during a save).
   useEffect(() => {
@@ -107,5 +132,5 @@ export function useAutosave(opts: {
     setLastSavedAt(updatedAt)
   }, [])
 
-  return { state, lastSavedAt, flush, adoptVersion }
+  return { state, lastSavedAt, flush, settle, adoptVersion }
 }

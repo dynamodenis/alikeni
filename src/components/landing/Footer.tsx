@@ -1,5 +1,5 @@
 import { CONTACT_EMAIL } from "@/lib/social"
-import { Logo, NAV_LINKS } from "./Nav"
+import { Logo, NAV_LINKS, NavLink } from "./Nav"
 import { SocialLinks } from "./SocialLinks"
 
 export function Footer() {
@@ -10,9 +10,7 @@ export function Footer() {
         <ul className="flex flex-wrap items-center justify-center gap-8">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <a href={link.href} className="link">
-                {link.label}
-              </a>
+              <NavLink link={link} />
             </li>
           ))}
           <li>

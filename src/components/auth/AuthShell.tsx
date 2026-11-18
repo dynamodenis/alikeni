@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { ArrowLeft, Eye, EyeOff, LoaderCircle } from "lucide-react"
 import { useState, type ComponentProps, type ReactNode } from "react"
 import { brandButton } from "@/components/brand/ButtonLink"
@@ -39,13 +40,13 @@ export function AuthShell({
       {/* Lines up with the card's edges: way out on the left, the page's
           own link on the right. */}
       <div className="mt-6 flex w-full max-w-sm flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="flex items-center gap-1.5 rounded-sm transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-gold-soft focus-visible:outline-none"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           Back to website
-        </a>
+        </Link>
         {footer && <p>{footer}</p>}
       </div>
     </div>

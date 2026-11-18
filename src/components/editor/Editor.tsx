@@ -1,6 +1,6 @@
 import { BrandLoader } from "@/components/brand/Loader"
 import { canEditWhenLocked } from "@/lib/edit-lock"
-import { Link, useRouter } from "@tanstack/react-router"
+import { Link, useBlocker, useRouter } from "@tanstack/react-router"
 import {
   AlertTriangle,
   HardDrive,
@@ -371,6 +371,20 @@ function EditorLoaded({
       canEdit,
     ]
   )
+
+  // Leaving for another page inside the app (logo, Upgrade, the template
+  // link): save first, so nothing typed in the last second is lost. Only
+  // when it cannot be saved is the host asked.
+  const { settle } = autosave
+  useBlocker({
+    shouldBlockFn: async () => {
+      if (await settle()) return false
+      return !window.confirm(
+        "Some changes could not be saved. Leave the editor anyway?"
+      )
+    },
+    enableBeforeUnload: false,
+  })
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {

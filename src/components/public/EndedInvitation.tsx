@@ -1,6 +1,7 @@
 // What guests see at /i/<slug> once a free invitation's page has gone offline
 // (the day after the event; see src/lib/plans.ts). Worded in the invitation's
 // language, with a quiet link for the host to bring it back with Premium.
+import { Link } from "@tanstack/react-router"
 import { Logo } from "@/components/landing/Nav"
 import { INTL_LOCALE, getMessages, type Locale } from "@/lib/i18n"
 
@@ -25,12 +26,12 @@ export function EndedInvitation({
         <h1 className="mt-2 font-display text-3xl">{t.title}</h1>
         <p className="mt-3 text-muted-foreground">{t.body}</p>
       </div>
-      <a
-        href="/dashboard"
+      <Link
+        to="/dashboard"
         className="mt-6 rounded-sm text-sm text-muted-foreground underline-offset-4 hover:text-cream hover:underline focus-visible:ring-2 focus-visible:ring-gold-soft focus-visible:outline-none"
       >
         {t.host}
-      </a>
+      </Link>
     </main>
   )
 }
