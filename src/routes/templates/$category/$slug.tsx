@@ -1,3 +1,5 @@
+import { SitePending } from "@/components/brand/pending"
+import { BrandLoader } from "@/components/brand/Loader"
 import {
   Link,
   createFileRoute,
@@ -76,6 +78,7 @@ export const Route = createFileRoute("/templates/$category/$slug")({
       ],
     })
   },
+  pendingComponent: SitePending,
   component: TemplateDetailPage,
 })
 
@@ -262,7 +265,7 @@ function TemplateDetailPage() {
                 loaded && "opacity-0"
               )}
             >
-              <span className="size-10 animate-spin rounded-full border-2 border-gold/20 border-t-gold" />
+              <BrandLoader label="" className="size-20" />
             </div>
             <iframe
               ref={frame}

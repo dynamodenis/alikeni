@@ -1,3 +1,4 @@
+import { DashboardPending } from "@/components/brand/pending"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 import { z } from "zod"
 import { AlbumView } from "@/components/dashboard/AlbumView"
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authed/dashboard/$invitationId/album")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  pendingComponent: DashboardPending,
   component: AlbumPage,
 })
 

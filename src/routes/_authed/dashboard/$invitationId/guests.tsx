@@ -1,3 +1,4 @@
+import { DashboardPending } from "@/components/brand/pending"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 import { z } from "zod"
 import { DashboardShell } from "@/components/dashboard/DashboardShell"
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authed/dashboard/$invitationId/guests")(
         { name: "robots", content: "noindex" },
       ],
     }),
+    pendingComponent: DashboardPending,
     component: GuestsPage,
   }
 )

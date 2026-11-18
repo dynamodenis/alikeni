@@ -1,3 +1,4 @@
+import { DashboardPending } from "@/components/brand/pending"
 import { createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { BrandLink } from "@/components/brand/ButtonLink"
@@ -8,6 +9,7 @@ import { listMyInvitationsFn } from "@/server/invitations/invitations.functions"
 export const Route = createFileRoute("/_authed/dashboard/")({
   loader: () => listMyInvitationsFn(),
   head: () => ({ meta: [{ title: "My invitations · Alikeni" }] }),
+  pendingComponent: DashboardPending,
   component: Dashboard,
 })
 

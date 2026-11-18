@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand/Loader"
 import { useEffect, useRef, useState } from "react"
 import { DeviceFrame } from "@/components/gallery/DeviceFrame"
 import type { DeviceId } from "@/lib/devices"
@@ -68,7 +69,7 @@ export function EditorPreview({
           ready && "opacity-0"
         )}
       >
-        <span className="size-10 animate-spin rounded-full border-2 border-gold/20 border-t-gold" />
+        <BrandLoader label="" className="size-20" />
       </div>
       <iframe
         ref={frame}

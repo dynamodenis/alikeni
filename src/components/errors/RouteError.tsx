@@ -5,8 +5,8 @@
 // still asks for the previous version's script files, which no longer exist.
 // The cure is to load the page again, so that is done automatically (once,
 // so a real outage cannot loop) while a quiet spinner shows.
+import { BrandLoader } from "@/components/brand/Loader"
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router"
-import { LoaderCircle } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -59,10 +59,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
   if (reloading) {
     return (
       <main className="theme-alikeni grid min-h-svh place-items-center bg-background text-muted-foreground">
-        <LoaderCircle className="size-6 animate-spin" aria-hidden="true" />
-        <span className="sr-only" role="status">
-          Loading
-        </span>
+        <BrandLoader />
       </main>
     )
   }

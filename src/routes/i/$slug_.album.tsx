@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand/Loader"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import { ArrowLeft, Download, LoaderCircle, Lock } from "lucide-react"
 import { useCallback, useEffect, useState, type FormEvent } from "react"
@@ -441,9 +442,9 @@ function AlbumBody({
           onToggle={toggle}
         />
       ) : loading ? (
-        <p className="flex justify-center py-16 text-muted-foreground">
-          <LoaderCircle className="size-6 animate-spin" aria-hidden="true" />
-        </p>
+        <div className="flex justify-center py-16">
+          <BrandLoader />
+        </div>
       ) : error ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="text-sm text-muted-foreground">{t.loadFailed}</p>

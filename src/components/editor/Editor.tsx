@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand/Loader"
 import { canEditWhenLocked } from "@/lib/edit-lock"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
@@ -272,10 +273,7 @@ export function Editor({ draft }: { draft: DraftData }) {
   if (!module) {
     return (
       <div className="theme-alikeni grid min-h-svh place-items-center bg-background text-muted-foreground">
-        <LoaderCircle
-          className="size-8 animate-spin text-primary"
-          aria-label="Loading editor"
-        />
+        <BrandLoader label="Loading editor" />
       </div>
     )
   }

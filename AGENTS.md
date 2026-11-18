@@ -133,13 +133,23 @@ to revive a free page or reusing a paid invitation.
   and ask the owner first.
 - Support unlock: set `invitations.edit_unlocked_until` (`docs/DEPLOY.md`).
 
-### 9. Accessibility and motion
+### 9. Loading states
+
+- A page or preview that is loading shows `BrandLoader`
+  (`src/components/brand/Loader.tsx`). The plain `LoaderCircle` spinner is
+  only for small "busy" icons inside buttons and inline status text.
+- The header and footer never disappear while content loads. A route with a
+  loader sets `pendingComponent` to the matching shell from
+  `src/components/brand/pending.tsx` (`DashboardPending`, `SitePending`);
+  only pages with no shell fall back to the full-page loader.
+
+### 10. Accessibility and motion
 
 Respect `prefers-reduced-motion` and `theme.motionLevel`. Every `<img>` has
 `alt`; decorative SVG is `aria-hidden`. Palettes pass the AA checks in
 `palettes.test.ts`. Select by role and label in tests; do not add test ids.
 
-### 10. Code quality
+### 11. Code quality
 
 TypeScript strict, no `any` in app code, ESLint and Prettier clean, tests
 next to the code. `src/components/ui` (shadcn) and
@@ -147,7 +157,7 @@ next to the code. `src/components/ui` (shadcn) and
 ReactBits is fetched from the `@react-bits` registry, never hand-written,
 and its source is never redistributed.
 
-### 11. Ask before irreversible choices
+### 12. Ask before irreversible choices
 
 Providers (database, auth, storage, payments, hosting), destructive
 migrations, deleting user data, and anything that sends email or charges

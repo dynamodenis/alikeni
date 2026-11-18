@@ -1,3 +1,4 @@
+import { SitePending } from "@/components/brand/pending"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import { ChevronLeft } from "lucide-react"
 import { BrandLink } from "@/components/brand/ButtonLink"
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/blog/$slug")({
       ],
     }
   },
+  pendingComponent: SitePending,
   component: PostPage,
 })
 

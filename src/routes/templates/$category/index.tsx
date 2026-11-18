@@ -1,3 +1,4 @@
+import { SitePending } from "@/components/brand/pending"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import { BrandLink } from "@/components/brand/ButtonLink"
 import { SiteShell } from "@/components/gallery/SiteShell"
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/templates/$category/")({
       ],
     })
   },
+  pendingComponent: SitePending,
   component: CategoryPage,
 })
 

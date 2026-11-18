@@ -1,4 +1,5 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router"
+import { FullPageLoader } from "@/components/brand/Loader"
 import { RouteError, reloadOnce } from "@/components/errors/RouteError"
 import { routeTree } from "./routeTree.gen"
 
@@ -19,6 +20,8 @@ export function getRouter() {
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: RouteError,
+    // Routes with a header and footer set their own (components/brand/pending).
+    defaultPendingComponent: FullPageLoader,
   })
 
   return router
