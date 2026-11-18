@@ -1,0 +1,1 @@
+ALTER TABLE "invitations" ADD COLUMN "edit_unlocked_until" timestamp with time zone;

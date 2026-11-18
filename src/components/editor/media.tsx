@@ -154,7 +154,8 @@ export function ImageListField({
   max: number
   help?: string
 }) {
-  const { config, set, uploadImage } = useEditor()
+  const { config, set, uploadImage, canEdit } = useEditor()
+  const editable = canEdit(path)
   const input = useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState<{
     done: number
@@ -208,7 +209,7 @@ export function ImageListField({
           variant="outline"
           size="sm"
           onClick={() => input.current?.click()}
-          disabled={room <= 0 || progress !== null}
+          disabled={room <= 0 || progress !== null || !editable}
         >
           {progress ? (
             <LoaderCircle className="animate-spin" aria-hidden="true" />
@@ -242,6 +243,7 @@ export function ImageListField({
                   variant="secondary"
                   size="icon-sm"
                   aria-label={`Remove ${label.toLowerCase()} photo ${index + 1}`}
+                  disabled={!editable}
                   className="absolute top-1.5 right-1.5 bg-background/80 backdrop-blur"
                   onClick={() => remove(index)}
                 >

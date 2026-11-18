@@ -148,6 +148,23 @@ accepts in `PAYSTACK_CURRENCIES` (default `KES`; `KES,USD` once USD is on):
 the upgrade page offers only those. Prices, the free RSVP cap and the free
 expiry live in `src/lib/plans.ts`.
 
+### Unlocking an invitation after its event
+
+An invitation is locked for editing once its published event has ended
+(`src/lib/edit-lock.ts`): the owner can still add gallery photos, manage the
+album and change the closing words, nothing else. When an owner asks to
+correct something, open the editing window again for a limited time in the
+Neon SQL editor:
+
+```sql
+update invitations
+set edit_unlocked_until = now() + interval '2 days'
+where slug = 'their-link';
+```
+
+It locks again by itself when that time passes. While it is open the owner
+can change everything, including the date, so keep the window short.
+
 To test webhooks against `pnpm dev`, expose port 3000 with a Cloudflare quick
 tunnel (no account needed; `vite.config.ts` allows `*.trycloudflare.com`):
 

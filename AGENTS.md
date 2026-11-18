@@ -119,13 +119,27 @@ A payment is accepted only when Paystack's amount and currency match the
 order exactly (`applyTransaction`); keep that check. Offered currencies come
 from `PAYSTACK_CURRENCIES`. Never log or echo a secret key.
 
-### 8. Accessibility and motion
+### 8. Invitations lock after the event
+
+Once the **published** event has ended (the day after its last event day,
+event time zone; `src/lib/edit-lock.ts`), only gallery photos, the album and
+`texts.closing` may change, on every plan. This stops a host moving the date
+to revive a free page or reusing a paid invitation.
+
+- The server enforces it in `saveDraft` and `publishInvitation`; the editor
+  only mirrors it. Any new way to change an invitation's content must apply
+  the same check.
+- To let a new field stay editable, add its path to `LOCKED_EDITABLE_PATHS`
+  and ask the owner first.
+- Support unlock: set `invitations.edit_unlocked_until` (`docs/DEPLOY.md`).
+
+### 9. Accessibility and motion
 
 Respect `prefers-reduced-motion` and `theme.motionLevel`. Every `<img>` has
 `alt`; decorative SVG is `aria-hidden`. Palettes pass the AA checks in
 `palettes.test.ts`. Select by role and label in tests; do not add test ids.
 
-### 9. Code quality
+### 10. Code quality
 
 TypeScript strict, no `any` in app code, ESLint and Prettier clean, tests
 next to the code. `src/components/ui` (shadcn) and
@@ -133,7 +147,7 @@ next to the code. `src/components/ui` (shadcn) and
 ReactBits is fetched from the `@react-bits` registry, never hand-written,
 and its source is never redistributed.
 
-### 10. Ask before irreversible choices
+### 11. Ask before irreversible choices
 
 Providers (database, auth, storage, payments, hosting), destructive
 migrations, deleting user data, and anything that sends email or charges

@@ -104,10 +104,17 @@ export function freeOnlineUntil(config: DatedConfig): string {
   return addDays(localDay(lastEventMoment(config), zone), FREE_DAYS_AFTER_EVENT)
 }
 
-/** Whether a free invitation's page has gone offline at `now`. */
-export function freeHasEnded(config: DatedConfig, now = new Date()): boolean {
+/**
+ * Whether the event is over at `now`: the day after its last event day has
+ * passed, in the event's time zone. A free page goes offline at this moment
+ * and every invitation is locked for editing (`src/lib/edit-lock.ts`).
+ */
+export function eventHasEnded(config: DatedConfig, now = new Date()): boolean {
   return localDay(now, config.datetime.timezone) > freeOnlineUntil(config)
 }
+
+/** Whether a free invitation's page has gone offline at `now`. */
+export const freeHasEnded = eventHasEnded
 
 /* ---------- what guests receive ---------- */
 
@@ -123,10 +130,10 @@ const NO_GIFTS: InvitationConfigBase["gifts"] = {
  * section, and the bank, wallet, QR and registry details are removed, so they
  * never leave the server.
  */
-export function configForPlan<C extends InvitationConfigBase>(
-  config: C,
+export function configForPlan<TConfig extends InvitationConfigBase>(
+  config: TConfig,
   plan: Plan
-): C {
+): TConfig {
   if (plan === "premium") return config
   return {
     ...config,

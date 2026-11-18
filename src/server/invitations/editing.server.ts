@@ -2,6 +2,7 @@
 // and the public read. Pure functions over a Drizzle db (tested on PGlite).
 import { and, eq, ne, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
+import { applyLockedEdits, isEditLocked } from "@/lib/edit-lock"
 import { configForPlan, freeHasEnded } from "@/lib/plans"
 import { RESERVED_SLUGS, SLUG_PATTERN } from "@/lib/slug"
 import { invalidatePublishedCard } from "@/server/og/cache.server"
@@ -29,15 +30,23 @@ export type SaveResult = { updatedAt: string }
 const sameMillis = (iso: string) =>
   sql`date_trunc('milliseconds', ${inv.updatedAt}) = ${new Date(iso).toISOString()}::timestamptz`
 
-async function ownedTemplateId(db: AnyDb, id: string, ownerId: string) {
+/** The owner's row with what saving and publishing need, lock included. */
+async function ownedForEdit(db: AnyDb, id: string, ownerId: string, now: Date) {
   const row = (
     await db
-      .select({ templateId: inv.templateId, status: inv.status })
+      .select({
+        templateId: inv.templateId,
+        slug: inv.slug,
+        draftConfig: inv.draftConfig,
+        publishedConfig: inv.publishedConfig,
+        publishedAt: inv.publishedAt,
+        editUnlockedUntil: inv.editUnlockedUntil,
+      })
       .from(inv)
       .where(and(eq(inv.id, id), eq(inv.ownerId, ownerId)))
   ).at(0)
   if (!row) throw new EditorError("Invitation not found.", "not_found")
-  return row
+  return { ...row, locked: isEditLocked(row, now) }
 }
 
 export async function validateForTemplate(templateId: string, config: unknown) {
@@ -48,6 +57,10 @@ export async function validateForTemplate(templateId: string, config: unknown) {
 /**
  * Autosave. `baseUpdatedAt` is the version the editor loaded; if the row
  * changed since (another tab, another device) we refuse unless `force`.
+ *
+ * Once the event has ended (`src/lib/edit-lock.ts`) only photos and the
+ * closing words are taken from `config`; everything else stays as stored,
+ * whatever the client sent.
  */
 export async function saveDraft(
   db: AnyDb,
@@ -57,17 +70,22 @@ export async function saveDraft(
     config: unknown
     baseUpdatedAt: string
     force?: boolean
-  }
+  },
+  now = new Date()
 ): Promise<SaveResult> {
-  const { templateId } = await ownedTemplateId(db, input.id, input.ownerId)
-  const parsed = await validateForTemplate(templateId, input.config)
+  const owned = await ownedForEdit(db, input.id, input.ownerId, now)
+  const parsed = await validateForTemplate(
+    owned.templateId,
+    owned.locked
+      ? applyLockedEdits(owned.draftConfig, input.config)
+      : input.config
+  )
   if (!parsed.success)
     throw new EditorError(
       "Some fields need attention before saving.",
       "invalid"
     )
 
-  const now = new Date()
   const where = and(
     eq(inv.id, input.id),
     eq(inv.ownerId, input.ownerId),
@@ -116,34 +134,44 @@ export async function checkSlug(
     : { available: true }
 }
 
-/** Publish (or republish) the current draft at `slug`. */
+/**
+ * Publish (or republish) the current draft at `slug`.
+ *
+ * Once the event has ended, republishing only carries the draft's photos and
+ * closing words onto the published page; its date, names, address and the
+ * rest stay as guests last saw them, and so does the link.
+ */
 export async function publishInvitation(
   db: AnyDb,
-  input: { id: string; ownerId: string; slug: string }
+  input: { id: string; ownerId: string; slug: string },
+  now = new Date()
 ) {
-  const { templateId } = await ownedTemplateId(db, input.id, input.ownerId)
-  const check = await checkSlug(db, { slug: input.slug, id: input.id })
+  const owned = await ownedForEdit(db, input.id, input.ownerId, now)
+  const { templateId } = owned
+  const keepSlug = owned.locked && owned.slug ? owned.slug : null
+  const check = keepSlug
+    ? ({ available: true } as const)
+    : await checkSlug(db, { slug: input.slug, id: input.id })
   if (!check.available)
     throw new EditorError(
       check.reason,
       check.reason.includes("taken") ? "slug_taken" : "slug_invalid"
     )
 
-  const draft = (
-    await db
-      .select({ draftConfig: inv.draftConfig, publishedAt: inv.publishedAt })
-      .from(inv)
-      .where(eq(inv.id, input.id))
-  ).at(0)
-  const parsed = await validateForTemplate(templateId, draft?.draftConfig)
+  const draft = owned
+  const parsed = await validateForTemplate(
+    templateId,
+    owned.locked
+      ? applyLockedEdits(owned.publishedConfig, owned.draftConfig)
+      : owned.draftConfig
+  )
   if (!parsed.success)
     throw new EditorError(
       "Fix the highlighted fields before publishing.",
       "invalid"
     )
 
-  const slug = input.slug.trim().toLowerCase()
-  const now = new Date()
+  const slug = keepSlug ?? input.slug.trim().toLowerCase()
   try {
     const [row] = await db
       .update(inv)
@@ -161,7 +189,7 @@ export async function publishInvitation(
         updatedAt: inv.updatedAt,
       })
     // The OG card key includes publishedAt; drop the old one (best effort).
-    await invalidatePublishedCard(input.id, draft?.publishedAt)
+    await invalidatePublishedCard(input.id, draft.publishedAt)
     return {
       slug: row.slug ?? slug,
       publishedAt: (row.publishedAt ?? now).toISOString(),

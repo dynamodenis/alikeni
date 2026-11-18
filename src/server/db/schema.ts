@@ -152,6 +152,12 @@ export const invitations = pgTable(
     draftConfig: jsonb("draft_config").$type<InvitationConfigBase>().notNull(),
     publishedConfig: jsonb("published_config").$type<InvitationConfigBase>(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    /**
+     * Support override for the after-event edit lock (`src/lib/edit-lock.ts`):
+     * while this is in the future the owner can edit everything again. Set by
+     * hand (docs/DEPLOY.md); null for everyone else.
+     */
+    editUnlockedUntil: timestamp("edit_unlocked_until", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

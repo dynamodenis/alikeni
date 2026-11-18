@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { PGlite } from "@electric-sql/pglite"
+import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
@@ -175,5 +176,168 @@ describe("slugs and publishing", () => {
     })
     await expect(attempt).rejects.toBeInstanceOf(EditorError)
     await expect(attempt).rejects.toMatchObject({ code: "slug_taken" })
+  })
+})
+
+describe("after the event has ended", () => {
+  // Its own invitation, so the tests above keep their state.
+  let id = ""
+  let version = ""
+  let slug = ""
+  const START = "2026-12-12T15:00:00+03:00"
+  const BEFORE = new Date("2026-12-01T09:00:00Z")
+  const AFTER = new Date("2026-12-20T09:00:00Z")
+  const photo = { assetKey: "after-party", url: "https://example.com/p.webp" }
+
+  const row = async () =>
+    (
+      await db
+        .select()
+        .from(schema.invitations)
+        .where(eq(schema.invitations.id, id))
+    )[0]
+  const save = async (patch: unknown, now: Date) => {
+    const stored = await row()
+    // Some tests change the row directly, which moves its version.
+    version = stored.updatedAt.toISOString()
+    const config = deepMerge(stored.draftConfig, patch)
+    version = (
+      await saveDraft(
+        db,
+        { id, ownerId: DEV_USER.id, config, baseUpdatedAt: version },
+        now
+      )
+    ).updatedAt
+  }
+  const publish = async (now: Date, as = slug) => {
+    const result = await publishInvitation(
+      db,
+      { id, ownerId: DEV_USER.id, slug: as },
+      now
+    )
+    version = result.updatedAt
+    return result
+  }
+
+  beforeAll(async () => {
+    id = (
+      await createDraft(db, {
+        ownerId: DEV_USER.id,
+        templateId: "wedding/ivory-garden",
+      })
+    ).id
+    slug = `locked-${id.slice(0, 8)}`
+    version = (await row()).updatedAt.toISOString()
+    await save(
+      {
+        datetime: { start: START, end: undefined },
+        event: { title: "Amara & Kofi", subEvents: [] },
+      },
+      BEFORE
+    )
+    // deepMerge keeps `end` when patched with undefined; clear it for real.
+    const config = structuredClone((await row()).draftConfig)
+    delete config.datetime.end
+    version = (
+      await saveDraft(
+        db,
+        { id, ownerId: DEV_USER.id, config, baseUpdatedAt: version },
+        BEFORE
+      )
+    ).updatedAt
+    await publish(BEFORE)
+  })
+
+  it("still saves everything before the event ends", async () => {
+    await save({ texts: { headline: "Before the day" } }, BEFORE)
+    expect((await row()).draftConfig.texts.headline).toBe("Before the day")
+    await publish(BEFORE)
+  })
+
+  it("keeps the date, names and words; takes photos and the closing", async () => {
+    await save(
+      {
+        datetime: { start: "2027-06-01T15:00:00+03:00" },
+        event: { title: "A different event" },
+        texts: { headline: "Reused", closing: "Thank you for coming!" },
+        gallery: [photo],
+      },
+      AFTER
+    )
+    const draft = (await row()).draftConfig
+    expect(draft.datetime.start).toBe(START)
+    expect(draft.event.title).toBe("Amara & Kofi")
+    expect(draft.texts.headline).toBe("Before the day")
+    expect(draft.texts.closing).toBe("Thank you for coming!")
+    expect(draft.gallery).toEqual([photo])
+  })
+
+  it("republishes only those parts, at the same link", async () => {
+    // A date change that reached the draft some other way must not publish.
+    await db
+      .update(schema.invitations)
+      .set({
+        draftConfig: deepMerge((await row()).draftConfig, {
+          datetime: { start: "2027-06-01T15:00:00+03:00" },
+          texts: { headline: "Sneaked in" },
+        }),
+      })
+      .where(eq(schema.invitations.id, id))
+    const result = await publish(AFTER, "a-new-link-for-reuse")
+    expect(result.slug).toBe(slug)
+    const live = (await row()).publishedConfig!
+    expect(live.datetime.start).toBe(START)
+    expect(live.texts.headline).toBe("Before the day")
+    expect(live.texts.closing).toBe("Thank you for coming!")
+    expect(live.gallery).toEqual([photo])
+  })
+
+  it("stays locked when unpublished or archived", async () => {
+    await db
+      .update(schema.invitations)
+      .set({ status: "archived" })
+      .where(eq(schema.invitations.id, id))
+    await save({ event: { title: "Archived then edited" } }, AFTER)
+    expect((await row()).draftConfig.event.title).toBe("Amara & Kofi")
+  })
+
+  it("opens again while support has unlocked it", async () => {
+    await db
+      .update(schema.invitations)
+      .set({ editUnlockedUntil: new Date(AFTER.getTime() + 86_400_000) })
+      .where(eq(schema.invitations.id, id))
+    await save({ event: { title: "Corrected title" } }, AFTER)
+    expect((await row()).draftConfig.event.title).toBe("Corrected title")
+  })
+
+  it("never locks a draft that was not published", async () => {
+    const fresh = await createDraft(db, {
+      ownerId: DEV_USER.id,
+      templateId: "wedding/ivory-garden",
+    })
+    const before = (await getOwnedInvitation(db, {
+      id: fresh.id,
+      ownerId: DEV_USER.id,
+    }))!
+    const config = deepMerge(before.draftConfig, {
+      datetime: { start: "2020-01-01T10:00:00+03:00", end: undefined },
+      event: { title: "Old date, new draft", subEvents: [] },
+    })
+    delete (config.datetime as { end?: string }).end
+    await saveDraft(
+      db,
+      {
+        id: fresh.id,
+        ownerId: DEV_USER.id,
+        config,
+        baseUpdatedAt: before.updatedAt.toISOString(),
+      },
+      AFTER
+    )
+    const after = (await getOwnedInvitation(db, {
+      id: fresh.id,
+      ownerId: DEV_USER.id,
+    }))!
+    expect(after.draftConfig.event.title).toBe("Old date, new draft")
   })
 })

@@ -30,6 +30,10 @@ export type EditorApi = {
   storageDriver: "local" | "r2"
   /** Free or Premium (`src/lib/plans.ts`); Gifts shows a notice on free. */
   plan: "free" | "premium"
+  /** The event has ended (`src/lib/edit-lock.ts`); the server enforces it. */
+  locked: boolean
+  /** False for fields that can no longer change once locked. */
+  canEdit: (path: Path) => boolean
 }
 
 export const EditorContext = createContext<EditorApi | null>(null)

@@ -75,6 +75,8 @@ export async function getOwnedInvitation(
       plan: schema.invitations.plan,
       slug: schema.invitations.slug,
       draftConfig: schema.invitations.draftConfig,
+      publishedConfig: schema.invitations.publishedConfig,
+      editUnlockedUntil: schema.invitations.editUnlockedUntil,
       updatedAt: schema.invitations.updatedAt,
       publishedAt: schema.invitations.publishedAt,
     })

@@ -1,6 +1,7 @@
 // Server functions for invitations. Safe to import from routes: the build
 // replaces handlers with RPC stubs in the client bundle.
 import { createServerFn } from "@tanstack/react-start"
+import { isEditLocked } from "@/lib/edit-lock"
 import { z } from "zod"
 import { hasTemplate } from "@/templates/loaders"
 import { getDb } from "@/server/db/client.server"
@@ -75,8 +76,11 @@ export const getDraftFn = createServerFn({ method: "GET" })
     const ownerId = await requireUserId(db)
     const row = await getOwnedInvitation(db, { id: data.id, ownerId })
     if (!row) return null
+    const { publishedConfig, editUnlockedUntil, ...draft } = row
     return {
-      ...row,
+      ...draft,
+      /** The event has ended: only photos and the closing words can change. */
+      locked: isEditLocked({ publishedConfig, editUnlockedUntil }),
       updatedAt: row.updatedAt.toISOString(),
       publishedAt: row.publishedAt?.toISOString() ?? null,
       /** Which storage uploads go to; the editor badges "local". */

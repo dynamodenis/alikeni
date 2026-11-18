@@ -56,7 +56,7 @@ export function SharingTab({
   lastSavedAt,
   onPublished,
 }: Props) {
-  const { config, invitationId, plan } = useEditor()
+  const { config, invitationId, plan, locked } = useEditor()
   const checkSlug = useServerFn(checkSlugFn)
   const publish = useServerFn(publishFn)
   const hydrated = useHydrated()
@@ -173,6 +173,7 @@ export function SharingTab({
                 setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
               }
               maxLength={60}
+              disabled={locked}
               aria-describedby="slug-status"
               className="rounded-none border-0 focus-visible:ring-0"
             />

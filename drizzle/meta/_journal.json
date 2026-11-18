@@ -43,6 +43,13 @@
       "when": 1794842691071,
       "tag": "0005_album",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795006012758,
+      "tag": "0006_edit_lock",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { canEditWhenLocked } from "@/lib/edit-lock"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
   AlertTriangle,
@@ -61,6 +62,8 @@ export type DraftData = {
   updatedAt: string
   publishedAt: string | null
   storageDriver: "local" | "r2"
+  /** The event has ended: only photos and the closing words can change. */
+  locked: boolean
 }
 
 type TabId =
@@ -137,6 +140,36 @@ const PANELS: Record<Exclude<TabId, "sharing">, ComponentType> = {
   gifts: GiftsTab,
   tickets: TicketsTab,
   album: AlbumTab,
+}
+
+/**
+ * Tabs that still hold something editable after the event. Their own fields
+ * ask `canEdit`; every other tab is switched off as a whole.
+ */
+const OPEN_WHEN_LOCKED: ReadonlySet<TabId> = new Set([
+  "texts",
+  "gallery",
+  "album",
+])
+
+function LockedNotice() {
+  return (
+    <p
+      role="status"
+      className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm"
+    >
+      This event has ended, so the invitation is locked. You can still add
+      gallery photos, manage the album and change the closing words; publish to
+      show them. To correct anything else, write to{" "}
+      <a
+        href="mailto:info@alikeni.com"
+        className="font-medium underline underline-offset-4"
+      >
+        info@alikeni.com
+      </a>
+      .
+    </p>
+  )
 }
 
 /** Dev-only reminder that uploads are going to .storage/, not R2. */
@@ -288,9 +321,17 @@ function EditorLoaded({
     initialUpdatedAt: draft.updatedAt,
   })
 
+  const { locked } = draft
+  const canEdit = useCallback(
+    (path: Path) => !locked || canEditWhenLocked(path),
+    [locked]
+  )
   const set = useCallback(
-    (path: Path, value: unknown) => setConfig((c) => setIn(c, path, value)),
-    []
+    (path: Path, value: unknown) => {
+      // The server ignores these too; refusing here keeps the preview honest.
+      if (canEdit(path)) setConfig((c) => setIn(c, path, value))
+    },
+    [canEdit]
   )
   const issueCount = useCallback(
     (prefix: Path) => {
@@ -314,6 +355,8 @@ function EditorLoaded({
       uploadAudio,
       storageDriver: draft.storageDriver,
       plan: draft.plan,
+      locked,
+      canEdit,
     }),
     [
       draft.id,
@@ -326,6 +369,8 @@ function EditorLoaded({
       uploadAudio,
       draft.storageDriver,
       draft.plan,
+      locked,
+      canEdit,
     ]
   )
 
@@ -489,8 +534,15 @@ function EditorLoaded({
                 {TABS.find((t) => t.id === tab)?.label}
               </h2>
               <div className="flex flex-col gap-8 pb-24">
+                {locked && <LockedNotice />}
                 {Panel ? (
-                  <Panel />
+                  // A disabled fieldset switches off every control inside.
+                  <fieldset
+                    disabled={locked && !OPEN_WHEN_LOCKED.has(tab)}
+                    className="flex min-w-0 flex-col gap-8 disabled:opacity-60"
+                  >
+                    <Panel />
+                  </fieldset>
                 ) : (
                   <SharingTab
                     published={published}

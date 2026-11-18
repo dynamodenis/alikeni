@@ -81,7 +81,7 @@ export function TextField({
   type = "text",
   className,
 }: TextProps) {
-  const { config, set, issue } = useEditor()
+  const { config, set, issue, canEdit } = useEditor()
   const id = useId()
   const value = (getIn(config, path) as string | undefined) ?? ""
   const error = issue(path)
@@ -92,6 +92,7 @@ export function TextField({
     value,
     placeholder,
     maxLength,
+    disabled: !canEdit(path),
     "aria-invalid": !!error,
     "aria-describedby": described(id, help, error),
   }
@@ -221,7 +222,7 @@ export function ToggleField({
   label: string
   help?: string
 }) {
-  const { config, set } = useEditor()
+  const { config, set, canEdit } = useEditor()
   const id = useId()
   return (
     <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card/50 px-4 py-3">
@@ -234,6 +235,7 @@ export function ToggleField({
       <Switch
         id={id}
         checked={getIn(config, path) === true}
+        disabled={!canEdit(path)}
         onCheckedChange={(on) => set(path, on)}
       />
     </div>
@@ -254,7 +256,7 @@ export function DateTimeField({
   optional?: boolean
   className?: string
 }) {
-  const { config, set, issue } = useEditor()
+  const { config, set, issue, canEdit } = useEditor()
   const id = useId()
   const tz = config.datetime.timezone
   const iso = getIn(config, path) as string | undefined
@@ -272,6 +274,7 @@ export function DateTimeField({
         id={id}
         type="datetime-local"
         value={iso ? toZonedInput(iso, tz) : ""}
+        disabled={!canEdit(path)}
         aria-invalid={!!error}
         onChange={(e) => {
           if (!e.target.value) return set(path, optional ? undefined : iso)
