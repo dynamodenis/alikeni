@@ -15,6 +15,7 @@ import {
   Sections,
   Wishes,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
 import { useInvitation } from "../../_shared/context"
 import { Flourishes, PetalField, Seal, StarField } from "../../_shared/decor"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
@@ -37,8 +38,14 @@ function ChristmasDinner({
   config: ChristmasDinnerConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
-  const crest = <Seal label="25" caption="December" />
+  const { motion, palette, locale } = useInvitation()
+  // The seal and the dinner heading show the invitation's own date.
+  const date = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
+  const crest = <Seal label={date.day} caption={date.month} />
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">
@@ -93,7 +100,7 @@ function ChristmasDinner({
               <EventDetails
                 tone="tint"
                 variant="single"
-                eyebrow="Christmas Day"
+                eyebrow={`${date.day} ${date.month}`}
                 title="Dinner is served"
               />
             </Reveal>

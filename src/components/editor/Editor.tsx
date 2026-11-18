@@ -95,6 +95,7 @@ const TABS: Array<{ id: TabId; label: string; prefixes: Array<string> }> = [
       "datetime",
       "age",
       "graduation",
+      "classOf",
     ],
   },
   { id: "people", label: "People", prefixes: ["hosts"] },

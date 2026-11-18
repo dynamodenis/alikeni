@@ -87,7 +87,7 @@ function GoldenYears({
                 tone="tint"
                 variant="milestones"
                 eyebrow={`${config.years} years`}
-                title="Five decades"
+                title="Our years together"
               />
             </Reveal>
           ),

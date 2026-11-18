@@ -11,6 +11,7 @@ import {
   GiftEnvelope,
   Hero,
   Hosts,
+  hostNames,
   MapSection,
   MusicPlayer,
   RsvpForm,
@@ -72,7 +73,7 @@ function MinimalMono({
               variant="list"
               portrait="square"
               eyebrow="the two of us"
-              title="Noor & Jonas"
+              title={hostNames(config.hosts)}
             />
           ),
           countdown: <Countdown variant="inline" eyebrow="until then" />,

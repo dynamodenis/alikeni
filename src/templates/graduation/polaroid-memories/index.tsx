@@ -110,7 +110,7 @@ function PolaroidMemories({
               tone="tint"
               variant="milestones"
               eyebrow="Snapshots in time"
-              title="Four years in frames"
+              title="The years in frames"
             />
           ),
           gallery: (

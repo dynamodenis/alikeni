@@ -14,6 +14,7 @@ import {
   RsvpForm,
   Sections,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
 import { useInvitation } from "../../_shared/context"
 import { Seal, StarField } from "../../_shared/decor"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
@@ -36,8 +37,14 @@ function BlackTieGala({
   config: BlackTieGalaConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
-  const crest = <Seal label="2027" caption="Gala" />
+  const { motion, palette, locale } = useInvitation()
+  // The seal carries the year of the event, not the sample's.
+  const { year } = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
+  const crest = <Seal label={year} caption="Gala" />
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">

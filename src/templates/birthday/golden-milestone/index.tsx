@@ -99,7 +99,7 @@ function GoldenMilestone({
             <StoryTimeline
               tone="tint"
               variant="milestones"
-              eyebrow="Six decades"
+              eyebrow={`${config.age} years`}
               title="A life well lived"
             />
           ),

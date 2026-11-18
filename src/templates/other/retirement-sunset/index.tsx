@@ -93,7 +93,7 @@ function RetirementSunset({
               <StoryTimeline
                 tone="tint"
                 variant="milestones"
-                eyebrow="Thirty-five years"
+                eyebrow="Through the years"
                 title="Career highlights"
               />
             </Reveal>

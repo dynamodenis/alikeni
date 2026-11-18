@@ -15,6 +15,8 @@ import {
   Sections,
   Wishes,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
+import { localDay } from "@/lib/plans"
 import { useInvitation } from "../../_shared/context"
 import { PetalField, WaveLines } from "../../_shared/decor"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
@@ -38,7 +40,18 @@ function TeamOffsite({
   config: TeamOffsiteConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
+  const { motion, palette, locale } = useInvitation()
+  // Itinerary heading: how many days the offsite runs, else its date.
+  const date = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
+  const { start, end, timezone } = config.datetime
+  const dayAt = (iso: string) => Date.parse(localDay(new Date(iso), timezone))
+  const days = end
+    ? Math.round((dayAt(end) - dayAt(start)) / 86_400_000) + 1
+    : 1
   const crest = <TrailBadge className="size-20" />
 
   return (
@@ -77,7 +90,9 @@ function TeamOffsite({
             <Reveal motion={motion}>
               <EventDetails
                 variant="timeline"
-                eyebrow="Two days"
+                eyebrow={
+                  days > 1 ? `${days} days` : `${date.day} ${date.month}`
+                }
                 title="Itinerary"
               />
             </Reveal>

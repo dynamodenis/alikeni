@@ -89,7 +89,11 @@ function SweetSeventeen({
               variant="carousel"
               effect={meta.effects.gallery}
               eyebrow="Little moments"
-              title="Seventeen so far"
+              title={
+                config.age === 17
+                  ? "Seventeen so far"
+                  : `${config.age} years so far`
+              }
             />
           ),
           map: (

@@ -14,6 +14,7 @@ import {
   RsvpForm,
   Sections,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
 import { useInvitation } from "../../_shared/context"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
 import { defineTemplate, type TemplateMode } from "../../types"
@@ -27,7 +28,8 @@ import { schema, type ConferenceGridConfig } from "./schema"
  *
  * Hairline GridLines behind the cover and an editorial, left-aligned hero,
  * the "Schedule" timeline in a tint band, speakers as a square-portrait list
- * and square corners everywhere. No effects; a line ornament.
+ * and square corners everywhere. No effects; a line ornament. The year and
+ * day in the headings come from the event's date.
  */
 function ConferenceGrid({
   config,
@@ -36,7 +38,13 @@ function ConferenceGrid({
   config: ConferenceGridConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
+  const { motion, palette, locale } = useInvitation()
+  // The headings follow the invitation's own date, not the sample's.
+  const date = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">
@@ -53,7 +61,7 @@ function ConferenceGrid({
         <Hero
           variant="editorial"
           titleEffect={meta.effects.title}
-          kicker="Conference · 2027"
+          kicker={`Conference · ${date.year}`}
         >
           <Divider />
         </Hero>
@@ -66,7 +74,7 @@ function ConferenceGrid({
             <EventDetails
               tone="tint"
               variant="timeline"
-              eyebrow="13 May"
+              eyebrow={`${date.day} ${date.month}`}
               title="Schedule"
             />
           ),
@@ -86,7 +94,6 @@ function ConferenceGrid({
               tone="tint"
               variant="grid"
               effect={meta.effects.gallery}
-              eyebrow="2026"
               title="Previous edition"
             />
           ),

@@ -33,6 +33,7 @@ export const defaults: z.infer<typeof schema> = schema.parse({
       photo: photo("class-reunion-david", 800, 1000, "David Mutua"),
     },
   ],
+  classOf: 2007,
   event: {
     type: "other",
     title: "Alliance High Class of '07 Reunion",

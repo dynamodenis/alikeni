@@ -15,6 +15,7 @@ import {
   Sections,
   Wishes,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
 import { useInvitation } from "../../_shared/context"
 import { ConfettiField, Seal } from "../../_shared/decor"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
@@ -25,9 +26,10 @@ import { schema, type ClassReunionConfig } from "./schema"
 import { YearsRibbon } from "./YearsRibbon"
 
 /**
- * Class Reunion: twenty years later.
+ * Class Reunion: years later.
  *
- * A "Class of '07" seal is the crest, a notched "20 years" ribbon hangs under
+ * A "Class of" seal with the class year is the crest, a notched ribbon with the
+ * years since hangs under
  * the poster headline, light confetti and soft particles drift behind, and a
  * "Then" masonry of old photos leads into a stream of "Memories".
  */
@@ -38,8 +40,17 @@ function ClassReunion({
   config: ClassReunionConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
-  const crest = <Seal label="'07" caption="Class of" />
+  const { motion, palette, locale } = useInvitation()
+  // Seal: the class year. Ribbon: years from it to the event's date.
+  const date = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
+  const yearsSince = Number(date.year) - config.classOf
+  const crest = (
+    <Seal label={`'${String(config.classOf).slice(-2)}`} caption="Class of" />
+  )
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">
@@ -62,7 +73,9 @@ function ClassReunion({
           titleEffect={meta.effects.title}
           kicker={config.event.subtitle}
         >
-          <YearsRibbon label="20 years" className="mt-6" />
+          {yearsSince > 0 && (
+            <YearsRibbon label={`${yearsSince} years`} className="mt-6" />
+          )}
           <Divider />
         </Hero>
       </div>
@@ -136,4 +149,14 @@ export default defineTemplate({
   schema,
   defaults,
   Component: ClassReunion,
+  fieldsUi: [
+    {
+      path: ["classOf"],
+      label: "Class of",
+      type: "number",
+      min: 1900,
+      max: 2200,
+      help: "The year you graduated. The ribbon counts the years since.",
+    },
+  ],
 })

@@ -1,10 +1,11 @@
-import { useId } from "react"
+import { useEffect, useId, useRef } from "react"
 import { Switch } from "@/components/ui/switch"
 import {
   MAX_SPONSORS,
   type SectionId,
   type Sponsor,
 } from "@/templates/_shared/schema"
+import { getIn } from "@/lib/set-in"
 import { useEditor } from "../EditorContext"
 import { ListEditor } from "../ListEditor"
 import { editorCopy } from "../copy"
@@ -20,17 +21,23 @@ const capitalise = (word: string) =>
  * Shows or hides a section by adding it to (or removing it from) the page
  * order. A new section goes just above the first of `before` that is on the
  * page, else at the end. The Sections tab can move it afterwards.
+ *
+ * The section also switches itself on when its first content is added
+ * (`hasContent` going from false to true), so a host who adds a ticket sees
+ * it in the preview at once. Switching it off by hand afterwards sticks.
  */
 function SectionSwitch({
   section,
   label,
   help,
   before,
+  hasContent,
 }: {
   section: SectionId
   label: string
   help: string
   before: ReadonlyArray<SectionId>
+  hasContent: boolean
 }) {
   const { config, set } = useEditor()
   const id = useId()
@@ -47,6 +54,12 @@ function SectionSwitch({
     const at = anchor ? order.indexOf(anchor) : order.length
     set(["sectionsOrder"], [...order.slice(0, at), section, ...order.slice(at)])
   }
+  const hadContent = useRef(hasContent)
+  useEffect(() => {
+    const first = hasContent && !hadContent.current
+    hadContent.current = hasContent
+    if (first && !order.includes(section)) toggle(true)
+  })
   return (
     <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card/50 px-4 py-3">
       <div>
@@ -65,8 +78,14 @@ function SectionSwitch({
 }
 
 export function TicketsTab() {
-  const { module } = useEditor()
+  const { module, config } = useEditor()
   const copy = editorCopy(module.meta.category)
+  // Read loosely: drafts saved before these fields existed have no such keys.
+  const count = (path: Array<string>) =>
+    (getIn(config, path) as Array<unknown> | undefined)?.length ?? 0
+  const hasTickets =
+    count(["admission", "tiers"]) > 0 || !!getIn(config, ["admission", "url"])
+  const hasSponsors = count(["sponsors", "items"]) > 0
   return (
     <>
       <Group title="Tickets" description={copy.ticketsDescription}>
@@ -75,6 +94,7 @@ export function TicketsTab() {
           label="Show tickets on the invitation"
           help="Appears once there is at least one ticket or a link."
           before={["rsvp", "calendar", "closing"]}
+          hasContent={hasTickets}
         />
         <TextField
           path={["admission", "title"]}
@@ -140,6 +160,7 @@ export function TicketsTab() {
           label={`Show ${copy.sponsor}s on the invitation`}
           help={`Appears once there is at least one ${copy.sponsor}.`}
           before={["calendar", "closing"]}
+          hasContent={hasSponsors}
         />
         <TextField
           path={["sponsors", "title"]}

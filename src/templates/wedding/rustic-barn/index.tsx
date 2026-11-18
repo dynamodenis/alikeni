@@ -17,6 +17,7 @@ import {
   StoryTimeline,
   Wishes,
 } from "../../_shared/blocks"
+import { dateParts } from "@/lib/format-date"
 import { useInvitation } from "../../_shared/context"
 import { PetalField, Seal } from "../../_shared/decor"
 import { BackgroundFx, Reveal } from "../../_shared/effects"
@@ -40,8 +41,14 @@ function RusticBarn({
   config: RusticBarnConfig
   mode: TemplateMode
 }) {
-  const { motion, palette } = useInvitation()
-  const crest = <Seal label="'27" caption="Est." />
+  const { motion, palette, locale } = useInvitation()
+  // The seal carries the wedding's own year: Est. '27.
+  const date = dateParts(
+    config.datetime.start,
+    config.datetime.timezone,
+    locale
+  )
+  const crest = <Seal label={`'${date.year.slice(-2)}`} caption="Est." />
 
   return (
     <div data-template={meta.id} data-mode={mode} className="relative">

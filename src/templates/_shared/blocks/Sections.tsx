@@ -18,10 +18,13 @@ export const FEATURE_FOR: Partial<Record<SectionId, keyof Features>> = {
 
 export function isSectionEnabled(
   id: SectionId,
+  // The editor passes drafts as stored: ones saved before tickets and
+  // sponsors existed have neither key.
   config: Pick<
     InvitationConfigBase,
-    "features" | "gallery" | "story" | "gifts" | "admission" | "sponsors"
-  >
+    "features" | "gallery" | "story" | "gifts"
+  > &
+    Partial<Pick<InvitationConfigBase, "admission" | "sponsors">>
 ): boolean {
   const flag = FEATURE_FOR[id]
   if (flag && !config.features[flag]) return false
@@ -29,8 +32,8 @@ export function isSectionEnabled(
   if (id === "story" && config.story.length === 0) return false
   if (id === "gifts" && !config.gifts.enabled) return false
   if (id === "admission")
-    return config.admission.tiers.length > 0 || !!config.admission.url
-  if (id === "sponsors") return config.sponsors.items.length > 0
+    return (config.admission?.tiers.length ?? 0) > 0 || !!config.admission?.url
+  if (id === "sponsors") return (config.sponsors?.items.length ?? 0) > 0
   return true
 }
 
