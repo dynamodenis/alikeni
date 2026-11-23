@@ -10,6 +10,7 @@ import {
   MessageSquareText,
   Rocket,
   Sparkles,
+  Undo2,
   Users,
   XCircle,
 } from "lucide-react"
@@ -17,6 +18,7 @@ import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { renderSVG } from "uqr"
 import { Button } from "@/components/ui/button"
+import { useConfirm } from "@/components/ui/confirm"
 import { Input } from "@/components/ui/input"
 import { useHydrated } from "@/hooks/use-hydrated"
 import { FREE_RSVP_LIMIT, freeOnlineUntil } from "@/lib/plans"
@@ -42,6 +44,8 @@ type Props = {
   canPublish: boolean
   lastSavedAt: string
   onPublished: (state: PublishState, updatedAt: string) => void
+  /** Put the draft back to the published version. */
+  onDiscard: () => Promise<void>
 }
 
 type Checked = { slug: string; available: boolean; reason?: string }
@@ -55,6 +59,7 @@ export function SharingTab({
   canPublish,
   lastSavedAt,
   onPublished,
+  onDiscard,
 }: Props) {
   const { config, invitationId, plan, locked } = useEditor()
   const checkSlug = useServerFn(checkSlugFn)
@@ -67,6 +72,7 @@ export function SharingTab({
   )
   const [checked, setChecked] = useState<Checked | null>(null)
   const [busy, setBusy] = useState(false)
+  const [confirm, confirmDialog] = useConfirm()
   const normalized = slug.trim().toLowerCase()
 
   // Results are tied to the slug they were checked for, so "checking" is derived.
@@ -147,8 +153,34 @@ export function SharingTab({
     }
   }
 
+  const doDiscard = async () => {
+    const yes = await confirm({
+      title: "Discard unpublished changes?",
+      body: "Your draft goes back to the version guests see now. Everything you changed since you last published is lost.",
+      action: "Discard changes",
+      destructive: true,
+    })
+    if (!yes) return
+    setBusy(true)
+    try {
+      await onDiscard()
+      toast("Changes discarded", {
+        description: "The draft matches the published invitation again.",
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message.replace(/^\w+: /, "")
+          : String(error)
+      toast.error("Could not discard the changes", { description: message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <>
+      {confirmDialog}
       <PlanBox
         plan={plan}
         invitationId={invitationId}
@@ -212,24 +244,36 @@ export function SharingTab({
                   : ""}
           </p>
         </div>
-        <Button
-          type="button"
-          size="lg"
-          onClick={doPublish}
-          disabled={busy || !canPublish || availability.state !== "ok"}
-          className="self-start"
-        >
-          {busy ? (
-            <LoaderCircle className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Rocket aria-hidden="true" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="lg"
+            onClick={doPublish}
+            disabled={busy || !canPublish || availability.state !== "ok"}
+          >
+            {busy ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Rocket aria-hidden="true" />
+            )}
+            {live
+              ? changedSincePublish
+                ? "Publish changes"
+                : "Republish"
+              : "Publish invitation"}
+          </Button>
+          {changedSincePublish && (
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={doDiscard}
+              disabled={busy}
+            >
+              <Undo2 aria-hidden="true" /> Discard changes
+            </Button>
           )}
-          {live
-            ? changedSincePublish
-              ? "Publish changes"
-              : "Republish"
-            : "Publish invitation"}
-        </Button>
+        </div>
         {!canPublish && (
           <p className="text-xs text-amber-300">
             Save your changes (and fix any highlighted fields) before

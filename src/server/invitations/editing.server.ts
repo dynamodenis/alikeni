@@ -1,6 +1,6 @@
 // Editor persistence: autosave with optimistic concurrency, slugs, publish,
 // and the public read. Pure functions over a Drizzle db (tested on PGlite).
-import { and, eq, ne, sql } from "drizzle-orm"
+import { and, eq, isNotNull, ne, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { applyLockedEdits, isEditLocked } from "@/lib/edit-lock"
 import { configForPlan, freeHasEnded } from "@/lib/plans"
@@ -103,6 +103,45 @@ export async function saveDraft(
       "conflict"
     )
   return { updatedAt: row.updatedAt.toISOString() }
+}
+
+/**
+ * Throw away the draft's unpublished edits: the draft becomes what guests
+ * see now. Allowed while locked too, since it can only put back content that
+ * is already public.
+ *
+ * `updatedAt` goes back to the publish time, so "edited since publishing"
+ * (compared by time in the editor) is false again. Not checked against the
+ * editor's version: discarding is deliberate, whatever another tab saved.
+ */
+export async function discardDraft(
+  db: AnyDb,
+  input: { id: string; ownerId: string }
+) {
+  const updated = await db
+    .update(inv)
+    .set({
+      draftConfig: sql`${inv.publishedConfig}`,
+      updatedAt: sql`coalesce(${inv.publishedAt}, now())`,
+    })
+    .where(
+      and(
+        eq(inv.id, input.id),
+        eq(inv.ownerId, input.ownerId),
+        isNotNull(inv.publishedConfig)
+      )
+    )
+    .returning({ draftConfig: inv.draftConfig, updatedAt: inv.updatedAt })
+  const row = updated.at(0)
+  if (!row)
+    throw new EditorError(
+      "There is no published version to go back to.",
+      "not_found"
+    )
+  return {
+    draftConfig: row.draftConfig,
+    updatedAt: row.updatedAt.toISOString(),
+  }
 }
 
 export type SlugCheck =

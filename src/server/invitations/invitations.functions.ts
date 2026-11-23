@@ -20,6 +20,7 @@ import { EMPTY_STATS, statsForInvitations } from "./dashboard.server"
 import {
   EditorError,
   checkSlug,
+  discardDraft,
   getPublishedBySlug,
   publishInvitation,
   saveDraft,
@@ -121,6 +122,19 @@ export const saveDraftFn = createServerFn({ method: "POST" })
       const db = getDb()
       const ownerId = await requireUserId(db)
       return await saveDraft(db, { ownerId, ...data })
+    } catch (error) {
+      throw editorError(error)
+    }
+  })
+
+/** Discard unpublished edits: the draft goes back to the published version. */
+export const discardDraftFn = createServerFn({ method: "POST" })
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }) => {
+    try {
+      const db = getDb()
+      const ownerId = await requireUserId(db)
+      return currentMedia(await discardDraft(db, { ownerId, ...data }))
     } catch (error) {
       throw editorError(error)
     }

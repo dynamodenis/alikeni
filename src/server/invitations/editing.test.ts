@@ -11,6 +11,7 @@ import { createDraft, getOwnedInvitation } from "./drafts.server"
 import {
   EditorError,
   checkSlug,
+  discardDraft,
   getPublishedBySlug,
   publishInvitation,
   saveDraft,
@@ -162,6 +163,32 @@ describe("slugs and publishing", () => {
     expect(
       (await getPublishedBySlug(db, "zuri-turns-seven"))?.config.texts.headline
     ).toBe("Zuri turns 7!")
+  })
+
+  it("discards unpublished edits, back to the published version", async () => {
+    expect((await current()).draftConfig.texts.headline).toBe(
+      "Draft-only change"
+    )
+    await expect(
+      discardDraft(db, { id: draftId, ownerId: OTHER.id })
+    ).rejects.toMatchObject({ code: "not_found" })
+    const result = await discardDraft(db, { id: draftId, ownerId: DEV_USER.id })
+    const row = await current()
+    expect(result.draftConfig.texts.headline).toBe("Zuri turns 7!")
+    expect(row.draftConfig).toEqual(row.publishedConfig)
+    // The version is the publish time again: nothing is waiting to publish.
+    expect(result.updatedAt).toBe(row.publishedAt?.toISOString())
+    loadedAt = result.updatedAt
+  })
+
+  it("has nothing to discard before the first publish", async () => {
+    const { id } = await createDraft(db, {
+      ownerId: DEV_USER.id,
+      templateId: "birthday/confetti-pop",
+    })
+    await expect(
+      discardDraft(db, { id, ownerId: DEV_USER.id })
+    ).rejects.toMatchObject({ code: "not_found" })
   })
 
   it("refuses a slug another invitation owns", async () => {

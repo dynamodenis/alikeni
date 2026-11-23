@@ -1,6 +1,7 @@
 import { BrandLoader } from "@/components/brand/Loader"
 import { canEditWhenLocked } from "@/lib/edit-lock"
 import { Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useServerFn } from "@tanstack/react-start"
 import {
   AlertTriangle,
   HardDrive,
@@ -29,6 +30,7 @@ import type { DeviceId } from "@/lib/devices"
 import { pathKey, setIn, type Path } from "@/lib/set-in"
 import { cn } from "@/lib/utils"
 import { CATEGORY_LABELS, templateParams } from "@/templates/catalog"
+import { discardDraftFn } from "@/server/invitations/invitations.functions"
 import { loadTemplate } from "@/templates/registry"
 import type { TemplateModule } from "@/templates/types"
 import {
@@ -372,10 +374,21 @@ function EditorLoaded({
     ]
   )
 
+  // Back to the published version. Pending edits are saved first so no
+  // autosave is left to land on top of the restored draft.
+  const discardFn = useServerFn(discardDraftFn)
+  const { settle, adoptDraft } = autosave
+  const discard = useCallback(async () => {
+    await settle()
+    const result = await discardFn({ data: { id: draft.id } })
+    const restored = result.draftConfig as EditorConfig
+    adoptDraft(restored, result.updatedAt)
+    setConfig(restored)
+  }, [settle, adoptDraft, discardFn, draft.id])
+
   // Leaving for another page inside the app (logo, Upgrade, the template
   // link): save first, so nothing typed in the last second is lost. Only
   // when it cannot be saved is the host asked.
-  const { settle } = autosave
   useBlocker({
     shouldBlockFn: async () => {
       if (await settle()) return false
@@ -562,6 +575,7 @@ function EditorLoaded({
                       autosave.state === "saved" && validation.success
                     }
                     lastSavedAt={autosave.lastSavedAt}
+                    onDiscard={discard}
                     onPublished={(state, updatedAt) => {
                       setPublished(state)
                       autosave.adoptVersion(updatedAt)

@@ -132,5 +132,15 @@ export function useAutosave(opts: {
     setLastSavedAt(updatedAt)
   }, [])
 
-  return { state, lastSavedAt, flush, settle, adoptVersion }
+  /** The server replaced the draft (discard): `config` is now what is saved. */
+  const adoptDraft = useCallback((config: EditorConfig, updatedAt: string) => {
+    latest.current = config
+    savedRef.current = config
+    base.current = updatedAt
+    setSavedConfig(config)
+    setLastSavedAt(updatedAt)
+    setFailure(null)
+  }, [])
+
+  return { state, lastSavedAt, flush, settle, adoptVersion, adoptDraft }
 }
