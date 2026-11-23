@@ -384,7 +384,9 @@ function EditorLoaded({
     const restored = result.draftConfig as EditorConfig
     adoptDraft(restored, result.updatedAt)
     setConfig(restored)
-  }, [settle, adoptDraft, discardFn, draft.id])
+    // The dashboard and this route still hold the draft from before.
+    void router.invalidate()
+  }, [settle, adoptDraft, discardFn, draft.id, router])
 
   // Leaving for another page inside the app (logo, Upgrade, the template
   // link): save first, so nothing typed in the last second is lost. Only
