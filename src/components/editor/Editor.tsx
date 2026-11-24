@@ -90,7 +90,13 @@ type TabId =
  * when, who, where, the words, then colours and envelope with real names in
  * the preview, photos, extras, fine-tuning, and sending last.
  */
-const TABS: Array<{ id: TabId; label: string; prefixes: Array<string> }> = [
+const TABS: Array<{
+  id: TabId
+  label: string
+  prefixes: Array<string>
+  /** Guests see what this tab holds on Premium invitations only. */
+  premium?: boolean
+}> = [
   {
     id: "basics",
     label: "Basics",
@@ -115,13 +121,14 @@ const TABS: Array<{ id: TabId; label: string; prefixes: Array<string> }> = [
   { id: "gallery", label: "Gallery", prefixes: ["gallery"] },
   { id: "story", label: "Story", prefixes: ["story"] },
   { id: "music", label: "Music", prefixes: ["music"] },
-  { id: "gifts", label: "Gifts", prefixes: ["gifts"] },
+  { id: "gifts", label: "Gifts", prefixes: ["gifts"], premium: true },
   {
     id: "tickets",
     label: "Tickets & Sponsors",
     prefixes: ["admission", "sponsors"],
+    premium: true,
   },
-  { id: "album", label: "Album", prefixes: [] },
+  { id: "album", label: "Album", prefixes: [], premium: true },
   {
     id: "sections",
     label: "Sections",
@@ -542,6 +549,18 @@ function EditorLoaded({
                         )}
                       >
                         {t.label}
+                        {t.premium && (
+                          <>
+                            <Sparkles
+                              className={cn(
+                                "size-3.5",
+                                tab !== t.id && "text-amber-300"
+                              )}
+                              aria-hidden="true"
+                            />
+                            <span className="sr-only">(Premium)</span>
+                          </>
+                        )}
                         {count > 0 && (
                           <span
                             className="rounded-full bg-destructive px-1.5 text-[0.65rem] font-semibold text-white"

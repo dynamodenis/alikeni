@@ -80,6 +80,11 @@ approval before the migration is written.
 
 Add a line when something goes wrong here. Newest first.
 
+- 2026-11-24: The editor showed "This page did not load" on localhost for
+  every invitation: the local database (`DATABASE_URL` in `.env`) was one
+  migration behind (`0006_edit_lock`), so the editor's query named a column
+  that did not exist. The `db-migrate` workflow only migrates production;
+  run `pnpm db:migrate` locally after pulling or generating a migration.
 - 2026-11-18: The site went down after a deploy because the saved
   `PAYSTACK_SECRET_KEY` did not match the `sk_(test|live)_` pattern. A new
   secret only takes effect in the running Worker on the next deploy or
