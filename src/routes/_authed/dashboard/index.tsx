@@ -1,5 +1,5 @@
 import { DashboardPending } from "@/components/brand/pending"
-import { createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { BrandLink } from "@/components/brand/ButtonLink"
 import { DashboardShell } from "@/components/dashboard/DashboardShell"
@@ -80,6 +80,12 @@ function EmptyState() {
       <BrandLink to="/templates" className="mt-6" arrow>
         Browse templates
       </BrandLink>
+      <Link
+        to="/dashboard/help"
+        className="mt-4 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+      >
+        New here? See how it works
+      </Link>
     </div>
   )
 }

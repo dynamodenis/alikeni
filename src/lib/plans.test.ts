@@ -87,6 +87,34 @@ describe("configForPlan", () => {
   it("keeps them on premium", () => {
     expect(configForPlan(withGifts, "premium")).toBe(withGifts)
   })
+
+  const ticketed = {
+    ...sampleConfig,
+    admission: {
+      title: "Passes",
+      tiers: [{ label: "Regular", price: "KES 4,000" }],
+      url: "https://tickets.example.com/summit",
+    },
+    sponsors: {
+      title: "Partners",
+      items: [{ name: "Acme Bank", url: "https://acme.example.com" }],
+    },
+  }
+
+  it("removes tickets and sponsors on free", () => {
+    const free = configForPlan(ticketed, "free")
+    expect(free.admission).toEqual({ tiers: [] })
+    expect(free.sponsors).toEqual({ items: [] })
+    const sent = JSON.stringify(free)
+    expect(sent).not.toContain("tickets.example.com")
+    expect(sent).not.toContain("Acme Bank")
+  })
+
+  it("keeps tickets and sponsors on premium", () => {
+    const premium = configForPlan(ticketed, "premium")
+    expect(premium.admission.tiers).toHaveLength(1)
+    expect(premium.sponsors.items).toHaveLength(1)
+  })
 })
 
 describe("prices", () => {

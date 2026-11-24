@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { useEffect, useId, useRef } from "react"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -78,7 +79,7 @@ function SectionSwitch({
 }
 
 export function TicketsTab() {
-  const { module, config } = useEditor()
+  const { module, config, plan, invitationId } = useEditor()
   const copy = editorCopy(module.meta.category)
   // Read loosely: drafts saved before these fields existed have no such keys.
   const count = (path: Array<string>) =>
@@ -88,6 +89,20 @@ export function TicketsTab() {
   const hasSponsors = count(["sponsors", "items"]) > 0
   return (
     <>
+      {plan === "free" && (
+        <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+          Guests see tickets and {copy.sponsor}s on Premium invitations only.
+          You can fill them in now; they appear once you{" "}
+          <Link
+            to="/dashboard/$invitationId/upgrade"
+            params={{ invitationId }}
+            className="font-medium underline underline-offset-4"
+          >
+            upgrade
+          </Link>
+          .
+        </p>
+      )}
       <Group title="Tickets" description={copy.ticketsDescription}>
         <SectionSwitch
           section="admission"

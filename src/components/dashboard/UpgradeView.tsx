@@ -87,7 +87,7 @@ export function UpgradeView({
           </p>
           <p className="text-muted-foreground">
             The page stays online after the event, RSVPs are unlimited and the
-            gift section is shown to guests.
+            gift section, tickets and sponsors are shown to guests.
             {info.paid &&
               ` Paid ${new Intl.NumberFormat("en", {
                 style: "currency",
@@ -143,7 +143,7 @@ export function UpgradeView({
               ? `Page online until ${formatDay(info.onlineUntil)} (the day after the event)`
               : "Page online until the day after the event",
             `Up to ${FREE_RSVP_LIMIT} RSVPs (${info.responses} so far)`,
-            "No gift section",
+            "No gift section, tickets or sponsors",
             `${FREE_PUBLISHED_LIMIT} free invitations per account`,
           ]}
         />
@@ -155,6 +155,7 @@ export function UpgradeView({
             "Page stays online after the event",
             "Unlimited RSVPs",
             "Gift section: bank accounts, M-Pesa, QR code, registry links",
+            "Tickets with a “Get tickets” button, and your sponsors’ logos",
             "Event photo album: guests add their photos, we host them",
             "Does not count towards your free invitations",
             "One-time payment for this invitation",

@@ -1,6 +1,6 @@
 import { forgetNavigationSession } from "@/lib/session"
 import { Link, useRouteContext, useRouter } from "@tanstack/react-router"
-import { LayoutGrid, LogOut } from "lucide-react"
+import { CircleHelp, LayoutGrid, LogOut } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +54,12 @@ export function UserMenu() {
           <Link to="/dashboard">
             <LayoutGrid aria-hidden="true" />
             My invitations
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/help">
+            <CircleHelp aria-hidden="true" />
+            Help
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void signOut()}>

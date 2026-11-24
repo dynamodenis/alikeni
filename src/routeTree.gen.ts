@@ -27,6 +27,7 @@ import { Route as IcsSlugRouteImport } from './routes/ics/$slug'
 import { Route as OgChar123slugChar125DotpngRouteImport } from './routes/og/{$slug}[.]png'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
+import { Route as AuthedDashboardHelpRouteImport } from './routes/_authed/dashboard/help'
 import { Route as AuthedEditorInvitationIdRouteImport } from './routes/_authed/editor/$invitationId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiCronNotificationsRouteImport } from './routes/api/cron/notifications'
@@ -134,6 +135,11 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
 const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedDashboardHelpRoute = AuthedDashboardHelpRouteImport.update({
+  id: '/dashboard/help',
+  path: '/dashboard/help',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedEditorInvitationIdRoute =
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/blog/': typeof BlogIndexRoute
   '/templates/': typeof TemplatesIndexRoute
+  '/dashboard/help': typeof AuthedDashboardHelpRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/notifications': typeof ApiCronNotificationsRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/blog': typeof BlogIndexRoute
   '/templates': typeof TemplatesIndexRoute
+  '/dashboard/help': typeof AuthedDashboardHelpRoute
   '/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/notifications': typeof ApiCronNotificationsRoute
@@ -325,6 +333,7 @@ export interface FileRoutesById {
   '/og/{$slug}.png': typeof OgChar123slugChar125DotpngRoute
   '/blog/': typeof BlogIndexRoute
   '/templates/': typeof TemplatesIndexRoute
+  '/_authed/dashboard/help': typeof AuthedDashboardHelpRoute
   '/_authed/editor/$invitationId': typeof AuthedEditorInvitationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/notifications': typeof ApiCronNotificationsRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/og/{$slug}.png'
     | '/blog/'
     | '/templates/'
+    | '/dashboard/help'
     | '/editor/$invitationId'
     | '/api/auth/$'
     | '/api/cron/notifications'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/og/{$slug}.png'
     | '/blog'
     | '/templates'
+    | '/dashboard/help'
     | '/editor/$invitationId'
     | '/api/auth/$'
     | '/api/cron/notifications'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/og/{$slug}.png'
     | '/blog/'
     | '/templates/'
+    | '/_authed/dashboard/help'
     | '/_authed/editor/$invitationId'
     | '/api/auth/$'
     | '/api/cron/notifications'
@@ -616,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/dashboard/help': {
+      id: '/_authed/dashboard/help'
+      path: '/dashboard/help'
+      fullPath: '/dashboard/help'
+      preLoaderRoute: typeof AuthedDashboardHelpRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/editor/$invitationId': {
       id: '/_authed/editor/$invitationId'
       path: '/editor/$invitationId'
@@ -765,6 +784,7 @@ const DevRouteRouteWithChildren = DevRouteRoute._addFileChildren(
 
 interface AuthedRouteChildren {
   AuthedConnectGoogleRoute: typeof AuthedConnectGoogleRoute
+  AuthedDashboardHelpRoute: typeof AuthedDashboardHelpRoute
   AuthedEditorInvitationIdRoute: typeof AuthedEditorInvitationIdRoute
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
   AuthedDashboardInvitationIdAlbumRoute: typeof AuthedDashboardInvitationIdAlbumRoute
@@ -775,6 +795,7 @@ interface AuthedRouteChildren {
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedConnectGoogleRoute: AuthedConnectGoogleRoute,
+  AuthedDashboardHelpRoute: AuthedDashboardHelpRoute,
   AuthedEditorInvitationIdRoute: AuthedEditorInvitationIdRoute,
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
   AuthedDashboardInvitationIdAlbumRoute: AuthedDashboardInvitationIdAlbumRoute,

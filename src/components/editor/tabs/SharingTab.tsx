@@ -426,7 +426,8 @@ function PlanBox({
         />
         <span>
           <span className="font-medium">Premium.</span> The page stays online
-          after the event, RSVPs are unlimited and guests see the gift section.
+          after the event, RSVPs are unlimited and guests see the gift section,
+          tickets and sponsors.
         </span>
       </p>
     )
@@ -445,14 +446,15 @@ function PlanBox({
           day after the event, then the page goes offline.
         </li>
         <li>Up to {FREE_RSVP_LIMIT} RSVPs.</li>
-        <li>Gift details are not shown to guests.</li>
+        <li>Gift details, tickets and sponsors are not shown to guests.</li>
         <li>
           One account can publish {FREE_PUBLISHED_LIMIT} free invitations.
         </li>
       </ul>
       <p className="text-sm">
         Premium keeps the page online for good, lifts the RSVP cap and shows the
-        gift section. One-time payment for this invitation.
+        gift section, tickets and sponsors. One-time payment for this
+        invitation.
       </p>
       <Button asChild size="sm" className="self-start">
         <Link to="/dashboard/$invitationId/upgrade" params={{ invitationId }}>

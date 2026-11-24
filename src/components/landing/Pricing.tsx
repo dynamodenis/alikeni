@@ -23,6 +23,7 @@ const FREE: Array<Item> = [
   { text: "Online until the day after the event" },
   { text: `${FREE_PUBLISHED_LIMIT} free invitations per account` },
   { text: "Gift section", included: false },
+  { text: "Tickets and sponsors", included: false },
   { text: "Event photo album", included: false },
 ]
 
@@ -37,6 +38,9 @@ const premium = (kenya: boolean): Array<Item> => [
       : "Gift section: bank accounts, QR code, registry links",
   },
   { text: "Event photo album: guests add their photos, we host them" },
+  {
+    text: "For ticketed events: prices with a “Get tickets” button to your ticket seller, and your sponsors’ logos",
+  },
 ]
 
 /**

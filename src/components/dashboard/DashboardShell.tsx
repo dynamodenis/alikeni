@@ -32,6 +32,12 @@ export function DashboardShell({
             >
               Templates
             </Link>
+            <Link
+              to="/dashboard/help"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Help
+            </Link>
             <UserMenu />
           </div>
         </div>

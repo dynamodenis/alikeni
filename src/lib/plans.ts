@@ -143,8 +143,10 @@ const NO_GIFTS: InvitationConfigBase["gifts"] = {
 
 /**
  * The published config as guests may see it on `plan`. Free: no gift
- * section, and the bank, wallet, QR and registry details are removed, so they
- * never leave the server.
+ * section, no tickets and no sponsors. Their details (bank, wallet, QR and
+ * registry; ticket prices and link; sponsor names, logos and links) are
+ * removed, so they never leave the server. The host's draft keeps them, and
+ * they appear once the invitation is Premium.
  */
 export function configForPlan<TConfig extends InvitationConfigBase>(
   config: TConfig,
@@ -155,5 +157,7 @@ export function configForPlan<TConfig extends InvitationConfigBase>(
     ...config,
     gifts: NO_GIFTS,
     features: { ...config.features, gifts: false },
+    admission: { tiers: [] },
+    sponsors: { items: [] },
   }
 }
