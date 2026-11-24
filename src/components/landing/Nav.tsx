@@ -17,6 +17,7 @@ type NavItem = { href: string; label: string; to?: "/templates" | "/blog" }
 export const NAV_LINKS: ReadonlyArray<NavItem> = [
   { href: "/#how", label: "How it works" },
   { href: "/#features", label: "Features" },
+  { href: "/#pricing", label: "Pricing" },
   { href: "/templates", label: "Templates", to: "/templates" },
   { href: "/blog", label: "Blog", to: "/blog" },
 ]

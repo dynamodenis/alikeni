@@ -10,7 +10,12 @@ import {
 import { useState, type ReactNode } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { FREE_RSVP_LIMIT, formatPrice, type Currency } from "@/lib/plans"
+import {
+  FREE_PUBLISHED_LIMIT,
+  FREE_RSVP_LIMIT,
+  formatPrice,
+  type Currency,
+} from "@/lib/plans"
 import { cn } from "@/lib/utils"
 import { startCheckoutFn } from "@/server/payments/payments.functions"
 import type {
@@ -139,6 +144,7 @@ export function UpgradeView({
               : "Page online until the day after the event",
             `Up to ${FREE_RSVP_LIMIT} RSVPs (${info.responses} so far)`,
             "No gift section",
+            `${FREE_PUBLISHED_LIMIT} free invitations per account`,
           ]}
         />
         <PlanCard
@@ -149,6 +155,8 @@ export function UpgradeView({
             "Page stays online after the event",
             "Unlimited RSVPs",
             "Gift section: bank accounts, M-Pesa, QR code, registry links",
+            "Event photo album: guests add their photos, we host them",
+            "Does not count towards your free invitations",
             "One-time payment for this invitation",
           ]}
         />

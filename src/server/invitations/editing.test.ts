@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { deepMerge } from "@/lib/deep-merge"
+import { FREE_PUBLISHED_LIMIT } from "@/lib/plans"
 import * as schema from "@/server/db/schema"
 import { DEV_USER } from "@/server/db/seed"
 import { createDraft, getOwnedInvitation } from "./drafts.server"
@@ -203,6 +204,68 @@ describe("slugs and publishing", () => {
     })
     await expect(attempt).rejects.toBeInstanceOf(EditorError)
     await expect(attempt).rejects.toMatchObject({ code: "slug_taken" })
+  })
+})
+
+describe("free publish limit", () => {
+  // Its own account, so the invitations above do not count.
+  const HOST = { id: "limit-user", email: "limit@example.com" }
+  const draft = async () =>
+    (
+      await createDraft(db, {
+        ownerId: HOST.id,
+        templateId: "birthday/confetti-pop",
+      })
+    ).id
+  const publish = (id: string, slug: string) =>
+    publishInvitation(db, { id, ownerId: HOST.id, slug })
+  let first = ""
+  let third = ""
+
+  beforeAll(async () => {
+    await db.insert(schema.users).values(HOST)
+    first = await draft()
+    await publish(first, "limit-first")
+    await publish(await draft(), "limit-second")
+    third = await draft()
+  })
+
+  it("refuses another free invitation once the account has its limit", async () => {
+    expect(FREE_PUBLISHED_LIMIT).toBe(2)
+    const attempt = publish(third, "limit-third")
+    await expect(attempt).rejects.toMatchObject({ code: "free_limit" })
+    expect(await getPublishedBySlug(db, "limit-third")).toBeNull()
+  })
+
+  it("still republishes an invitation that is already out", async () => {
+    await expect(publish(first, "limit-first")).resolves.toMatchObject({
+      slug: "limit-first",
+    })
+  })
+
+  it("does not free a place when a published one is archived", async () => {
+    await db
+      .update(schema.invitations)
+      .set({ status: "archived" })
+      .where(eq(schema.invitations.id, first))
+    await expect(publish(third, "limit-third")).rejects.toMatchObject({
+      code: "free_limit",
+    })
+  })
+
+  it("publishes a Premium invitation whatever the count", async () => {
+    await db
+      .update(schema.invitations)
+      .set({ plan: "premium" })
+      .where(eq(schema.invitations.id, third))
+    await expect(publish(third, "limit-third")).resolves.toMatchObject({
+      slug: "limit-third",
+    })
+    // A Premium invitation does not use a free place either.
+    const fourth = await draft()
+    await expect(publish(fourth, "limit-fourth")).rejects.toMatchObject({
+      code: "free_limit",
+    })
   })
 })
 

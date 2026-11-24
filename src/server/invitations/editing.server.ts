@@ -1,9 +1,9 @@
 // Editor persistence: autosave with optimistic concurrency, slugs, publish,
 // and the public read. Pure functions over a Drizzle db (tested on PGlite).
-import { and, eq, isNotNull, ne, sql } from "drizzle-orm"
+import { and, count, eq, isNotNull, ne, sql } from "drizzle-orm"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { applyLockedEdits, isEditLocked } from "@/lib/edit-lock"
-import { configForPlan, freeHasEnded } from "@/lib/plans"
+import { FREE_PUBLISHED_LIMIT, configForPlan, freeHasEnded } from "@/lib/plans"
 import { RESERVED_SLUGS, SLUG_PATTERN } from "@/lib/slug"
 import { invalidatePublishedCard } from "@/server/og/cache.server"
 import { loadTemplate } from "@/templates/registry"
@@ -17,7 +17,12 @@ export class EditorError extends Error {
   constructor(
     message: string,
     readonly code:
-      "not_found" | "invalid" | "conflict" | "slug_taken" | "slug_invalid"
+      | "not_found"
+      | "invalid"
+      | "conflict"
+      | "slug_taken"
+      | "slug_invalid"
+      | "free_limit"
   ) {
     super(message)
     this.name = "EditorError"
@@ -37,6 +42,7 @@ async function ownedForEdit(db: AnyDb, id: string, ownerId: string, now: Date) {
       .select({
         templateId: inv.templateId,
         slug: inv.slug,
+        plan: inv.plan,
         draftConfig: inv.draftConfig,
         publishedConfig: inv.publishedConfig,
         publishedAt: inv.publishedAt,
@@ -174,7 +180,35 @@ export async function checkSlug(
 }
 
 /**
+ * How many free invitations the owner has published, leaving out `exceptId`.
+ * Archived and ended ones count: taking a page down does not free a place.
+ */
+async function freePublishedCount(
+  db: AnyDb,
+  ownerId: string,
+  exceptId: string
+) {
+  const [row] = await db
+    .select({ total: count() })
+    .from(inv)
+    .where(
+      and(
+        eq(inv.ownerId, ownerId),
+        eq(inv.plan, "free"),
+        isNotNull(inv.publishedConfig),
+        ne(inv.id, exceptId)
+      )
+    )
+  return row.total
+}
+
+/**
  * Publish (or republish) the current draft at `slug`.
+ *
+ * A free invitation that has never been published is refused once the
+ * account already has `FREE_PUBLISHED_LIMIT` published free invitations.
+ * Republishing one that is already out, and any Premium invitation, is not
+ * counted.
  *
  * Once the event has ended, republishing only carries the draft's photos and
  * closing words onto the published page; its date, names, address and the
@@ -187,6 +221,16 @@ export async function publishInvitation(
 ) {
   const owned = await ownedForEdit(db, input.id, input.ownerId, now)
   const { templateId } = owned
+  if (
+    owned.plan === "free" &&
+    !owned.publishedConfig &&
+    (await freePublishedCount(db, input.ownerId, input.id)) >=
+      FREE_PUBLISHED_LIMIT
+  )
+    throw new EditorError(
+      `You have published ${FREE_PUBLISHED_LIMIT} free invitations, the most one account can have. Upgrade this invitation to Premium to publish it.`,
+      "free_limit"
+    )
   const keepSlug = owned.locked && owned.slug ? owned.slug : null
   const check = keepSlug
     ? ({ available: true } as const)

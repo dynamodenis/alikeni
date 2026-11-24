@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import {
   CheckCircle2,
@@ -21,7 +21,11 @@ import { Button } from "@/components/ui/button"
 import { useConfirm } from "@/components/ui/confirm"
 import { Input } from "@/components/ui/input"
 import { useHydrated } from "@/hooks/use-hydrated"
-import { FREE_RSVP_LIMIT, freeOnlineUntil } from "@/lib/plans"
+import {
+  FREE_PUBLISHED_LIMIT,
+  FREE_RSVP_LIMIT,
+  freeOnlineUntil,
+} from "@/lib/plans"
 import { suggestSlug } from "@/lib/slug"
 import { cn } from "@/lib/utils"
 import {
@@ -64,6 +68,7 @@ export function SharingTab({
   const { config, invitationId, plan, locked } = useEditor()
   const checkSlug = useServerFn(checkSlugFn)
   const publish = useServerFn(publishFn)
+  const navigate = useNavigate()
   const hydrated = useHydrated()
   const [slug, setSlug] = useState(
     () =>
@@ -143,11 +148,24 @@ export function SharingTab({
         description: `/i/${result.slug}`,
       })
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message.replace(/^\w+: /, "")
-          : String(error)
-      toast.error("Could not publish", { description: message })
+      const raw = error instanceof Error ? error.message : String(error)
+      const overLimit = raw.startsWith("free_limit:")
+      toast.error("Could not publish", {
+        // Long enough to read the reason and reach the button.
+        duration: overLimit ? 15_000 : undefined,
+        description: raw.replace(/^\w+: /, ""),
+        // The account has used its free invitations: the way on is to pay.
+        action: overLimit
+          ? {
+              label: "Upgrade",
+              onClick: () =>
+                void navigate({
+                  to: "/dashboard/$invitationId/upgrade",
+                  params: { invitationId },
+                }),
+            }
+          : undefined,
+      })
     } finally {
       setBusy(false)
     }
@@ -428,6 +446,9 @@ function PlanBox({
         </li>
         <li>Up to {FREE_RSVP_LIMIT} RSVPs.</li>
         <li>Gift details are not shown to guests.</li>
+        <li>
+          One account can publish {FREE_PUBLISHED_LIMIT} free invitations.
+        </li>
       </ul>
       <p className="text-sm">
         Premium keeps the page online for good, lifts the RSVP cap and shows the

@@ -188,7 +188,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[?]` blocked / needs d
 ## Phase 9 — Payments (Paystack)
 
 - [x] Plans in `src/lib/plans.ts`: free page offline after the day following the last event day (event time zone), 50 RSVPs (`FREE_RSVP_LIMIT`), no gift section; Premium one-time per invitation
-- [?] Prices are placeholders: KES 1,500 / USD 12 (`PREMIUM_PRICE`)
+- [?] Prices are placeholders: KES 2,500 / USD 29 (`PREMIUM_PRICE`)
 - [x] Migration `0003_payments`: `invitations.plan` (free | premium), `orders` (reference, amount in subunits, currency, status pending | paid | failed, Paystack id + channel)
 - [x] Paystack client (`src/server/payments/paystack.server.ts`, fetch + Web Crypto): initialize, verify, webhook HMAC-SHA512 check in constant time
 - [x] Flow: `startCheckoutFn` (owner only) → hosted checkout (M-Pesa / card / Apple Pay) → webhook `POST /api/payments/paystack` and `?reference=` return both call `applyTransaction` (exact amount + currency, idempotent, editor `updated_at` untouched)

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { LandingPage } from "@/components/landing/LandingPage"
+import { priceCurrencies } from "@/lib/plans"
+import { visitorCountry } from "@/server/geo/visitor-country.functions"
 import {
   organizationJsonLd,
   seo,
@@ -17,5 +19,15 @@ export const Route = createFileRoute("/")({
       imageAlt: "Alikeni, online invitations with RSVP",
       jsonLd: [organizationJsonLd, websiteJsonLd, webApplicationJsonLd],
     }),
-  component: LandingPage,
+  // Which prices to show: read from the request while rendering, so it
+  // costs no call. Kept for the visit so the prices do not change under
+  // someone who comes back to this page.
+  loader: () => ({ currencies: priceCurrencies(visitorCountry()) }),
+  staleTime: Infinity,
+  component: Home,
 })
+
+function Home() {
+  const { currencies } = Route.useLoaderData()
+  return <LandingPage currencies={currencies} />
+}

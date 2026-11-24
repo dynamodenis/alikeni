@@ -9,6 +9,7 @@ import {
   freeOnlineUntil,
   lastEventMoment,
   localDay,
+  priceCurrencies,
 } from "./plans"
 
 const dated = (
@@ -102,8 +103,15 @@ describe("prices", () => {
     expect(defaultCurrency("KE", ["USD", "KES"])).toBe("KES")
   })
 
+  it("shows shillings only to visitors in Kenya", () => {
+    expect(priceCurrencies("KE")).toEqual(["KES", "USD"])
+    expect(priceCurrencies("ke")).toEqual(["KES", "USD"])
+    expect(priceCurrencies("DE")).toEqual(["USD"])
+    expect(priceCurrencies(null)).toEqual(["USD"])
+  })
+
   it("formats whole amounts without decimals", () => {
-    expect(formatPrice("USD")).toBe("$12")
-    expect(formatPrice("KES")).toMatch(/^KES\s1,500$/)
+    expect(formatPrice("USD")).toBe("$29")
+    expect(formatPrice("KES")).toMatch(/^KES\s2,500$/)
   })
 })

@@ -1,4 +1,4 @@
-import { FREE_RSVP_LIMIT } from "@/lib/plans"
+import { FREE_PUBLISHED_LIMIT, FREE_RSVP_LIMIT } from "@/lib/plans"
 import { Faq, type FaqItem } from "./Faq"
 import { OccasionLinks } from "./OccasionLinks"
 import { SectionHeading } from "./SectionHeading"
@@ -10,7 +10,7 @@ const QUESTIONS: Array<FaqItem> = [
   },
   {
     q: "Is it free to create an invitation?",
-    a: `Yes. Creating, publishing and sharing an invitation is free. A free invitation takes up to ${FREE_RSVP_LIMIT} RSVPs and stays online until the day after the event. A one-time Premium upgrade for that invitation removes both limits and adds a gift section.`,
+    a: `Yes. Creating, publishing and sharing an invitation is free. A free invitation takes up to ${FREE_RSVP_LIMIT} RSVPs and stays online until the day after the event, and one account can publish ${FREE_PUBLISHED_LIMIT} free invitations. A one-time Premium upgrade for an invitation removes those limits and adds a gift section.`,
   },
   {
     q: "How do guests RSVP?",

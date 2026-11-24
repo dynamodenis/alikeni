@@ -16,19 +16,25 @@ export const FREE_DAYS_AFTER_EVENT = 1
 export const FREE_RSVP_LIMIT = 50
 
 /**
+ * Free invitations one account may publish. Counted over the account's free
+ * invitations that have been published, archived or ended ones included; a
+ * Premium invitation never counts. Enforced in `publishInvitation`.
+ */
+export const FREE_PUBLISHED_LIMIT = 2
+
+/**
  * One-time Premium upgrade per invitation, in each currency's subunit (what
  * Paystack charges). KES is for M-Pesa and Kenyan cards, USD for everyone
  * else. Placeholder prices: change them here.
  */
-// TEMPORARY live-test prices (KES 200 / $3). Restore: { KES: 150_000, USD: 1_200 }
-export const PREMIUM_PRICE = { KES: 20_000, USD: 300 } as const
+export const PREMIUM_PRICE = { KES: 250_000, USD: 2_900 } as const
 export type Currency = keyof typeof PREMIUM_PRICE
 export const CURRENCIES = Object.keys(PREMIUM_PRICE) as Array<Currency>
 
 export const isCurrency = (value: unknown): value is Currency =>
   typeof value === "string" && value in PREMIUM_PRICE
 
-/** "KES 1,500" / "$12". */
+/** "KES 2,500" / "$29". */
 export function formatPrice(currency: Currency, locale = "en"): string {
   const amount = PREMIUM_PRICE[currency] / 100
   return new Intl.NumberFormat(locale, {
@@ -50,6 +56,16 @@ export const defaultCurrency = (
   const preferred: Currency = country?.toUpperCase() === "KE" ? "KES" : "USD"
   return available.includes(preferred) ? preferred : (available[0] ?? preferred)
 }
+
+/**
+ * The currencies to show a price in before anyone is paying (the home
+ * page): shillings and dollars in Kenya, dollars alone everywhere else and
+ * when the country is unknown.
+ */
+export const priceCurrencies = (
+  country: string | null | undefined
+): Array<Currency> =>
+  country?.toUpperCase() === "KE" ? ["KES", "USD"] : ["USD"]
 
 /* ---------- free-plan expiry ---------- */
 
