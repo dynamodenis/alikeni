@@ -68,21 +68,22 @@ export function Closing({
 }
 
 /**
- * Link to the Alikeni home page for guests who want an invitation of their
- * own. `ref` says where on the invitation it was tapped ("invite-footer",
- * "invite-rsvp"), so sign-ups that start on an invitation can be counted.
+ * Where the links from an invitation back to Alikeni lead: the template
+ * gallery, tagged so visits that start on an invitation can be counted in
+ * analytics. `content` says which link was tapped.
  */
-export function CreateYoursLink({
-  source,
-  className,
-}: {
-  source: "footer" | "rsvp"
-  className?: string
-}) {
+export const madeWithHref = (content: "footer" | "rsvp") =>
+  `/templates?utm_source=invitation&utm_medium=referral&utm_campaign=made_with&utm_content=${content}`
+
+/**
+ * Button for guests who have just replied and may want an invitation of
+ * their own.
+ */
+export function CreateYoursLink({ className }: { className?: string }) {
   const { t } = useInvitation()
   return (
     <a
-      href={`/?ref=invite-${source}`}
+      href={madeWithHref("rsvp")}
       className={cn(
         "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-inv-line px-5 text-sm text-inv-fg transition-colors hover:border-inv-primary hover:text-inv-primary focus-visible:ring-2 focus-visible:ring-inv-primary focus-visible:ring-offset-2 focus-visible:ring-offset-inv-bg focus-visible:outline-none",
         className
@@ -95,8 +96,10 @@ export function CreateYoursLink({
 }
 
 /**
- * Footer every invitation ends with. Guests also get the "create your own"
- * link; previews are already on the site, so they keep the plain credit.
+ * Footer every invitation ends with, on every plan: the host's note, the
+ * music credit and one underlined "Made with Alikeni" link to the template
+ * gallery. Previews are already on the site, so their link carries no
+ * tracking tags.
  */
 export function Footer({ className }: { className?: string }) {
   const { config, mode, slug, album, t } = useInvitation()
@@ -118,18 +121,12 @@ export function Footer({ className }: { className?: string }) {
       )}
       {config.texts.footerNote && <p>{config.texts.footerNote}</p>}
       <MusicCredit />
-      <p>
-        {t.closing.madeWith}{" "}
-        <a
-          href="/"
-          className="underline-offset-4 hover:text-inv-fg hover:underline"
-        >
-          Alikeni
-        </a>
-      </p>
-      {mode === "public" && (
-        <CreateYoursLink source="footer" className="mt-2" />
-      )}
+      <a
+        href={mode === "public" ? madeWithHref("footer") : "/templates"}
+        className="mt-2 inline-flex min-h-11 items-center text-sm text-inv-fg underline decoration-inv-primary underline-offset-4 transition-colors hover:text-inv-primary focus-visible:text-inv-primary focus-visible:outline-none"
+      >
+        {t.closing.madeWith}
+      </a>
     </footer>
   )
 }

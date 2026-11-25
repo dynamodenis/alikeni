@@ -5,7 +5,7 @@ import { InvitationProvider } from "../context"
 import { sampleInvitationConfig } from "../schema/sample"
 import type { TemplateMode } from "../../types"
 import type { Host } from "../schema"
-import { Closing, Footer } from "./Closing"
+import { Closing, Footer, madeWithHref } from "./Closing"
 
 const footer = (mode: TemplateMode, locale: "en" | "id" = "en") =>
   renderToString(
@@ -18,22 +18,27 @@ const footer = (mode: TemplateMode, locale: "en" | "id" = "en") =>
   )
 
 describe("invitation footer", () => {
-  it("invites guests to create their own invitation, tagged by source", () => {
+  it("links to the template gallery, underlined and tagged for analytics", () => {
     const html = footer("public")
-    expect(html).toContain('href="/?ref=invite-footer"')
-    expect(html).toContain("Create your own invitation, free")
+    expect(html).toContain(
+      'href="/templates?utm_source=invitation&amp;utm_medium=referral&amp;utm_campaign=made_with&amp;utm_content=footer"'
+    )
+    expect(html).toContain("Made with Alikeni – create yours free")
+    expect(html).toMatch(/class="[^"]*\bunderline\b[^"]*"/)
+    expect(madeWithHref("rsvp")).toContain("utm_content=rsvp")
   })
 
   it("uses the invitation's language", () => {
     expect(footer("public", "id")).toContain(
-      "Buat undangan Anda sendiri, gratis"
+      "Dibuat dengan Alikeni – buat undangan Anda, gratis"
     )
   })
 
-  it("keeps only the plain credit in previews", () => {
+  it("shows the same link in previews, without tracking tags", () => {
     const html = footer("preview")
-    expect(html).not.toContain("?ref=invite")
-    expect(html).toContain("Alikeni")
+    expect(html).toContain("Made with Alikeni – create yours free")
+    expect(html).toContain('href="/templates"')
+    expect(html).not.toContain("utm_")
   })
 })
 

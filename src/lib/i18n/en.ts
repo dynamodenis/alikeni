@@ -144,7 +144,7 @@ export const en = {
   closing: {
     signOff: "With love",
     signOffFormal: "We look forward to welcoming you",
-    madeWith: "Made with",
+    madeWith: "Made with Alikeni – create yours free",
     createYours: "Create your own invitation, free",
     album: "Photos & videos from the event",
   },

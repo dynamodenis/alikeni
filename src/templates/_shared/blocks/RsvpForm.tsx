@@ -121,7 +121,7 @@ export function RsvpForm({
           </p>
           <div className="flex flex-col items-center gap-3">
             <p className="text-sm text-inv-muted">{t.rsvp.hostPrompt}</p>
-            <CreateYoursLink source="rsvp" />
+            <CreateYoursLink />
           </div>
         </div>
       ) : (
