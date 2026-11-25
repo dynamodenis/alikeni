@@ -4,7 +4,15 @@ export const meta: TemplateMeta = {
   id: "other/khitanan-ceria",
   name: "Khitanan Ceria",
   category: "other",
-  tags: ["khitanan", "sunat", "ceria", "indonesia", "confetti", "kids"],
+  tags: [
+    "khitanan",
+    "sunat",
+    "islamic",
+    "ceria",
+    "indonesia",
+    "confetti",
+    "kids",
+  ],
   description:
     "A joyful khitanan: bunting and confetti over falling confetti particles, a seal crest with the boy's initial and warm Indonesian copy throughout.",
   thumbnail: "/thumbs/other-khitanan-ceria.webp",

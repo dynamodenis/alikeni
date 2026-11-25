@@ -8,30 +8,24 @@ import { Ornament } from "@/components/landing/InvitationCard"
 import { RichText } from "@/blog/RichText"
 import { OccasionLinks } from "@/components/landing/OccasionLinks"
 import { breadcrumbJsonLd, itemListJsonLd, seo } from "@/lib/seo"
-import { CATEGORY_LABELS } from "@/templates/catalog"
-import { CATEGORY_PAGES } from "@/templates/category-pages"
-import { TEMPLATE_METAS } from "@/templates/registry"
-import { TEMPLATE_CATEGORIES, type TemplateCategory } from "@/templates/types"
-
-const isCategory = (value: string): value is TemplateCategory =>
-  (TEMPLATE_CATEGORIES as ReadonlyArray<string>).includes(value)
+import { getListing, type Listing } from "@/templates/listings"
 
 /**
- * Occasion landing page, `/templates/<category>` (e.g. /templates/wedding):
- * that occasion's templates under their own title, intro and questions
- * (`src/templates/category-pages.ts`). Server-rendered, no search params.
+ * Landing page for an occasion or a collection, `/templates/<slug>` (e.g.
+ * /templates/wedding, /templates/islamic): its templates under their own
+ * title, intro and questions (`src/templates/category-pages.ts`,
+ * `collections.ts`). Server-rendered, no search params.
  */
 export const Route = createFileRoute("/templates/$category/")({
   loader: ({ params }) => {
-    if (!isCategory(params.category)) throw notFound()
-    return { category: params.category }
+    if (!getListing(params.category)) throw notFound()
+    return { slug: params.category }
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Templates · Alikeni" }] }
-    const { category } = loaderData
-    const page = CATEGORY_PAGES[category]
-    const path = `/templates/${category}`
-    const templates = TEMPLATE_METAS.filter((t) => t.category === category)
+    const listing = loaderData && getListing(loaderData.slug)
+    if (!listing) return { meta: [{ title: "Templates · Alikeni" }] }
+    const { page, label, templates } = listing
+    const path = `/templates/${listing.slug}`
     return seo({
       title: page.title,
       description: page.description,
@@ -43,7 +37,7 @@ export const Route = createFileRoute("/templates/$category/")({
           { name: page.linkLabel, path },
         ]),
         itemListJsonLd(
-          `${CATEGORY_LABELS[category]} invitation templates`,
+          `${label} invitation templates`,
           templates.map((t) => ({ name: t.name, path: `/templates/${t.id}` }))
         ),
       ],
@@ -54,10 +48,9 @@ export const Route = createFileRoute("/templates/$category/")({
 })
 
 function CategoryPage() {
-  const { category } = Route.useLoaderData()
-  const page = CATEGORY_PAGES[category]
-  const templates = TEMPLATE_METAS.filter((t) => t.category === category)
-  const label = CATEGORY_LABELS[category]
+  const { slug } = Route.useLoaderData()
+  // The loader has already answered 404 for a slug that lists nothing.
+  const { page, label, templates } = getListing(slug) as Listing
 
   return (
     <SiteShell>
@@ -167,7 +160,7 @@ function CategoryPage() {
         <h2 id="occasions-heading" className="text-center heading-3">
           Invitations for other occasions
         </h2>
-        <OccasionLinks exclude={category} className="mt-8" />
+        <OccasionLinks exclude={slug} className="mt-8" />
       </section>
     </SiteShell>
   )

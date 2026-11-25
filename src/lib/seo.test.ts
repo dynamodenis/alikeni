@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 import { POSTS } from "@/blog/posts"
 import { parseInline, plainText } from "@/blog/types"
 import { CATEGORY_PAGES } from "@/templates/category-pages"
+import { COLLECTIONS, COLLECTION_PAGES } from "@/templates/collections"
+import { getListing } from "@/templates/listings"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
 import { absoluteUrl, breadcrumbJsonLd, seo } from "./seo"
@@ -75,10 +77,26 @@ describe("seo", () => {
   })
 })
 
+/** Occasion and collection pages: the same page, the same rules. */
+const LANDING_PAGES = { ...CATEGORY_PAGES, ...COLLECTION_PAGES }
+const LANDING_SLUGS = Object.keys(LANDING_PAGES) as Array<
+  keyof typeof LANDING_PAGES
+>
+
 describe("occasion pages", () => {
+  it("list templates for every occasion and collection", () => {
+    for (const slug of LANDING_SLUGS) {
+      expect(getListing(slug)?.templates.length, slug).toBeGreaterThanOrEqual(3)
+    }
+    expect(getListing("islamic")?.templates.map((t) => t.id)).toContain(
+      "wedding/royal-islamic"
+    )
+    expect(getListing("nothing")).toBeUndefined()
+  })
+
   it("have copy that fits a search result", () => {
-    for (const category of TEMPLATE_CATEGORIES) {
-      const page = CATEGORY_PAGES[category]
+    for (const category of LANDING_SLUGS) {
+      const page = LANDING_PAGES[category]
       expect(page.title.length, `${category} title`).toBeLessThanOrEqual(60)
       expect(
         page.description.length,
@@ -94,8 +112,8 @@ describe("occasion pages", () => {
 
   it("say 150 to 250 words about the occasion, in short paragraphs", () => {
     const paths = new Set(sitemapPaths())
-    for (const category of TEMPLATE_CATEGORIES) {
-      const page = CATEGORY_PAGES[category]
+    for (const category of LANDING_SLUGS) {
+      const page = LANDING_PAGES[category]
       const text = [page.intro, ...page.about].map(plainText)
       const words = text.join(" ").split(/\s+/).length
       expect(words, `${category} words`).toBeGreaterThanOrEqual(150)
@@ -107,12 +125,12 @@ describe("occasion pages", () => {
         if (part.href) expect(paths.has(part.href), part.href).toBe(true)
       }
     }
-    const abouts = Object.values(CATEGORY_PAGES).flatMap((p) => p.about)
+    const abouts = Object.values(LANDING_PAGES).flatMap((p) => p.about)
     expect(new Set(abouts).size).toBe(abouts.length)
   })
 
   it("have unique titles and descriptions", () => {
-    const pages = Object.values(CATEGORY_PAGES)
+    const pages = Object.values(LANDING_PAGES)
     expect(new Set(pages.map((p) => p.title)).size).toBe(pages.length)
     expect(new Set(pages.map((p) => p.description)).size).toBe(pages.length)
   })
@@ -128,7 +146,11 @@ describe("sitemap", () => {
     expect(paths).toContain(`/blog/${POSTS[0].slug}`)
     expect(paths).toContain("/templates/wedding/ivory-garden")
     expect(paths).toHaveLength(
-      3 + POSTS.length + TEMPLATE_CATEGORIES.length + TEMPLATE_METAS.length
+      3 +
+        POSTS.length +
+        TEMPLATE_CATEGORIES.length +
+        COLLECTIONS.length +
+        TEMPLATE_METAS.length
     )
     expect(new Set(paths).size).toBe(paths.length)
   })
