@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/gallery/SiteShell"
 import { TemplateCard } from "@/components/gallery/TemplateCard"
 import { Faq } from "@/components/landing/Faq"
 import { Ornament } from "@/components/landing/InvitationCard"
+import { RichText } from "@/blog/RichText"
 import { OccasionLinks } from "@/components/landing/OccasionLinks"
 import { breadcrumbJsonLd, itemListJsonLd, seo } from "@/lib/seo"
 import { CATEGORY_LABELS } from "@/templates/catalog"
@@ -113,6 +114,33 @@ function CategoryPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section
+        aria-labelledby="about-heading"
+        className="mx-auto max-w-2xl px-4 pt-6 pb-4 sm:px-6"
+      >
+        <h2 id="about-heading" className="heading-3">
+          About {page.linkLabel.toLowerCase()}
+        </h2>
+        <p className="mt-5 body-copy">
+          <RichText text={page.about[0]} />
+        </p>
+        {page.about.length > 1 && (
+          // Native <details>: opens without JavaScript, and the text inside
+          // is in the HTML for search engines either way.
+          <details className="group mt-4">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-gold underline decoration-gold/40 underline-offset-4 transition-colors duration-300 hover:text-gold-soft focus-visible:text-gold-soft focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+              <span className="group-open:hidden">Read more</span>
+              <span className="hidden group-open:inline">Show less</span>
+            </summary>
+            {page.about.slice(1).map((paragraph) => (
+              <p key={paragraph} className="mt-4 body-copy">
+                <RichText text={paragraph} />
+              </p>
+            ))}
+          </details>
+        )}
       </section>
 
       <section

@@ -25,7 +25,11 @@ import { CATEGORY_PAGES } from "@/templates/category-pages"
 import { getFontPair } from "@/templates/_shared/theme/fonts"
 import { hasPalette } from "@/templates/_shared/theme/palettes"
 import { TEMPLATE_METAS, getTemplateMeta } from "@/templates/registry"
-import { TEMPLATE_PAGES, templateOccasion } from "@/templates/template-pages"
+import {
+  TEMPLATE_PAGES,
+  templateMetaDescription,
+  templateOccasion,
+} from "@/templates/template-pages"
 import type { TemplateMeta } from "@/templates/types"
 
 const DetailSearch = z.object({
@@ -61,7 +65,7 @@ export const Route = createFileRoute("/templates/$category/$slug")({
     const path = `/templates/${meta.id}`
     return seo({
       title: `${meta.name}: ${occasion} Invitation Template · Alikeni`,
-      description: `${meta.description} Online ${inSentence} invitation with RSVP and countdown.`,
+      description: templateMetaDescription(meta),
       path,
       image: absoluteUrl(meta.thumbnail),
       imageAlt: `${meta.name} ${inSentence} invitation template`,

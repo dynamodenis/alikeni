@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { POSTS } from "@/blog/posts"
+import { parseInline, plainText } from "@/blog/types"
 import { CATEGORY_PAGES } from "@/templates/category-pages"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
@@ -87,8 +88,27 @@ describe("occasion pages", () => {
         page.description.length,
         `${category} description`
       ).toBeLessThanOrEqual(160)
-      expect(page.questions.length).toBeGreaterThanOrEqual(3)
+      expect(page.questions.length).toBeGreaterThanOrEqual(4)
     }
+  })
+
+  it("say 150 to 250 words about the occasion, in short paragraphs", () => {
+    const paths = new Set(sitemapPaths())
+    for (const category of TEMPLATE_CATEGORIES) {
+      const page = CATEGORY_PAGES[category]
+      const text = [page.intro, ...page.about].map(plainText)
+      const words = text.join(" ").split(/\s+/).length
+      expect(words, `${category} words`).toBeGreaterThanOrEqual(150)
+      expect(words, `${category} words`).toBeLessThanOrEqual(250)
+      for (const paragraph of text) {
+        expect(paragraph.split(/\s+/).length, paragraph).toBeLessThanOrEqual(70)
+      }
+      for (const part of page.about.flatMap(parseInline)) {
+        if (part.href) expect(paths.has(part.href), part.href).toBe(true)
+      }
+    }
+    const abouts = Object.values(CATEGORY_PAGES).flatMap((p) => p.about)
+    expect(new Set(abouts).size).toBe(abouts.length)
   })
 
   it("have unique titles and descriptions", () => {

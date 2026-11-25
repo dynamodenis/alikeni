@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 import { sampleInvitationConfig as sample } from "./_shared/schema/sample"
 import { TEMPLATE_METAS } from "./registry"
-import { TEMPLATE_PAGES, templateOccasion } from "./template-pages"
+import {
+  TEMPLATE_PAGES,
+  templateMetaDescription,
+  templateOccasion,
+} from "./template-pages"
 import { loadTemplateSections, sectionLabels } from "./template-sections"
 
 describe("template pages", () => {
@@ -18,6 +22,18 @@ describe("template pages", () => {
     expect(new Set(abouts).size).toBe(abouts.length)
     for (const about of abouts) {
       expect(about.split(/\s+/).length, about).toBeGreaterThanOrEqual(35)
+    }
+  })
+
+  it("gives every template a unique meta description that fits a result", () => {
+    const descriptions = TEMPLATE_METAS.map(templateMetaDescription)
+    expect(new Set(descriptions).size).toBe(descriptions.length)
+    for (const [index, description] of descriptions.entries()) {
+      const meta = TEMPLATE_METAS[index]
+      expect(description.length, meta.id).toBeLessThanOrEqual(156)
+      expect(description.length, meta.id).toBeGreaterThan(110)
+      expect(description.startsWith(meta.name), meta.id).toBe(true)
+      expect(description, meta.id).toMatch(/invitation template\. /)
     }
   })
 

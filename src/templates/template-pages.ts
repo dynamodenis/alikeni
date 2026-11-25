@@ -254,3 +254,23 @@ export function templateOccasion(
     TEMPLATE_PAGES[meta.id]?.occasion ?? CATEGORY_LABELS[meta.category]
   return sentence && !PROPER.test(occasion) ? occasion.toLowerCase() : occasion
 }
+
+/** Longest meta description a search result shows in full. */
+const META_LIMIT = 155
+
+/**
+ * Meta description of a template page: the template's name and occasion
+ * first (what people search for), then its own design sentence, cut at a
+ * word when it runs past what a search result shows.
+ */
+export function templateMetaDescription(
+  meta: Pick<TemplateMeta, "id" | "category" | "name" | "description">
+): string {
+  const occasion = templateOccasion(meta, { sentence: true })
+  // "Eid Open House" already says Eid; do not repeat it.
+  const named = meta.name.toLowerCase().includes(occasion.toLowerCase())
+  const full = `${meta.name}${named ? "" : ` ${occasion}`} invitation template. ${meta.description}`
+  if (full.length <= META_LIMIT) return full
+  const cut = full.slice(0, META_LIMIT)
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,:;.]$/, "")}…`
+}
