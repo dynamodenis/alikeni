@@ -1,8 +1,10 @@
+import { existsSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import { sitemapPaths, sitemapXml } from "@/lib/sitemap"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
 import { POSTS, getPost, postFaqs, relatedPosts } from "./posts"
+import SHOTS from "./shots.json"
 import { parseInline, plainText, type Post } from "./types"
 
 /** Every line of a post that may carry `[label](/path)` links. */
@@ -36,6 +38,8 @@ const wordCount = (post: Post): number =>
           return block.items
         case "faq":
           return block.items.flatMap((item) => [item.q, item.a])
+        case "image":
+          return []
         default:
           return [block.text]
       }
@@ -105,6 +109,29 @@ describe("blog posts", () => {
       ).toBe(true)
       expect(wordCount(post), post.slug).toBeGreaterThanOrEqual(900)
       expect(wordCount(post), post.slug).toBeLessThanOrEqual(1400)
+    }
+  })
+
+  it("show only screenshots that `pnpm blog:shots` has taken", () => {
+    const sizes: Partial<Record<string, { width: number; height: number }>> =
+      SHOTS
+    const seen = new Set<string>()
+    for (const post of POSTS) {
+      for (const block of post.blocks) {
+        if (block.type !== "image") continue
+        expect(block.src.startsWith(`/blog/${post.slug}/`), block.src).toBe(
+          true
+        )
+        expect(seen.has(block.src), `${block.src} used twice`).toBe(false)
+        seen.add(block.src)
+        expect(existsSync(`public${block.src}`), block.src).toBe(true)
+        expect(sizes[block.src], block.src).toBeDefined()
+        expect(block.alt.length, block.src).toBeGreaterThan(20)
+        expect(
+          TEMPLATE_METAS.some((t) => t.id === block.shot.template),
+          block.shot.template
+        ).toBe(true)
+      }
     }
   })
 

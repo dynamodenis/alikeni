@@ -42,6 +42,14 @@ export const whatsappWeddingInvitation: Post = {
       type: "p",
       text: "You do not have to choose only one. Many couples send a card image or a short video for the feeling, with the link underneath for the details and the RSVP.",
     },
+    {
+      type: "image",
+      src: "/blog/whatsapp-wedding-invitation/cover.webp",
+      alt: "A wedding invitation page open on a phone, showing the couple's names and an Open invitation button",
+      caption:
+        "What guests see when they tap the link: the cover of the Ivory Garden template, with sample names.",
+      shot: { template: "wedding/ivory-garden", section: "cover" },
+    },
     { type: "h2", text: "What to put on a wedding invitation" },
     {
       type: "ul",
@@ -70,6 +78,14 @@ export const whatsappWeddingInvitation: Post = {
         "Keep the RSVP form switched on and set the date you need replies by. After that date the form closes.",
         "Publish, copy your link and send it.",
       ],
+    },
+    {
+      type: "image",
+      src: "/blog/whatsapp-wedding-invitation/events.webp",
+      alt: "The ceremony and the reception listed as two events, each with a time and a venue",
+      caption:
+        "The ceremony and the reception as separate events, from the Ivory Garden sample.",
+      shot: { template: "wedding/ivory-garden", section: "event" },
     },
     { type: "h2", text: "Wedding invitation messages you can copy" },
     {
@@ -110,6 +126,13 @@ export const whatsappWeddingInvitation: Post = {
     {
       type: "p",
       text: "Send it to each guest in a private message and use their name. An invitation dropped into a group feels like an announcement, and it is buried under replies within the hour. Post it in the family and committee groups as well, but do not rely on them.",
+    },
+    {
+      type: "image",
+      src: "/blog/whatsapp-wedding-invitation/rsvp.webp",
+      alt: "An RSVP form on a wedding invitation with a name field, attendance choices and number of guests",
+      caption: "The RSVP form guests fill in, from the Ivory Garden sample.",
+      shot: { template: "wedding/ivory-garden", section: "rsvp" },
     },
     {
       type: "p",

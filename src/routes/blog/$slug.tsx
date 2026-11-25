@@ -6,6 +6,7 @@ import { SiteShell } from "@/components/gallery/SiteShell"
 import { TemplateCard } from "@/components/gallery/TemplateCard"
 import { OccasionLinks } from "@/components/landing/OccasionLinks"
 import { RichText } from "@/blog/RichText"
+import SHOTS from "@/blog/shots.json"
 import { formatPostDate, plainText, type Block } from "@/blog/types"
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, seo } from "@/lib/seo"
 import { CATEGORY_PAGES } from "@/templates/category-pages"
@@ -114,6 +115,27 @@ function BlockView({ block }: { block: Block }) {
           <RichText text={block.text} />
         </p>
       )
+    case "image": {
+      const size = (
+        SHOTS as Partial<Record<string, { width: number; height: number }>>
+      )[block.src]
+      return (
+        <figure className="mx-auto mt-8 max-w-xs">
+          <img
+            src={block.src}
+            alt={block.alt}
+            width={size?.width}
+            height={size?.height}
+            loading="lazy"
+            decoding="async"
+            className="h-auto w-full rounded-3xl border border-gold/20"
+          />
+          <figcaption className="mt-3 text-center text-sm text-sand">
+            {block.caption}
+          </figcaption>
+        </figure>
+      )
+    }
     case "faq":
       return (
         <dl className="mt-6 grid gap-4">

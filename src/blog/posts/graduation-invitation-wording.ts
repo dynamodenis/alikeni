@@ -111,12 +111,27 @@ export const graduationInvitationWording: Post = {
       text: "Once you have the words, put them where guests can also find the map and reply. The [graduation invitation templates](/templates/graduation) have places for the school, the degree and the class year, a photo gallery for the years of study and an RSVP form.",
     },
     {
+      type: "image",
+      src: "/blog/graduation-invitation-wording/cover.webp",
+      alt: "A graduation invitation page open on a phone, in navy and gold",
+      caption: "The cover of the Cap & Gown template, with sample details.",
+      shot: { template: "graduation/cap-and-gown", section: "cover" },
+    },
+    {
       type: "ul",
       items: [
         "[Cap & Gown](/templates/graduation/cap-and-gown) is formal, in navy and gold, and suits a university graduation.",
         "[Chalkboard](/templates/graduation/chalkboard) is playful and fits a high school or primary school graduation.",
         "[Polaroid Memories](/templates/graduation/polaroid-memories) puts photos first, for when you have plenty of pictures.",
       ],
+    },
+    {
+      type: "image",
+      src: "/blog/graduation-invitation-wording/events.webp",
+      alt: "The graduation ceremony and the party listed as separate events with times and venues",
+      caption:
+        "The ceremony and the party as separate events, from the Cap & Gown sample.",
+      shot: { template: "graduation/cap-and-gown", section: "event" },
     },
     {
       type: "p",

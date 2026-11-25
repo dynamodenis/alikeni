@@ -27,6 +27,7 @@ pnpm format         # Prettier (Tailwind plugin); run on files you touched
 pnpm e2e            # Playwright in system Chrome; own DB (55434) and app (3300)
 pnpm db:generate    # new SQL migration from src/server/db/schema.ts
 pnpm thumbs --only <category>/<slug>       # template thumbnail (needs pnpm dev)
+pnpm blog:shots     # screenshots for blog `image` blocks (needs pnpm dev)
 ```
 
 Use pnpm, never npm or yarn.

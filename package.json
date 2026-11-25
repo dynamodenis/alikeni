@@ -18,6 +18,7 @@
     "test:ui": "vitest --ui",
     "smoke:check": "node scripts/smoke-check.mjs",
     "thumbs": "tsx scripts/thumbs.ts",
+    "blog:shots": "tsx scripts/blog-shots.ts",
     "contact-sheet": "tsx scripts/contact-sheet.ts",
     "brand:icons": "tsx scripts/brand-icons.ts",
     "gen:template": "tsx scripts/gen-template.ts",

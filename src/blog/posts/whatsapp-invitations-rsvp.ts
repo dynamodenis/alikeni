@@ -36,6 +36,14 @@ export const whatsappInvitationsRsvp: Post = {
         "A way to reply: yes, no or maybe, and how many are coming",
       ],
     },
+    {
+      type: "image",
+      src: "/blog/whatsapp-invitations-rsvp/map.webp",
+      alt: "The venue of an event shown on a map with buttons for directions",
+      caption:
+        "The venue on a map with directions, from the Rustic Barn sample.",
+      shot: { template: "wedding/rustic-barn", section: "map" },
+    },
     { type: "h2", text: "2. Ask one clear question" },
     {
       type: "p",

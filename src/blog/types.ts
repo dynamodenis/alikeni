@@ -1,6 +1,17 @@
 // The shape of a blog post and the small helpers that need no post content,
 // so routes can import them without pulling every article into their chunk.
+import type { SectionId } from "@/templates/_shared/schema"
 import type { TemplateCategory } from "@/templates/types"
+
+/**
+ * What `pnpm blog:shots` photographs for an `image` block: one section of a
+ * template's sample invitation at phone width, or its cover.
+ */
+export type Shot = {
+  /** Template id, e.g. "wedding/ivory-garden". */
+  template: string
+  section: SectionId | "cover"
+}
 
 /**
  * Text in `p`, `ul`/`ol`, `tip` and FAQ answers may link to a page on this
@@ -14,6 +25,11 @@ export type Block =
   /** A message to copy and paste, shown as a quote card. */
   | { type: "message"; label: string; text: string }
   | { type: "tip"; text: string }
+  /**
+   * A screenshot taken by `pnpm blog:shots` (never by hand). `src` is
+   * `/blog/<post-slug>/<name>.webp`; the caption says which template it is.
+   */
+  | { type: "image"; src: string; alt: string; caption: string; shot: Shot }
   /** Questions and answers; also published as FAQPage structured data. */
   | { type: "faq"; items: Array<{ q: string; a: string }> }
 

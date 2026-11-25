@@ -66,8 +66,23 @@ export const collectRsvpsWithoutAnApp: Post = {
       ],
     },
     {
+      type: "image",
+      src: "/blog/collect-rsvps-without-an-app/countdown.webp",
+      alt: "A countdown to the event on a birthday invitation",
+      caption:
+        "The same page counts down to the day, from the Golden Milestone sample.",
+      shot: { template: "birthday/golden-milestone", section: "countdown" },
+    },
+    {
       type: "p",
       text: "Guests open the link in their phone browser. They tap yes, no or maybe, enter the number of guests and can add a message. They do not create an account and they do not install anything.",
+    },
+    {
+      type: "image",
+      src: "/blog/collect-rsvps-without-an-app/rsvp-form.webp",
+      alt: "An RSVP form on a birthday invitation with a name field, attendance choices and number of guests",
+      caption: "The RSVP form on the Golden Milestone birthday template.",
+      shot: { template: "birthday/golden-milestone", section: "rsvp" },
     },
     { type: "h2", text: "Ask in a way that gets an answer" },
     {
