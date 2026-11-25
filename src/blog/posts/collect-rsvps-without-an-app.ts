@@ -92,12 +92,12 @@ export const collectRsvpsWithoutAnApp: Post = {
     {
       type: "message",
       label: "First message",
-      text: "Hi Achieng! We are celebrating Mum's 60th birthday on Saturday 6 March. The details are here:\n[your link]\nPlease tap RSVP on the page by 20 February and tell us how many of you are coming. We give the caterer our numbers that week.",
+      text: "Hi Anna! We are celebrating Mum's 60th birthday on Saturday 6 March. The details are here:\n[your link]\nPlease tap RSVP on the page by 20 February and tell us how many of you are coming. We give the caterer our numbers that week.",
     },
     {
       type: "message",
       label: "Reminder",
-      text: "Hi Achieng, a quick reminder about Mum's birthday. We are closing the list on Friday. Could you answer yes or no here today?\n[your link]",
+      text: "Hi Anna, a quick reminder about Mum's birthday. We are closing the list on Friday. Could you answer yes or no here today?\n[your link]",
     },
     {
       type: "tip",
@@ -119,7 +119,7 @@ export const collectRsvpsWithoutAnApp: Post = {
     },
     {
       type: "p",
-      text: "When someone else needs the list, such as the caterer, the usher at the gate or a committee member, export it as a CSV file. It opens in Excel or Google Sheets. That is the only time a spreadsheet appears, and you did not have to type it.",
+      text: "When someone else needs the list, such as the caterer, the usher at the door or a family member, export it as a CSV file. It opens in Excel or Google Sheets. That is the only time a spreadsheet appears, and you did not have to type it.",
     },
     {
       type: "tip",

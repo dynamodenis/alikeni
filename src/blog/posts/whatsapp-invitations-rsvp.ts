@@ -62,7 +62,7 @@ export const whatsappInvitationsRsvp: Post = {
     {
       type: "message",
       label: "Formal or work event",
-      text: "Good afternoon Mr Otieno. You are invited to the launch of our new office on Thursday 4 June at 5 pm. The programme and location are here:\n[your link]\nKindly confirm your attendance on the page by 28 May.",
+      text: "Good afternoon Mr Patel. You are invited to the launch of our new office on Thursday 4 June at 5 pm. The programme and location are here:\n[your link]\nKindly confirm your attendance on the page by 28 May.",
     },
     { type: "h2", text: "3. Send it to each person, not only to a group" },
     {

@@ -13,7 +13,7 @@ export const whatsappWeddingInvitation: Post = {
   blocks: [
     {
       type: "p",
-      text: "Most wedding guests will first see your invitation on their phone, in a WhatsApp chat. That is good news: it costs nothing to send, it arrives in seconds and nobody has to deliver cards across town or upcountry. But a wedding invitation carries more than a date. It sets the tone of the day, and it has to answer every practical question a guest has.",
+      text: "Most wedding guests will first see your invitation on their phone, in a WhatsApp chat. That is good news: it costs nothing to send, it arrives in seconds and nobody has to deliver cards across town or to another city. But a wedding invitation carries more than a date. It sets the tone of the day, and it has to answer every practical question a guest has.",
     },
     {
       type: "p",
@@ -61,7 +61,7 @@ export const whatsappWeddingInvitation: Post = {
         "The dress code or colour theme, if you have one",
         "Whether the invitation is for one person, a couple or the family",
         "How to reply, and the date you need the reply by",
-        "A phone number for questions, usually someone on the committee",
+        "A phone number for questions, usually a family member or the planner",
       ],
     },
     {
@@ -95,12 +95,12 @@ export const whatsappWeddingInvitation: Post = {
     {
       type: "message",
       label: "From the families",
-      text: "Greetings! The families of Mr and Mrs Kamau and Mr and Mrs Odhiambo joyfully invite you to the wedding of their children, Wanjiru and Daniel, on Saturday 12 December. The full invitation is here:\n[your link]\nKindly confirm your attendance on the page by 28 November.",
+      text: "Greetings! The families of Mr and Mrs Bennett and Mr and Mrs Rivera joyfully invite you to the wedding of their children, Sarah and Daniel, on Saturday 12 December. The full invitation is here:\n[your link]\nKindly confirm your attendance on the page by 28 November.",
     },
     {
       type: "message",
       label: "From the couple",
-      text: "Hi Shiro! We are getting married on Saturday 12 December and we would love you to be there. Everything you need is here:\n[your link]\nPlease tap RSVP by 28 November so we can save you a seat.",
+      text: "Hi Maya! We are getting married on Saturday 12 December and we would love you to be there. Everything you need is here:\n[your link]\nPlease tap RSVP by 28 November so we can save you a seat.",
     },
     {
       type: "message",
@@ -110,7 +110,7 @@ export const whatsappWeddingInvitation: Post = {
     {
       type: "message",
       label: "Save the date",
-      text: "Save the date! Wanjiru and Daniel are getting married on Saturday 12 December in Nairobi. The invitation with all the details will follow. Please keep the day free.",
+      text: "Save the date! Sarah and Daniel are getting married on Saturday 12 December in London. The invitation with all the details will follow. Please keep the day free.",
     },
     { type: "h2", text: "When to send it" },
     {
@@ -125,7 +125,7 @@ export const whatsappWeddingInvitation: Post = {
     { type: "h2", text: "How to send it so guests reply" },
     {
       type: "p",
-      text: "Send it to each guest in a private message and use their name. An invitation dropped into a group feels like an announcement, and it is buried under replies within the hour. Post it in the family and committee groups as well, but do not rely on them.",
+      text: "Send it to each guest in a private message and use their name. An invitation dropped into a group feels like an announcement, and it is buried under replies within the hour. Post it in the family and friends groups as well, but do not rely on them.",
     },
     {
       type: "image",

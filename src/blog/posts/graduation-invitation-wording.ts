@@ -12,7 +12,7 @@ export const graduationInvitationWording: Post = {
   blocks: [
     {
       type: "p",
-      text: "A graduation is one of the few days when the whole family wants to be in the same place: parents, grandparents, the aunt who paid a term's fees, the friends who shared the hostel. The invitation has to tell them all where to be and when, and it should sound like the family that is sending it.",
+      text: "A graduation is one of the few days when the whole family wants to be in the same place: parents, grandparents, the aunt who helped with the fees, the friends who shared the late nights. The invitation has to tell them all where to be and when, and it should sound like the family that is sending it.",
     },
     {
       type: "p",
@@ -48,12 +48,12 @@ export const graduationInvitationWording: Post = {
     {
       type: "message",
       label: "University graduation",
-      text: "With gratitude to God, Mr and Mrs Mwangi invite you to a thanksgiving lunch in honour of their daughter, Faith Wambui Mwangi, who is graduating from the University of Nairobi with a Bachelor of Commerce.\n\nSaturday 19 December, 1 pm\nThe Mwangi home, Kiambu\n\nKindly confirm your attendance by 10 December.",
+      text: "With gratitude to God, Mr and Mrs Carter invite you to a thanksgiving lunch in honour of their daughter, Emily Grace Carter, who is graduating from [name of university] with a Bachelor of Commerce.\n\nSaturday 19 December, 1 pm\nThe Carter family home\n\nKindly confirm your attendance by 10 December.",
     },
     {
       type: "message",
       label: "Diploma or professional course",
-      text: "The Otieno family is pleased to invite you to celebrate Brian Otieno, who has completed his Diploma in Clinical Medicine.\n\nSunday 20 December, 2 pm\nSt Mark's Church Hall, Kisumu\n\nPlease let us know by 12 December if you will join us.",
+      text: "The Hassan family is pleased to invite you to celebrate Omar Hassan, who has completed his Diploma in Nursing.\n\nSunday 20 December, 2 pm\nSt Mark's Community Hall\n\nPlease let us know by 12 December if you will join us.",
     },
     { type: "h2", text: "Casual wording, from the graduate" },
     {
@@ -63,7 +63,7 @@ export const graduationInvitationWording: Post = {
     {
       type: "message",
       label: "To friends",
-      text: "I made it! After four years, I am finally graduating, and I could not have done it without you. Come and celebrate with me.\n\nSaturday 19 December from 3 pm\nMy parents' place in Kiambu\n\nFood, music and plenty of photos. Tell me if you are coming by 10 December.",
+      text: "I made it! After four years, I am finally graduating, and I could not have done it without you. Come and celebrate with me.\n\nSaturday 19 December from 3 pm\nMy parents' place\n\nFood, music and plenty of photos. Tell me if you are coming by 10 December.",
     },
     {
       type: "message",
@@ -74,7 +74,7 @@ export const graduationInvitationWording: Post = {
     {
       type: "message",
       label: "High school",
-      text: "Please join us as we celebrate our son, Ian Kiprono, on finishing high school. Come for lunch, a word of prayer and a send-off to the next chapter.\n\nSaturday 5 December, 12 noon\nThe Kiprono home, Eldoret\n\nKindly confirm by 28 November.",
+      text: "Please join us as we celebrate our son, Lucas Silva, on finishing high school. Come for lunch, a word of prayer and a send-off to the next chapter.\n\nSaturday 5 December, 12 noon\nThe Silva family home\n\nKindly confirm by 28 November.",
     },
     { type: "h2", text: "Nursery and primary school graduation wording" },
     {
@@ -84,12 +84,12 @@ export const graduationInvitationWording: Post = {
     {
       type: "message",
       label: "From the parents",
-      text: "Our little graduate is moving up! Join us as Zawadi graduates from pre-primary at Sunrise Academy.\n\nFriday 27 November, 10 am, at the school hall\nCake and juice at home afterwards.\n\nLet us know if you can come.",
+      text: "Our little graduate is moving up! Join us as Mia graduates from kindergarten at Sunrise Academy.\n\nFriday 27 November, 10 am, at the school hall\nCake and juice at home afterwards.\n\nLet us know if you can come.",
     },
     {
       type: "message",
       label: "From the school",
-      text: "The head teacher, staff and pupils of Sunrise Academy invite all parents and guardians to the Grade 6 graduation ceremony.\n\nFriday 27 November, 9 am\nSchool grounds\n\nEach family may bring two guests. Kindly confirm your attendance with the class teacher or on the invitation page.",
+      text: "The head teacher, staff and pupils of Sunrise Academy invite all parents and guardians to the primary school graduation ceremony.\n\nFriday 27 November, 9 am\nSchool grounds\n\nEach family may bring two guests. Kindly confirm your attendance with the class teacher or on the invitation page.",
     },
     { type: "h2", text: "Small lines that make it personal" },
     {
@@ -143,7 +143,7 @@ export const graduationInvitationWording: Post = {
       items: [
         {
           q: "When should I send graduation party invitations?",
-          a: "Three to four weeks before the party is enough for most families. Send them earlier if guests are travelling from far, or if the graduation falls in December, when calendars fill up.",
+          a: "Three to four weeks before the party is enough for most families. Send them earlier if guests are travelling from far, or if the graduation falls in a holiday season, when calendars fill up.",
         },
         {
           q: "Who should host the graduation party?",
