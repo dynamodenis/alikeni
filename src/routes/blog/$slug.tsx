@@ -9,8 +9,7 @@ import { RichText } from "@/blog/RichText"
 import SHOTS from "@/blog/shots.json"
 import { formatPostDate, plainText, type Block } from "@/blog/types"
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, seo } from "@/lib/seo"
-import { CATEGORY_PAGES } from "@/templates/category-pages"
-import { TEMPLATE_METAS } from "@/templates/registry"
+import { getListing } from "@/templates/listings"
 
 /** How many of the occasion's templates a post shows. */
 const TEMPLATES_SHOWN = 3
@@ -157,12 +156,8 @@ function BlockView({ block }: { block: Block }) {
 
 function PostPage() {
   const { post, related } = Route.useLoaderData()
-  const templates = post.category
-    ? TEMPLATE_METAS.filter((t) => t.category === post.category).slice(
-        0,
-        TEMPLATES_SHOWN
-      )
-    : []
+  const listing = post.category ? getListing(post.category) : undefined
+  const templates = listing?.templates.slice(0, TEMPLATES_SHOWN) ?? []
   return (
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 pt-32 pb-16 sm:px-6 sm:pt-40">
@@ -196,13 +191,13 @@ function PostPage() {
         </aside>
       </article>
 
-      {post.category && templates.length > 0 && (
+      {listing && templates.length > 0 && (
         <section
           aria-labelledby="templates-heading"
           className="mx-auto max-w-6xl border-t border-gold/10 px-4 py-16 sm:px-6"
         >
           <h2 id="templates-heading" className="text-center heading-3">
-            {CATEGORY_PAGES[post.category].linkLabel} to start from
+            {listing.page.linkLabel} to start from
           </h2>
           <ul className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
             {templates.map((meta) => (
@@ -214,10 +209,10 @@ function PostPage() {
           <p className="mt-10 text-center">
             <Link
               to="/templates/$category"
-              params={{ category: post.category }}
+              params={{ category: listing.slug }}
               className="link"
             >
-              See all {CATEGORY_PAGES[post.category].linkLabel.toLowerCase()} →
+              See all {listing.page.linkLabel.toLowerCase()} →
             </Link>
           </p>
         </section>

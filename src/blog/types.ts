@@ -1,6 +1,7 @@
 // The shape of a blog post and the small helpers that need no post content,
 // so routes can import them without pulling every article into their chunk.
 import type { SectionId } from "@/templates/_shared/schema"
+import type { Collection } from "@/templates/collections"
 import type { TemplateCategory } from "@/templates/types"
 
 /**
@@ -44,8 +45,8 @@ export type Post = {
   /** YYYY-MM-DD, when the text last changed (defaults to `date`). */
   updated?: string
   readMinutes: number
-  /** The occasion whose templates are shown under the post. */
-  category?: TemplateCategory
+  /** The occasion or collection whose templates are shown under the post. */
+  category?: TemplateCategory | Collection
   /** Slugs of posts to suggest first; newer posts fill the rest. */
   related?: Array<string>
   blocks: Array<Block>

@@ -4,6 +4,7 @@
 // read from here.
 import { collectRsvpsWithoutAnApp } from "./posts/collect-rsvps-without-an-app"
 import { graduationInvitationWording } from "./posts/graduation-invitation-wording"
+import { nikahWalimaInvitationWording } from "./posts/nikah-walima-invitation-wording"
 import { whatsappInvitationsRsvp } from "./posts/whatsapp-invitations-rsvp"
 import { whatsappWeddingInvitation } from "./posts/whatsapp-wedding-invitation"
 import type { Post, PostSummary } from "./types"
@@ -12,6 +13,7 @@ export type { Block, Post, PostSummary } from "./types"
 export { formatPostDate } from "./types"
 
 export const POSTS: ReadonlyArray<Post> = [
+  nikahWalimaInvitationWording,
   whatsappWeddingInvitation,
   collectRsvpsWithoutAnApp,
   graduationInvitationWording,
