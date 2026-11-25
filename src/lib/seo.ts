@@ -137,11 +137,27 @@ export function itemListJsonLd(
   }
 }
 
+/** Questions answered on the page, in plain text. */
+export function faqJsonLd(
+  items: ReadonlyArray<{ q: string; a: string }>
+): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  }
+}
+
 /** A blog post. */
 export function articleJsonLd(post: {
   title: string
   description: string
   date: string
+  updated?: string
   path: string
 }): JsonLd {
   return {
@@ -150,7 +166,7 @@ export function articleJsonLd(post: {
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    dateModified: post.date,
+    dateModified: post.updated ?? post.date,
     mainEntityOfPage: absoluteUrl(post.path),
     image: DEFAULT_OG_IMAGE,
     author: { "@id": ORGANIZATION_ID },

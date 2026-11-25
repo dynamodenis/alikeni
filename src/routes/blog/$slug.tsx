@@ -3,23 +3,41 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import { ChevronLeft } from "lucide-react"
 import { BrandLink } from "@/components/brand/ButtonLink"
 import { SiteShell } from "@/components/gallery/SiteShell"
+import { TemplateCard } from "@/components/gallery/TemplateCard"
 import { OccasionLinks } from "@/components/landing/OccasionLinks"
-import { formatPostDate, getPost, type Block } from "@/blog/posts"
-import { articleJsonLd, breadcrumbJsonLd, seo } from "@/lib/seo"
+import { RichText } from "@/blog/RichText"
+import { formatPostDate, plainText, type Block } from "@/blog/types"
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, seo } from "@/lib/seo"
+import { CATEGORY_PAGES } from "@/templates/category-pages"
+import { TEMPLATE_METAS } from "@/templates/registry"
 
-/** One blog post, `/blog/<slug>` (content in `src/blog/posts.ts`). */
+/** How many of the occasion's templates a post shows. */
+const TEMPLATES_SHOWN = 3
+
+/** One blog post, `/blog/<slug>` (content in `src/blog/posts/`). */
 export const Route = createFileRoute("/blog/$slug")({
-  loader: ({ params }) => {
+  // Posts are imported lazily so route configs (which live in the app entry
+  // chunk) do not carry every article onto every page.
+  loader: async ({ params }) => {
+    const { getPost, postFaqs, relatedPosts } = await import("@/blog/posts")
     const post = getPost(params.slug)
     if (!post) throw notFound()
-    return { post }
+    return {
+      post,
+      related: relatedPosts(post),
+      faqs: postFaqs(post).map((item) => ({
+        q: item.q,
+        a: plainText(item.a),
+      })),
+    }
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Blog · Alikeni" }] }
-    const { post } = loaderData
+    const { post, faqs } = loaderData
     const path = `/blog/${post.slug}`
+    const branded = `${post.title} · Alikeni`
     const head = seo({
-      title: `${post.title} · Alikeni`,
+      title: branded.length <= 60 ? branded : post.title,
       description: post.description,
       path,
       jsonLd: [
@@ -29,6 +47,7 @@ export const Route = createFileRoute("/blog/$slug")({
           { name: "Blog", path: "/blog" },
           { name: post.title, path },
         ]),
+        ...(faqs.length ? [faqJsonLd(faqs)] : []),
       ],
     })
     return {
@@ -39,6 +58,10 @@ export const Route = createFileRoute("/blog/$slug")({
         ),
         { property: "og:type", content: "article" },
         { property: "article:published_time", content: post.date },
+        {
+          property: "article:modified_time",
+          content: post.updated ?? post.date,
+        },
       ],
     }
   },
@@ -52,7 +75,9 @@ function BlockView({ block }: { block: Block }) {
       return <h2 className="mt-14 heading-3 sm:text-3xl">{block.text}</h2>
     case "p":
       return (
-        <p className="mt-5 text-lg leading-relaxed text-sand">{block.text}</p>
+        <p className="mt-5 text-lg leading-relaxed text-sand">
+          <RichText text={block.text} />
+        </p>
       )
     case "ul":
     case "ol": {
@@ -66,7 +91,9 @@ function BlockView({ block }: { block: Block }) {
           }
         >
           {block.items.map((item) => (
-            <li key={item}>{item}</li>
+            <li key={item}>
+              <RichText text={item} />
+            </li>
           ))}
         </List>
       )
@@ -84,14 +111,36 @@ function BlockView({ block }: { block: Block }) {
       return (
         <p className="mt-6 rounded-3xl border border-gold/30 bg-gold/10 px-6 py-5 text-base leading-relaxed text-cream">
           <span className="mr-2 eyebrow">Tip</span>
-          {block.text}
+          <RichText text={block.text} />
         </p>
+      )
+    case "faq":
+      return (
+        <dl className="mt-6 grid gap-4">
+          {block.items.map((item) => (
+            <div
+              key={item.q}
+              className="rounded-3xl border border-gold/10 bg-umber/40 px-6 py-6 sm:px-8"
+            >
+              <dt className="font-display text-lg text-cream">{item.q}</dt>
+              <dd className="mt-3 body-copy">
+                <RichText text={item.a} />
+              </dd>
+            </div>
+          ))}
+        </dl>
       )
   }
 }
 
 function PostPage() {
-  const { post } = Route.useLoaderData()
+  const { post, related } = Route.useLoaderData()
+  const templates = post.category
+    ? TEMPLATE_METAS.filter((t) => t.category === post.category).slice(
+        0,
+        TEMPLATES_SHOWN
+      )
+    : []
   return (
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 pt-32 pb-16 sm:px-6 sm:pt-40">
@@ -124,6 +173,60 @@ function PostPage() {
           </BrandLink>
         </aside>
       </article>
+
+      {post.category && templates.length > 0 && (
+        <section
+          aria-labelledby="templates-heading"
+          className="mx-auto max-w-6xl border-t border-gold/10 px-4 py-16 sm:px-6"
+        >
+          <h2 id="templates-heading" className="text-center heading-3">
+            {CATEGORY_PAGES[post.category].linkLabel} to start from
+          </h2>
+          <ul className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {templates.map((meta) => (
+              <li key={meta.id} className="mx-auto w-full max-w-sm">
+                <TemplateCard meta={meta} />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-10 text-center">
+            <Link
+              to="/templates/$category"
+              params={{ category: post.category }}
+              className="link"
+            >
+              See all {CATEGORY_PAGES[post.category].linkLabel.toLowerCase()} →
+            </Link>
+          </p>
+        </section>
+      )}
+
+      {related.length > 0 && (
+        <section
+          aria-labelledby="related-heading"
+          className="border-t border-gold/10 px-4 py-16 sm:px-6"
+        >
+          <h2 id="related-heading" className="text-center heading-3">
+            More guides
+          </h2>
+          <ul className="mx-auto mt-8 grid max-w-3xl gap-4">
+            {related.map((other) => (
+              <li key={other.slug}>
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: other.slug }}
+                  className="group block rounded-3xl border border-gold/10 bg-umber/40 px-6 py-6 transition-colors duration-300 hover:border-gold/40 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none sm:px-8"
+                >
+                  <h3 className="font-display text-lg text-cream transition-colors duration-300 group-hover:text-gold-soft">
+                    {other.title}
+                  </h3>
+                  <p className="mt-2 body-copy">{other.description}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section
         aria-labelledby="occasions-heading"

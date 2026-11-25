@@ -18,9 +18,24 @@ export function sitemapPaths(): Array<string> {
   ]
 }
 
-export function sitemapXml(paths: Array<string> = sitemapPaths()): string {
+/** Last change (YYYY-MM-DD) of the pages that record one: blog posts. */
+export function sitemapLastmod(): Record<string, string> {
+  return Object.fromEntries(
+    POSTS.map((post) => [`/blog/${post.slug}`, post.updated ?? post.date])
+  )
+}
+
+export function sitemapXml(
+  paths: Array<string> = sitemapPaths(),
+  lastmod: Record<string, string> = sitemapLastmod()
+): string {
   const urls = paths
-    .map((path) => `  <url><loc>${absoluteUrl(path)}</loc></url>`)
+    .map((path) => {
+      const changed = lastmod[path]
+      return `  <url><loc>${absoluteUrl(path)}</loc>${
+        changed ? `<lastmod>${changed}</lastmod>` : ""
+      }</url>`
+    })
     .join("\n")
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
