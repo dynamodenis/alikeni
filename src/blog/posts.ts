@@ -45,3 +45,13 @@ export function relatedPosts(post: Post, count = 3): Array<PostSummary> {
 /** Every question a post answers in its FAQ blocks. */
 export const postFaqs = (post: Post): Array<{ q: string; a: string }> =>
   post.blocks.flatMap((block) => (block.type === "faq" ? block.items : []))
+
+/**
+ * Posts to link from a page: those written for `category` (an occasion or a
+ * collection) first, then the newest.
+ */
+export function guidesFor(category?: string, count = 3): Array<PostSummary> {
+  const own = POSTS.filter((post) => category && post.category === category)
+  const rest = POSTS.filter((post) => !own.includes(post))
+  return [...own, ...rest].slice(0, count).map(summarize)
+}

@@ -3,7 +3,8 @@ import { Faq, type FaqItem } from "./Faq"
 import { OccasionLinks } from "./OccasionLinks"
 import { SectionHeading } from "./SectionHeading"
 
-const QUESTIONS: Array<FaqItem> = [
+/** Also published as FAQPage structured data by the home route. */
+export const HOME_QUESTIONS: Array<FaqItem> = [
   {
     q: "What is Alikeni?",
     a: "Alikeni is an online invitation maker. You pick a design, add your event details, photos and music, and get an invitation website to share with one link. Guests open it on their phone and RSVP right there.",
@@ -41,7 +42,7 @@ export function HomeFaq() {
         description="What Alikeni is, what it costs and how your guests reply."
       />
       <div className="mt-14">
-        <Faq items={QUESTIONS} />
+        <Faq items={HOME_QUESTIONS} />
       </div>
       <h3 className="mt-20 text-center heading-3">
         Find an invitation for your occasion

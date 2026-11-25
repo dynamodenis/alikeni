@@ -4,10 +4,11 @@ import { BrandLink } from "@/components/brand/ButtonLink"
 import { SiteShell } from "@/components/gallery/SiteShell"
 import { TemplateCard } from "@/components/gallery/TemplateCard"
 import { Faq } from "@/components/landing/Faq"
+import { GuideLinks } from "@/components/landing/GuideLinks"
 import { Ornament } from "@/components/landing/InvitationCard"
 import { RichText } from "@/blog/RichText"
 import { OccasionLinks } from "@/components/landing/OccasionLinks"
-import { breadcrumbJsonLd, itemListJsonLd, seo } from "@/lib/seo"
+import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, seo } from "@/lib/seo"
 import { getListing, type Listing } from "@/templates/listings"
 
 /**
@@ -17,9 +18,11 @@ import { getListing, type Listing } from "@/templates/listings"
  * `collections.ts`). Server-rendered, no search params.
  */
 export const Route = createFileRoute("/templates/$category/")({
-  loader: ({ params }) => {
+  // Posts are imported lazily so the articles stay out of the entry chunk.
+  loader: async ({ params }) => {
     if (!getListing(params.category)) throw notFound()
-    return { slug: params.category }
+    const { guidesFor } = await import("@/blog/posts")
+    return { slug: params.category, guides: guidesFor(params.category) }
   },
   head: ({ loaderData }) => {
     const listing = loaderData && getListing(loaderData.slug)
@@ -40,6 +43,7 @@ export const Route = createFileRoute("/templates/$category/")({
           `${label} invitation templates`,
           templates.map((t) => ({ name: t.name, path: `/templates/${t.id}` }))
         ),
+        faqJsonLd(page.questions),
       ],
     })
   },
@@ -48,7 +52,7 @@ export const Route = createFileRoute("/templates/$category/")({
 })
 
 function CategoryPage() {
-  const { slug } = Route.useLoaderData()
+  const { slug, guides } = Route.useLoaderData()
   // The loader has already answered 404 for a slug that lists nothing.
   const { page, label, templates } = getListing(slug) as Listing
 
@@ -152,6 +156,8 @@ function CategoryPage() {
           </BrandLink>
         </div>
       </section>
+
+      <GuideLinks heading="Guides for hosts" posts={guides} />
 
       <section
         aria-labelledby="occasions-heading"

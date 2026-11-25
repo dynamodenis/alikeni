@@ -1,9 +1,11 @@
 import { MotionConfig } from "motion/react"
+import type { PostSummary } from "@/blog/types"
 import type { Currency } from "@/lib/plans"
 import { Contact } from "./Contact"
 import { Features } from "./Features"
 import { FinalCta } from "./FinalCta"
 import { Footer } from "./Footer"
+import { GuideLinks } from "./GuideLinks"
 import { Hero } from "./Hero"
 import { HomeFaq } from "./HomeFaq"
 import { HowItWorks } from "./HowItWorks"
@@ -15,7 +17,10 @@ import { Showcase } from "./Showcase"
 
 export function LandingPage({
   currencies,
+  guides,
 }: {
+  /** Blog posts linked under the questions (`guidesFor`). */
+  guides: ReadonlyArray<PostSummary>
   /** Currencies the visitor sees prices in (`priceCurrencies`). */
   currencies: Array<Currency>
 }) {
@@ -32,6 +37,7 @@ export function LandingPage({
           <Showcase />
           <Pricing currencies={currencies} />
           <HomeFaq />
+          <GuideLinks heading="Guides for hosts" posts={guides} />
           <FinalCta />
           <Contact />
         </main>

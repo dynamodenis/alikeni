@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { sitemapPaths, sitemapXml } from "@/lib/sitemap"
 import { TEMPLATE_METAS } from "@/templates/registry"
 import { TEMPLATE_CATEGORIES } from "@/templates/types"
-import { POSTS, getPost, postFaqs, relatedPosts } from "./posts"
+import { POSTS, getPost, guidesFor, postFaqs, relatedPosts } from "./posts"
 import SHOTS from "./shots.json"
 import { parseInline, plainText, type Post } from "./types"
 
@@ -141,6 +141,17 @@ describe("blog posts", () => {
       expect(related.length).toBeGreaterThan(0)
       expect(related.map((p) => p.slug)).not.toContain(post.slug)
     }
+  })
+
+  it("offers a page its own guides first, then the newest", () => {
+    expect(guidesFor()).toHaveLength(3)
+    expect(guidesFor().map((p) => p.slug)).toEqual(
+      POSTS.slice(0, 3).map((p) => p.slug)
+    )
+    expect(guidesFor("graduation")[0].slug).toBe(
+      "graduation-invitation-wording"
+    )
+    expect(guidesFor("islamic")[0].slug).toBe("nikah-walima-invitation-wording")
   })
 
   it("are all in the sitemap with the date they last changed", () => {
