@@ -50,17 +50,38 @@ describe("i18n", () => {
     ])
   })
 
+  it("translates Swahili strings rather than copying English", () => {
+    const sw = getMessages("sw")
+    // Brand names, "RSVP", "PIN" and "Video" (the Swahili word too) may stay.
+    const same = leaves(en).filter((key) => {
+      const a = leafAt(en, key)
+      return typeof a === "string" && a !== "" && a === leafAt(sw, key)
+    })
+    expect(same.sort()).toEqual([
+      "album.pinLabel",
+      "album.video",
+      "calendar.google",
+      "calendar.ics",
+      "rsvp.eyebrow",
+    ])
+  })
+
   it("interpolates and pluralises", () => {
     expect(getMessages("en").countdown.daysToGo(1)).toBe("1 day to go.")
     expect(getMessages("en").countdown.daysToGo(3)).toBe("3 days to go.")
     expect(getMessages("id").countdown.daysToGo(3)).toBe("3 hari lagi.")
     expect(getMessages("id").gallery.photoN(2, 5)).toBe("Foto 2 dari 5")
+    expect(getMessages("sw").countdown.daysToGo(1)).toBe("Imebaki siku 1.")
+    expect(getMessages("sw").countdown.daysToGo(3)).toBe("Zimebaki siku 3.")
+    expect(getMessages("sw").album.ready(2)).toBe("Faili 2 ziko tayari")
   })
 
   it("falls back to English and maps Intl tags", () => {
     expect(getMessages(undefined)).toBe(en)
     expect(INTL_LOCALE.id).toBe("id-ID")
+    expect(INTL_LOCALE.sw).toBe("sw")
     expect(isLocale("id")).toBe(true)
+    expect(isLocale("sw")).toBe(true)
     expect(isLocale("fr")).toBe(false)
   })
 })

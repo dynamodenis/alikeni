@@ -65,9 +65,10 @@ template headings. Do not add to its allow-list to get a design through.
 - The editor works on the draft **as stored**, not parsed. Editor code must
   tolerate a missing new key (`getIn(config, path)`, optional access). Only
   templates and blocks, which receive the parsed config, may assume defaults.
-- Guest-facing text for a new block goes in **both** `src/lib/i18n/en.ts` and
-  `id.ts`. Editor wording that depends on the kind of event goes in
-  `src/components/editor/copy.ts`, never hard-coded wedding terms in a tab.
+- Guest-facing text for a new block goes in **every** locale file in
+  `src/lib/i18n` (`en.ts`, `id.ts`, `sw.ts`). Editor wording that depends on
+  the kind of event goes in `src/components/editor/copy.ts`, never hard-coded
+  wedding terms in a tab.
 - A new section id must be added to `SectionId`, `isSectionEnabled`,
   `SECTION_LABELS` (editor) and `template-sections.ts`.
 - **Media is addressed by key.** A photo or audio reference is saved as

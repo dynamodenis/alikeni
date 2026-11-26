@@ -39,6 +39,7 @@ import {
   type EditorConfig,
 } from "./EditorContext"
 import { EditorPreview } from "./EditorPreview"
+import { LanguageMenu } from "./LanguageMenu"
 import { AlbumTab } from "./tabs/AlbumTab"
 import { BasicsTab } from "./tabs/BasicsTab"
 import { DesignTab } from "./tabs/DesignTab"
@@ -517,6 +518,7 @@ function EditorLoaded({
             >
               {published.status === "published" ? "Share" : "Publish"}
             </Button>
+            <LanguageMenu />
             <UserMenu />
           </div>
         </header>
